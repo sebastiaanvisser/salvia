@@ -1,0 +1,8 @@
+Use the Haskell cabal-install to install Salvia:
+
+  cabal configure &&
+  cabal build &&
+  cabal install
+
+Please report problems to: sfvisser@cs.uu.nl
+

@@ -1,0 +1,90 @@
+Name:             salvia
+Version:          0.3.0
+Description:      Lightweight Haskell Web Server Framework with modular support
+                  for serving static files, directories indices, default error
+                  responses, connection counting and logging, HEAD and PUT
+                  requests, keep-alives, custom banner printing, default
+                  handler environments for parsing request and printing
+                  responses, dispatching based on request methods, URI, paths
+                  and filename extension, URI rewriting and redirection,
+                  virtual hosting, cookie, session and user management and
+                  more...
+
+Synopsis:         Lightweight Haskell Web Server Framework 
+Cabal-version:    >= 1.6
+Category:         Network, Web
+License:          BSD3
+License-file:     LICENSE
+Author:           Sebastiaan Visser
+Maintainer:       sfvisser@cs.uu.nl
+Build-Type:       Simple
+Build-Depends:    base ==3.0.*,
+                  network ==2.2.*,
+                  containers ==0.2.*,
+                  parsec ==3.0.*,
+                  filepath == 1.1.*,
+                  fclabels ==0.2.*,
+                  utf8-string ==0.3.*,
+                  bytestring ==0.9.*,
+                  old-locale ==1.0.*,
+                  time ==1.1.*,
+                  encoding ==0.5.*,
+                  process ==1.0.*,
+                  stm ==2.1.*,
+                  pureMD5 ==0.2.*,
+                  directory ==1.0.*,
+                  bimap ==0.2.*,
+                  monads-fd ==0.0.*,
+                  random ==1.0.*,
+                  transformers ==0.1.*
+
+GHC-Options:      -threaded -Wall -fno-warn-orphans
+HS-Source-Dirs:   src
+Other-modules:    Misc.Misc,
+                  Misc.Terminal,
+                  Network.Protocol.Http.Data,
+                  Network.Protocol.Http.Parser,
+                  Network.Protocol.Http.Printer,
+                  Network.Protocol.Http.Status
+Exposed-modules:  Network.Protocol.Cookie,
+                  Network.Protocol.Http,
+                  Network.Protocol.Mime,
+                  Network.Protocol.Uri,
+                  Network.Salvia.Core.Aspects,
+                  Network.Salvia.Core.Config,
+                  Network.Salvia.Core.Context,
+                  Network.Salvia.Core.Handler,
+                  Network.Salvia.Core.Main,
+                  Network.Salvia.Handler.Banner,
+                  Network.Salvia.Handler.CGI,
+                  Network.Salvia.Handler.Close,
+                  Network.Salvia.Handler.Cookie,
+                  Network.Salvia.Handler.Counter,
+                  Network.Salvia.Handler.Directory,
+                  Network.Salvia.Handler.Dispatching,
+                  Network.Salvia.Handler.Environment,
+                  Network.Salvia.Handler.Error,
+                  Network.Salvia.Handler.ExtensionDispatcher,
+                  Network.Salvia.Handler.Fallback,
+                  Network.Salvia.Handler.File,
+                  Network.Salvia.Handler.FileSystem,
+                  Network.Salvia.Handler.Head,
+                  Network.Salvia.Handler.Log,
+                  Network.Salvia.Handler.Login,
+                  Network.Salvia.Handler.MethodRouter,
+                  Network.Salvia.Handler.Parser,
+                  Network.Salvia.Handler.PathRouter,
+                  Network.Salvia.Handler.Printer,
+                  Network.Salvia.Handler.Put,
+                  Network.Salvia.Handler.Redirect,
+                  Network.Salvia.Handler.Rewrite,
+                  Network.Salvia.Handler.Session,
+                  Network.Salvia.Handler.VirtualHosting,
+                  Network.Salvia.Handlers
+                  Network.Salvia.Httpd
+
+Executable:       salvia-demo
+Main-is:          Demo.hs
+GHC-Options:      -threaded -Wall -fno-warn-orphans
+HS-Source-Dirs:   src 
+
