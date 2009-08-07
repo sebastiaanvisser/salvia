@@ -28,6 +28,8 @@ the following criteria are met:
 * The client has set the `connection` header field to 'close'.
 
 * The connection has already been closed, possible due to IO errors.
+
+* The HTTP version is HTTP/1.0.
 -}
 
 hKeepAlive :: (MonadIO m, Socket m, Request m, Response m) => m a -> m ()
@@ -40,7 +42,7 @@ hKeepAlive handler =
      closed <- liftIO (hIsClosed h)
      if or [ closed
            , conn == "Close"
-           , isNothing (len::Maybe Integer)
+           , isNothing (len :: Maybe Integer)
            , ver == http10
            ]
        then liftIO (hClose h)

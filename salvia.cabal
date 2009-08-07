@@ -41,15 +41,22 @@ Build-Depends:    base ==3.0.*,
 GHC-Options:      -threaded -Wall -fno-warn-orphans
 HS-Source-Dirs:   src
 Other-modules:    Misc.Misc,
-                  Misc.Terminal,
+                  Misc.Terminal
+Exposed-modules:  Network.Protocol.Cookie,
+                  Network.Protocol.Http,
                   Network.Protocol.Http.Data,
                   Network.Protocol.Http.Parser,
                   Network.Protocol.Http.Printer,
                   Network.Protocol.Http.Status
-Exposed-modules:  Network.Protocol.Cookie,
-                  Network.Protocol.Http,
                   Network.Protocol.Mime,
                   Network.Protocol.Uri,
+                  Network.Protocol.Uri.Chars,
+                  Network.Protocol.Uri.Data,
+                  Network.Protocol.Uri.Encode,
+                  Network.Protocol.Uri.Parser,
+                  Network.Protocol.Uri.Path,
+                  Network.Protocol.Uri.Printer,
+                  Network.Protocol.Uri.Query,
                   Network.Salvia.Core.Aspects,
                   Network.Salvia.Core.Config,
                   Network.Salvia.Core.Context,
@@ -80,7 +87,7 @@ Exposed-modules:  Network.Protocol.Cookie,
                   Network.Salvia.Handler.Rewrite,
                   Network.Salvia.Handler.Session,
                   Network.Salvia.Handler.VirtualHosting,
-                  Network.Salvia.Handlers
+                  Network.Salvia.Handlers,
                   Network.Salvia.Httpd
 
 Executable:       salvia-demo

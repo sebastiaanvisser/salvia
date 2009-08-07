@@ -19,9 +19,9 @@ first argument the function silently returns.
 hParser
   :: (Socket m, Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
-  -> (String -> m a)   -- ^ The fail handler.
-  -> m a
-  -> m a
+  -> (String -> m ())  -- ^ The fail handler.
+  -> m ()
+  -> m ()
 hParser t onfail onsuccess =
   do h <- sock
      -- TODO use try and fail with bad request or reject silently.
@@ -31,7 +31,7 @@ hParser t onfail onsuccess =
        do hSetBuffering h (BlockBuffering (Just (64*1024)))
           fmap Just (readHeader h) `catch` const (return Nothing)
      case join mMsg of
-       Nothing -> onfail "internal IO error"
+       Nothing -> return ()
        Just msg -> 
          do case parseRequest (msg "") of
               Left err -> onfail (show err)
