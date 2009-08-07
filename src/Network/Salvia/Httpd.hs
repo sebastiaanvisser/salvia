@@ -8,6 +8,8 @@ module Network.Salvia.Httpd (
 
   , Config
   , config
+
+  , Client
   , address
 
   , Request
@@ -17,11 +19,8 @@ module Network.Salvia.Httpd (
   , response
 
   , Socket
+  , rawSock
   , sock
-  , flushQueue
-  , flushHeaders
-  , emptyQueue
-  , reset
 
   , Send
   , sendStr
@@ -29,6 +28,12 @@ module Network.Salvia.Httpd (
   , sendBs
   , spoolStr
   , spoolBs
+  , flushQueue
+  , flushHeaders
+  , emptyQueue
+
+  , reset
+
 
   , Receive
   , contents

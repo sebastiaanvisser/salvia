@@ -8,15 +8,17 @@ import Data.Encoding.UTF8
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Config
-import Network.Socket hiding (Socket)
 import System.IO
+import qualified Network.Socket as S
 import qualified Data.ByteString.Lazy as B
 
 -- Todo: figure out better separarion!
 
 class (Applicative m, Monad m) => Config m where
   config  :: m HttpdConfig
-  address :: m SockAddr
+
+class (Applicative m, Monad m) => Client m where
+  address :: m S.SockAddr
 
 class (Applicative m, Monad m) => Request m where
   request :: State Message a -> m a
@@ -25,17 +27,24 @@ class (Applicative m, Monad m) => Response m where
   response :: State Message a -> m a
 
 class (Applicative m, Monad m) => Socket m where
+  rawSock      :: m S.Socket
   sock         :: m Handle
+
+class (Applicative m, Monad m) => Send m where
+  sendStr      :: String                                   -> m ()
+  sendBs       :: B.ByteString                             -> m ()
+  spoolStr     :: (String       -> String)       -> Handle -> m ()
+  spoolBs      :: (B.ByteString -> B.ByteString) -> Handle -> m ()
   flushHeaders :: m ()
   flushQueue   :: m ()
   emptyQueue   :: m ()
-  reset        :: m ()
 
-class (Applicative m, Monad m) => Send m where
-  sendStr  :: String                                   -> m ()
-  sendBs   :: B.ByteString                             -> m ()
-  spoolStr :: (String       -> String)       -> Handle -> m ()
-  spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
+{- | Reset both the send queue and the generated server response. -}
+
+reset :: (Response m, Send m) => m ()
+reset =
+  do response (put emptyResponse)
+     emptyQueue
 
 sendStrLn :: Send m => String -> m ()
 sendStrLn = sendStr . (++"\n")

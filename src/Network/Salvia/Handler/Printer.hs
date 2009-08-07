@@ -8,6 +8,6 @@ client. This handler is generally used as (one of) the last handler in a
 handler environment.
 -}
 
-hPrinter :: Socket m => m ()
+hPrinter :: Send m => m ()
 hPrinter = flushHeaders >> flushQueue
 

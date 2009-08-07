@@ -32,7 +32,7 @@ the following criteria are met:
 * The HTTP version is HTTP/1.0.
 -}
 
-hKeepAlive :: (MonadIO m, Socket m, Request m, Response m) => m a -> m ()
+hKeepAlive :: (MonadIO m, Send m, Socket m, Request m, Response m) => m a -> m ()
 hKeepAlive handler =
   do handler
      h      <- sock
@@ -48,7 +48,7 @@ hKeepAlive handler =
        then liftIO (hClose h)
        else resetContext >> hKeepAlive handler
 
-resetContext :: (Socket m, Request m, Response m) => m ()
+resetContext :: (Socket m, Send m, Request m, Response m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)

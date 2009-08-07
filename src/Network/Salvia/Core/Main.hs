@@ -16,7 +16,10 @@ connection the specified handler will be executed with the client address and
 socket stored in the handler context.
 -}
 
-start :: HttpdConfig -> Handler () -> IO ()
+start
+  :: HttpdConfig
+  -> Handler ()
+  -> IO ()
 start config httpHandler =
   server
     (listenAddr config)
@@ -24,34 +27,30 @@ start config httpHandler =
     (backlog config)
     tcpHandler
   where
-    tcpHandler handle addr =
-      do let ctx = mkContext config addr handle
+    tcpHandler addr raw handle =
+      do let ctx = mkContext config addr raw handle
          evalStateT (unHandler httpHandler) ctx
 
 {-
 Start a listening TCP server on the specified address/port combination and
-handle every connection with a custom handler.
+handle every connection with a custom handler. Accept connections on the
+listening socket and pass execution to the application specific connection
+handler.
 -}
 
-server :: HostAddress -> PortNumber -> Int -> (Handle -> SockAddr -> IO ()) -> IO ()
+server
+  :: HostAddress
+  -> PortNumber
+  -> Int
+  -> (SockAddr -> Socket -> Handle -> IO ())
+  -> IO ()
 server addr port blog handler = do
   sock <- socket AF_INET Stream 0
   setSocketOption sock ReuseAddr 1
   bindSocket sock $ SockAddrInet port addr
   listen sock blog
-  acceptLoop sock handler
-
-{-
-Accept connections on the listening socket and pass execution to the
-application specific connection handler.
--}
-
-acceptLoop :: Socket -> (Handle -> SockAddr -> IO ()) -> IO ()
-acceptLoop sock handler =
-  do forever $
-       do (sock', addr) <- accept sock
-          forkIO $
-            do h <- socketToHandle sock' ReadWriteMode
-               handler h addr
-     putStrLn "quiting"
+  forever $
+    do (c, a) <- accept sock
+       forkIO (socketToHandle c ReadWriteMode >>= handler a c)
+  putStrLn "quiting"
 

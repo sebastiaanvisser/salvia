@@ -15,7 +15,7 @@ is executed. Failure is indicated by an HTTP response `Status` bigger than or
 equal to 400 (`BadRequest`). See `statusFailure`.
 -}
 
-hOr :: (Socket m, Response m) => m a -> m a -> m a
+hOr :: (Send m, Response m) => m a -> m a -> m a
 hOr h0 h1 = do
   a  <- h0
   st <- response (getM status)
@@ -28,6 +28,6 @@ Like the `hOr` function, but the types of the alternatives may differ because
 the values are packed up in an `Either`.
 -}
 
-hEither :: (Socket m, Response m) => m a -> m b -> m (Either a b)
+hEither :: (Send m, Response m) => m a -> m b -> m (Either a b)
 hEither h0 h1 = (Left <$> h0) `hOr` (Right <$> h1)
 

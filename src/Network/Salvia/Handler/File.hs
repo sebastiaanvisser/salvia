@@ -34,7 +34,7 @@ hFileResource file = do
     $ \fd -> do
       fs <- liftIO $ hFileSize fd
       response $
-        do setM contentType (m, Just "utf-8")
+        do setM contentType (m, Just utf8)
            setM contentLength (Just fs)
            setM status OK
       spoolBs id fd
@@ -52,7 +52,7 @@ hFileResourceFilter fFilter file = do  -- TODO... this should be a more general 
   hSafeIO (openBinaryFile file ReadMode)
     $ \fd -> do
       response $
-        do setM contentType (m, Just "utf-8")
+        do setM contentType (m, Just utf8)
            setM status OK
       spoolStr fFilter fd
 

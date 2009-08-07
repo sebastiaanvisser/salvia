@@ -22,6 +22,8 @@ newtype Handler a = Handler { unHandler :: StateT Context IO a }
 
 instance A.Config Handler where
   config  = getM config
+
+instance A.Client Handler where
   address = getM address
 
 instance A.Request Handler where
@@ -37,23 +39,23 @@ instance A.Response Handler where
        return a
 
 instance A.Socket Handler where
-  sock         = getM sock
-  flushHeaders = flushHeaders
-  flushQueue   = flushQueue
-  emptyQueue   = emptyQueue
-  reset        = reset
+  rawSock = getM rawSock
+  sock    = getM sock
+
+instance A.Send Handler where
+  sendStr s     = send (flip U.hPutStr s)
+  sendBs bs     = send (flip B.hPutStr bs)
+  spoolStr f fd = send (\s -> U.hGetContents fd >>= \d -> U.hPutStr s (f d))
+  spoolBs  f fd = send (\s -> B.hGetContents fd >>= \d -> B.hPut s (f d))
+
+  flushHeaders  = flushHeaders
+  flushQueue    = flushQueue
+  emptyQueue    = emptyQueue
 
 {- | Reset the send queue by throwing away all potential send actions. -}
 
 emptyQueue :: Handler ()
 emptyQueue = setM queue []
-
-{- | Reset both the send queue and the generated server response. -}
-
-reset :: Handler ()
-reset = do
-  setM response emptyResponse
-  emptyQueue
 
 {- | Send all the response headers directly over the socket. -}
 
@@ -80,12 +82,6 @@ over the socket.
 
 send :: SendAction -> Handler ()
 send f = modM queue (++[f])
-
-instance A.Send Handler where
-  sendStr s     = send (flip U.hPutStr s)
-  sendBs bs     = send (flip B.hPutStr bs)
-  spoolStr f fd = send (\s -> U.hGetContents fd >>= \d -> U.hPutStr s (f d))
-  spoolBs  f fd = send (\s -> B.hGetContents fd >>= \d -> B.hPut s (f d))
 
 instance A.Receive Handler where
   contents = handlerContents

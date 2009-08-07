@@ -26,7 +26,7 @@ printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, Socket m, Request m, Response m, Config m, Send m)
+  :: (MonadIO m, Client m, Socket m, Request m, Response m, Config m, Send m)
   => m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
@@ -44,7 +44,7 @@ environment take should be parametrized with a session.
 -}
 
 hSessionEnv
-  :: (MonadIO m, Socket m, Request m, Response m, Config m, Send m)
+  :: (MonadIO m, Client m, Send m, Socket m, Request m, Response m, Config m)
   => TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
@@ -59,12 +59,11 @@ hSessionEnv count sessions handler =
 
 -- Helper functions.
 
-
 before :: (MonadIO m, Response m) => m ()
 before = hBanner "salvia-httpd"
 
 after
-  :: (Socket m, Request m, Config m, MonadIO m, Response m)
+  :: (Client m, Send m, Socket m, Request m, Config m, MonadIO m, Response m)
   => Maybe (TVar Int) -> m ()
 after mc = 
   do hPrinter
@@ -74,7 +73,7 @@ after mc =
        mc
 
 wrapper
-  :: (MonadIO m, Response m, Config m, Socket m, Request m)
+  :: (MonadIO m, Client m, Response m, Config m, Send m, Socket m, Request m)
   => Maybe (TVar Int) -> m a -> m ()
 wrapper c h = before >> h >> after c
 

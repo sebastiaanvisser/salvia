@@ -8,6 +8,7 @@ module Network.Salvia.Core.Context
   , config
   , request
   , response
+  , rawSock
   , sock
   , address
   , queue
@@ -17,10 +18,8 @@ module Network.Salvia.Core.Context
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Config
-import Network.Socket (SockAddr)
+import Network.Socket (SockAddr, Socket)
 import System.IO
-
--------- single request/response context --------------------------------------
 
 -- | A send action is some thing that works on an IO handle.
 type SendAction = Handle -> IO ()
@@ -47,6 +46,7 @@ data Context =
     _config   :: HttpdConfig -- ^ The HTTP server configuration.
   , _request  :: Message     -- ^ The HTTP request header.
   , _response :: Message     -- ^ The HTTP response header.
+  , _rawSock  :: Socket      -- ^ The raw socket for the connection with the client.
   , _sock     :: Handle      -- ^ The socket handle for the connection with the client.
   , _address  :: SockAddr    -- ^ The client addres.
   , _queue    :: SendQueue   -- ^ The queue of send actions.
@@ -60,7 +60,10 @@ queue :: Label Context SendQueue
 {- | The client address.  -}
 address :: Label Context SockAddr
 
-{- | The socket to the client. -}
+{- | The raw socket to the client. -}
+rawSock :: Label Context Socket
+
+{- | The socket handle to the client. -}
 sock :: Label Context Handle
 
 {- |
@@ -89,11 +92,12 @@ Create and default server context with the specified server configuration,
 client address and socket.
 -}
 
-mkContext :: HttpdConfig -> SockAddr -> Handle -> Context
-mkContext c a s = Context {
+mkContext :: HttpdConfig -> SockAddr -> Socket -> Handle -> Context
+mkContext c a r s = Context {
     _config   = c
   , _request  = emptyRequest
   , _response = emptyResponse  -- 200 OK, by default.
+  , _rawSock  = r
   , _sock     = s
   , _address  = a
   , _queue    = []

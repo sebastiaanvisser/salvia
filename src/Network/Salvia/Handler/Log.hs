@@ -17,18 +17,18 @@ specified file handle.
 -}
 
 hLog
-  :: (Config m, MonadIO m, Response m, Request m)
+  :: (Client m, MonadIO m, Response m, Request m)
   => Handle -> m ()
 hLog = logger Nothing
 
 {- | Like `hLog` but also prints the request count since server startup. -}
 
 hLogWithCounter
-  :: (Config m, MonadIO m, Response m, Request m)
+  :: (Client m, MonadIO m, Response m, Request m)
   => TVar Int -> Handle -> m ()
 hLogWithCounter a = logger (Just a)
 
-logger :: (Config m, MonadIO m, Response m, Request m) => Maybe (TVar Int) -> Handle -> m ()
+logger :: (Client m, MonadIO m, Response m, Request m) => Maybe (TVar Int) -> Handle -> m ()
 logger count handle = do
   c <- case count of
     Nothing -> return ""
