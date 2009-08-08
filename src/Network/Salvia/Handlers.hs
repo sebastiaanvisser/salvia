@@ -42,11 +42,6 @@ module Network.Salvia.Handlers (
     , hLog
     , hLogWithCounter
 
-    -- ** Fallback handlers.
-
-    , hOr
-    , hEither
-
     -- ** Request counter.
 
     , hCounter
@@ -185,7 +180,6 @@ import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Handler.Environment
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.ExtensionDispatcher
-import Network.Salvia.Handler.Fallback
 import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Head

@@ -3,6 +3,7 @@ module Network.Salvia.Core.Handler where
 
 import Control.Applicative
 import Control.Monad.State
+import Data.Monoid
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Context
@@ -19,6 +20,27 @@ A HTTP request handler lives in `IO` and carries a server context in the
 
 newtype Handler a = Handler { unHandler :: StateT Context IO a }
   deriving (Functor, Applicative, Monad, MonadState Context, MonadIO)
+
+instance Monoid a => Monoid (Handler a) where
+  mempty = mzero >> return mempty
+  mappend = mplus
+
+instance Alternative Handler where
+  empty = mzero
+  (<|>) = mplus
+
+instance MonadPlus Handler where
+  mzero = Handler $
+    do setM (status % response) BadRequest
+       return (error "mzero/empty")
+  a `mplus` b =
+    do r <- a
+       s <- getM (status % response)
+       if statusFailure s
+         then A.reset >> b
+         else return r
+
+-- This Handler allows for a concrete implementation of all server aspects.
 
 instance A.Config Handler where
   config  = getM config
