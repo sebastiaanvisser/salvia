@@ -22,7 +22,7 @@ import Network.Socket (SockAddr, Socket)
 import System.IO
 
 -- | A send action is some thing that works on an IO handle.
-type SendAction = Handle -> IO ()
+type SendAction = (Socket, Handle) -> IO ()
 
 {- |
 The send queue is an abstraction to make sure all data that belongs to the

@@ -5,8 +5,6 @@ import Network.Socket
 import Network.Salvia.Httpd
 import Network.Salvia.Handlers
 
--- Serve the current directory.
-
 main :: IO ()
 main =
   do conf <- defaultConfig

@@ -1,6 +1,7 @@
 module Network.Salvia.Handler.File (
     hFile
   , hFileResource
+  , fileMime
 
   , hFileFilter
   , hFileResourceFilter
@@ -28,16 +29,20 @@ be set the file's size.
 
 -- TODO: what to do with encoding?
 hFileResource :: (MonadIO m, Response m, Send m) => FilePath -> m ()
-hFileResource file = do
-  let m = maybe defaultMime id $ (either (const Nothing) Just (parseURI file) >>= mimetype . lget path)
-  hSafeIO (openBinaryFile file ReadMode)
-    $ \fd -> do
-      fs <- liftIO $ hFileSize fd
-      response $
-        do setM contentType (m, Just utf8)
-           setM contentLength (Just fs)
-           setM status OK
-      spoolBs id fd
+hFileResource file =
+  hSafeIO (openBinaryFile file ReadMode) $ \fd ->
+    do fs <- liftIO (hFileSize fd)
+       response $
+         do setM contentType (fileMime file, Just utf8)
+            setM contentLength (Just fs)
+            setM status OK
+       spoolBs id fd
+
+fileMime :: String -> String
+fileMime file =
+    maybe defaultMime id
+  $ (either (const Nothing) Just (parseURI file)
+  >>= mimetype . lget path)
 
 {- |
 Like the `hFileResource` handler, but with a custom filter over the content.
@@ -47,14 +52,12 @@ This function will assume the content is an UTF-8 encoded text file. No
 
 -- TODO: what to do with encoding?
 hFileResourceFilter :: (MonadIO m, Response m, Send m) => (String -> String) -> FilePath -> m ()
-hFileResourceFilter fFilter file = do  -- TODO... this should be a more general hFilter
-  let m = maybe defaultMime id $ (either (const Nothing) Just (parseURI file) >>= mimetype . lget path)
-  hSafeIO (openBinaryFile file ReadMode)
-    $ \fd -> do
-      response $
-        do setM contentType (m, Just utf8)
-           setM status OK
-      spoolStr fFilter fd
+hFileResourceFilter fFilter file =
+  hSafeIO (openBinaryFile file ReadMode) $ \fd ->
+    do response $
+         do setM contentType (fileMime file, Just utf8)
+            setM status OK
+       spoolStr fFilter fd
 
 {- |
 Turn a resource handler into a regular handler that utilizes the path part of

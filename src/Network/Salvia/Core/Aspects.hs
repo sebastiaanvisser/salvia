@@ -27,8 +27,9 @@ class (Applicative m, Monad m) => Response m where
   response :: State Message a -> m a
 
 class (Applicative m, Monad m) => Socket m where
-  rawSock      :: m S.Socket
-  sock         :: m Handle
+  rawSock :: m S.Socket
+  sock    :: m Handle
+  raw     :: ((S.Socket, Handle) -> IO ()) -> m ()
 
 class (Applicative m, Monad m) => Send m where
   sendStr      :: String                                   -> m ()

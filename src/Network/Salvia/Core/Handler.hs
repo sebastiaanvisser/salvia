@@ -41,12 +41,21 @@ instance A.Response Handler where
 instance A.Socket Handler where
   rawSock = getM rawSock
   sock    = getM sock
+  raw     = send
+
+{- |
+Queue one potential send action in the send queue. This will not (yet) be sent
+over the socket.
+-}
+
+send :: SendAction -> Handler ()
+send f = modM queue (++[f])
 
 instance A.Send Handler where
-  sendStr s     = send (flip U.hPutStr s)
-  sendBs bs     = send (flip B.hPutStr bs)
-  spoolStr f fd = send (\s -> U.hGetContents fd >>= \d -> U.hPutStr s (f d))
-  spoolBs  f fd = send (\s -> B.hGetContents fd >>= \d -> B.hPut s (f d))
+  sendStr s     = send (flip U.hPutStr s . snd)
+  sendBs bs     = send (flip B.hPutStr bs . snd)
+  spoolStr f fd = send (\(_, h) -> U.hGetContents fd >>= \d -> U.hPutStr h (f d))
+  spoolBs  f fd = send (\(_, h) -> B.hGetContents fd >>= \d -> B.hPut h (f d))
 
   flushHeaders  = flushHeaders
   flushQueue    = flushQueue
@@ -60,28 +69,19 @@ emptyQueue = setM queue []
 {- | Send all the response headers directly over the socket. -}
 
 flushHeaders :: Handler ()
-flushHeaders = do
-  r <- getM response
-  s <- getM sock 
-  liftIO $ hPutStr s (showMessageHeader r)
+flushHeaders =
+  do r <- getM response
+     h <- getM sock 
+     liftIO (hPutStr h (showMessageHeader r) >> hFlush h)
 
 {- | Apply all send actions successively to the client socket. -}
 
 flushQueue :: Handler ()
 flushQueue =
-  do h <- getM sock
+  do s <- getM rawSock
+     h <- getM sock
      q <- getM queue
-     liftIO $
-       do mapM_ ($ h) q
-          hFlush h
-
-{- |
-Queue one potential send action in the send queue. This will not (yet) be sent
-over the socket.
--}
-
-send :: SendAction -> Handler ()
-send f = modM queue (++[f])
+     liftIO (mapM_ ($ (s, h)) q >> hFlush h)
 
 instance A.Receive Handler where
   contents = handlerContents
@@ -98,13 +98,13 @@ probably only useful in the case of 'PUT' request, because no decoding of
 -}
 
 handlerContents :: Handler (Maybe B.ByteString)
-handlerContents = do
-  len <- getM (contentLength % request)
-  kpa <- getM (keepAlive     % request)
-  s   <- getM sock
-  liftIO $
-    case (kpa :: Maybe Integer, len :: Maybe Integer) of
-      (_,       Just n)  -> liftM Just (B.hGet s (fromIntegral n))
-      (Nothing, Nothing) -> liftM Just (B.hGetContents s)
-      _                  -> return Nothing
+handlerContents =
+  do len <- getM (contentLength % request)
+     kpa <- getM (keepAlive     % request)
+     s   <- getM sock
+     liftIO $
+       case (kpa :: Maybe Integer, len :: Maybe Integer) of
+         (_,       Just n)  -> liftM Just (B.hGet s (fromIntegral n))
+         (Nothing, Nothing) -> liftM Just (B.hGetContents s)
+         _                  -> return Nothing
 

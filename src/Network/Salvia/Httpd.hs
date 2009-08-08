@@ -21,6 +21,7 @@ module Network.Salvia.Httpd (
   , Socket
   , rawSock
   , sock
+  , raw
 
   , Send
   , sendStr

@@ -73,6 +73,7 @@ module Network.Salvia.Handlers (
     , hFileResource
     , hFileResourceFilter
     , hResource
+    , fileMime
     , hUri
     , hFile
     , hFileFilter
