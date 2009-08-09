@@ -34,7 +34,7 @@ showMessageHeader (Message (Response s) v hs _) =
   ]
 
 showMessageHeader (Message (Request m u) v hs _) =
-  concat [show m, " ", show u, " ", show v, lf, showHeaders hs, lf, lf]
+  concat [show m, " ", u, " ", show v, lf, showHeaders hs, lf, lf]
 
 instance Show Message where
   show m = concat [showMessageHeader m, lget body m]

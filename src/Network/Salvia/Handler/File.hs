@@ -65,7 +65,7 @@ the request URI as the resource identifier.
 -}
 
 hResource :: Request m => (FilePath -> m a) -> m a
-hResource rh = request (getM (path % uri)) >>= rh
+hResource rh = request (getM (path % asURI)) >>= rh
 
 {- |
 Turn a URI handler into a regular handler that utilizes the request URI as the
@@ -73,7 +73,7 @@ resource identifier.
 -}
 
 hUri :: Request m => (URI -> m a) -> m a
-hUri rh = request (getM uri) >>= rh
+hUri rh = request (getM asURI) >>= rh
 
 {- |
 Like `hFileResource` but uses the path of the current request URI.

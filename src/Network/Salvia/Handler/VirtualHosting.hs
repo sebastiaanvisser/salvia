@@ -21,14 +21,14 @@ hVirtualHosting :: Request m => [(String, m b)] -> m b -> m b
 hVirtualHosting = (hListDispatch disp) . parse
   where
     disp    = hRequestDispatch hostname cmp
-    parse   = map (\(a, b) -> (either (const Nothing) Just $ parseAuthority a, b))
-    cmp a b = (==EQ) $ comparing (fmap (lget _host)) a b
+    parse   = map (\(a, b) -> (either (const mkAuthority) id $ parseAuthority a, b))
+    cmp a b = (==EQ) $ comparing (lget _host) a b
 
 {- |
 List dispatcher based on the hostname request header. This header field is
 parsed and interpreted as an `Authority` field.
 -}
 
-hHostRouter :: Request m => [(Maybe Authority, m b)] -> m b -> m b
+hHostRouter :: Request m => [(Authority, m b)] -> m b -> m b
 hHostRouter = hListDispatch $ hRequestDispatch hostname (==)
 

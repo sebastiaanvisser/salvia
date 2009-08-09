@@ -1,4 +1,7 @@
-module Network.Salvia.Handler.Printer (hPrinter) where
+module Network.Salvia.Handler.Printer (
+    hRequestPrinter
+  , hResponsePrinter
+  ) where
 
 import Network.Salvia.Httpd
 
@@ -8,6 +11,9 @@ client. This handler is generally used as (one of) the last handler in a
 handler environment.
 -}
 
-hPrinter :: Send m => m ()
-hPrinter = flushHeaders >> flushQueue
+hRequestPrinter :: Send m => m ()
+hRequestPrinter = flushRequest >> flushQueue
+
+hResponsePrinter :: Send m => m ()
+hResponsePrinter = flushResponse >> flushQueue
 

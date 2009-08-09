@@ -21,7 +21,7 @@ import Data.List (intercalate)
 import Data.Map (insert, empty)
 import Network.Protocol.Http.Data
 import Network.Protocol.Http.Status
-import Network.Protocol.Uri
+-- import Network.Protocol.Uri
 import Text.Parsec hiding (many, (<|>))
 import Text.Parsec.Prim (Stream, ParsecT)
 
@@ -71,7 +71,7 @@ pRequest :: Stream s m Char => ParsecT s u m Message
 pRequest =
       (\m u v h b -> Message (Request m u) v h b)
   <$> (pMethod <* many1 (oneOf ls))
-  <*> (pUriReference <* many1 (oneOf ls))
+  <*> (many1 (noneOf ws) <* many1 (oneOf ls))
   <*> (pVersion <* eol)
   <*> (pHeaders <* eol)
   <*> many anyToken

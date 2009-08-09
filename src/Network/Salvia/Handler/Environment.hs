@@ -20,18 +20,18 @@ import System.IO
 
 {- |
 This is the default stateless handler evnironment. It takes care of request
-parsing (`hParser`), response printing (`hPrinter`), request logging (`hLog`),
+parsing (`hParser`), response printing (`hResponsePrinter`), request logging (`hLog`),
 connection keep-alives (`hKeepAlive`), handling `HEAD` requests (`hHead`) and
 printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, Client m, Socket m, Request m, Response m, Config m, Send m)
+  :: (MonadIO m, Socket m, Request m, Response m, ServerConfig m, Send m)
   => m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
   hKeepAlive $ 
-    hParser (1000 * 15)
+    hRequestParser (1000 * 15)
       (wrapper Nothing . parseError)
       (wrapper Nothing $ hHead handler)
 
@@ -44,14 +44,14 @@ environment take should be parametrized with a session.
 -}
 
 hSessionEnv
-  :: (MonadIO m, Client m, Send m, Socket m, Request m, Response m, Config m)
+  :: (MonadIO m, Send m, Socket m, Request m, Response m, ServerConfig m)
   => TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
   -> m ()
 hSessionEnv count sessions handler =
   hKeepAlive $ 
-    hParser (1000 * 15)
+    hRequestParser (1000 * 15)
      (wrapper (Just count) . parseError)
      (wrapper (Just count) $
        do session <- hSession sessions 300
@@ -63,17 +63,17 @@ before :: (MonadIO m, Response m) => m ()
 before = hBanner "salvia-httpd"
 
 after
-  :: (Client m, Send m, Socket m, Request m, Config m, MonadIO m, Response m)
+  :: (Send m, Socket m, Request m, ServerConfig m, MonadIO m, Response m)
   => Maybe (TVar Int) -> m ()
 after mc = 
-  do hPrinter
+  do hResponsePrinter
      maybe
        (hLog stdout)
        (\c -> hCounter c >> hLogWithCounter c stdout)
        mc
 
 wrapper
-  :: (MonadIO m, Client m, Response m, Config m, Send m, Socket m, Request m)
+  :: (MonadIO m, Response m, ServerConfig m, Send m, Socket m, Request m)
   => Maybe (TVar Int) -> m a -> m ()
 wrapper c h = before >> h >> after c
 

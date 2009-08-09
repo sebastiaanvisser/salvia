@@ -30,7 +30,7 @@ bound to the domain and port this server runs on. The path will be locked to
 root.
 -}
 
-newCookie :: (Config m, FormatTime t) => t -> m Cookie
+newCookie :: (ServerConfig m, FormatTime t) => t -> m Cookie
 newCookie expire = do
   httpd <- config
   return $ empty {

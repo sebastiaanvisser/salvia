@@ -7,12 +7,12 @@ import Network.Salvia.Handlers
 
 main :: IO ()
 main =
-  do conf <- defaultConfig
-     addr <- inet_addr "127.0.0.1"
+  do addr <- inet_addr "127.0.0.1"
      putStrLn "started"
      start 
-       (conf { listenAddr = addr, listenPort = 8080 })
+       (defaultConfig { listenAddr = addr, listenPort = 8080 })
        (hDefaultEnv myHandler)
+       ()
 
 -- Serve the current directory.
 

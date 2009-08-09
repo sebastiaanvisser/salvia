@@ -4,15 +4,15 @@ module Network.Salvia.Handler.ExtensionDispatcher (
   ) where
 
 import Data.Record.Label
-import Network.Protocol.Http (uri)
-import Network.Protocol.Uri (extension, path)
+import Network.Protocol.Http
+import Network.Protocol.Uri
 import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Httpd
 
 {- | Request dispatcher based on the request path file extenstion. -}
 
 hExtension :: Request m => Maybe String -> m a -> m a -> m a
-hExtension = hRequestDispatch (extension % path % uri) (==)
+hExtension = hRequestDispatch (extension % path % asURI) (==)
 
 {- | List dispatcher version of `hExtension`. -}
 

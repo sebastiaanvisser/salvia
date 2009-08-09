@@ -53,7 +53,7 @@ type Headers     = Map HeaderKey HeaderValue
 {- | Request or response specific part of HTTP messages. -}
 
 data Direction =
-    Request  { __method :: Method, __uri :: URI }
+    Request  { __method :: Method, __uri :: String }
   | Response { __status :: Status }
   deriving Eq
 
@@ -69,7 +69,7 @@ data Message = Message
 {- | Create an empty HTTP request object. -}
 
 emptyRequest :: Message
-emptyRequest = Message (Request GET (mkURI)) http11 empty ""
+emptyRequest = Message (Request GET "") http11 empty ""
 
 {- | Create an empty HTTP response object. -}
 
@@ -87,7 +87,7 @@ major :: Label Version Int
 minor :: Label Version Int
 
 _status   :: Label Direction Status
-_uri      :: Label Direction URI
+_uri      :: Label Direction String
 _method   :: Label Direction Method
 
 {- | Label to access the body part of an HTTP message. -}
@@ -113,8 +113,11 @@ method = _method % direction
 
 {- | Label to access the URI part of an HTTP message. -}
 
-uri :: Label Message URI
+uri :: Label Message String
 uri = _uri % direction
+
+asURI :: Label Message URI
+asURI = (toURI, show) `lmap` uri
 
 {- | Label to access the status part of an HTTP message. -}
 
@@ -160,10 +163,10 @@ cookie = mkLabel (lget $ header "Cookie") (lset $ header "Set-Cookie")
 
 {- | Access the /Location/ header field. -}
 
-location :: Label Message (Maybe URI)
-location = mkLabel
-  (either (const Nothing) Just . parseURI . lget (header "Location"))
-  (lset (header "Location") . maybe "" show)
+location :: Label Message String
+location = header "Location"
+--   (either (const Nothing) Just . parseURI . lget (header "Location"))
+--   (lset (header "Location") . maybe "" show)
 
 {- | Access the /Content-Type/ header field. -}
 
@@ -179,13 +182,16 @@ date = header "Date"
 
 {- | Access the /Host/ header field. -}
 
-hostname :: Label Message (Maybe Authority)
+hostname :: Label Message Authority
 hostname = mkLabel
-  (either (const Nothing) Just . parseAuthority . lget (header "Host"))
-  (lset (header "Host") . maybe "" show)
+  (either (const mkAuthority) id . parseAuthority . lget (header "Host"))
+  (lset (header "Host") . show)
 
 {- | Access the /Server/ header field. -}
 
 server :: Label Message String
 server = header "Server"
+
+userAgent :: Label Message String
+userAgent = header "User-Agent"
 

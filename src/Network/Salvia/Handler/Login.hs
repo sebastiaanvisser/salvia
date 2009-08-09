@@ -38,6 +38,7 @@ import Data.Record.Label
 import Misc.Misc (atomModTVar, safeHead)
 import Network.Protocol.Http (Status (Unauthorized, OK), status)
 import Network.Salvia.Handler.Error (hCustomError, hError)
+import Network.Salvia.Handler.Contents
 import Network.Salvia.Handler.Session
 import Network.Salvia.Httpd hiding (email)
 import Network.Protocol.Uri
@@ -137,10 +138,10 @@ initial set of actions assigned. On failure an `Unauthorized' error will be
 produced.
 -}
 
-hSignup :: (MonadIO m, Receive m, Response m, Send m) => TUserDatabase FilePath -> Actions -> m ()
+hSignup :: (MonadIO m, Contents m, Response m, Send m) => TUserDatabase FilePath -> Actions -> m ()
 hSignup tdb acts = do
   db <- liftIO . atomically $ readTVar tdb
-  params <- uriEncodedPostParamsUTF8
+  params <- (asParameters . asUTF8) contents
   case freshUserInfo params (dbUsers db) acts of
     Nothing -> hCustomError Unauthorized "signup failed"
     Just u  -> do
@@ -169,9 +170,9 @@ the user is logged in and stored in the session payload. Otherwise a
 `Unauthorized' response will be sent and the user has not logged in.
 -}
 
-hLogin :: (MonadIO m, Receive m, Response m, Send m) => UserDatabase b -> TUserSession a -> m ()
+hLogin :: (MonadIO m, Contents m, Response m, Send m) => UserDatabase b -> TUserSession a -> m ()
 hLogin db session = do
-  params <- uriEncodedPostParamsUTF8
+  params <- (asParameters . asUTF8) contents
   maybe
     (hCustomError Unauthorized "login failed")
     (loginSuccessful session)

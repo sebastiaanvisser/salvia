@@ -1,25 +1,23 @@
 module Network.Salvia.Core.Config (
-    HttpdConfig (..)
+    Config (..)
   , defaultConfig
   ) where
 
-import Network.Socket hiding (send, listen)
-import System.IO
+import Network.Socket
 
 {- |
 The HTTP server configuration specifies some important network settings the
 server must know before being able to run. Most fields speak for themselves.
 -}
 
-data HttpdConfig =
-   HttpdConfig {
-     hostname   :: String       -- ^ Server hostname.
-   , email      :: String       -- ^ Server admin email address.
-   , listenAddr :: HostAddress  -- ^ Addres to bind to.
-   , listenPort :: PortNumber   -- ^ Port to listen on.
-   , backlog    :: Int          -- ^ TCP backlog.
-   , bufferSize :: Int          -- ^ Serve chunck with size.
-   }
+data Config =
+  Config
+    { hostname   :: String       -- ^ Server hostname.
+    , email      :: String       -- ^ Server admin email address.
+    , listenAddr :: HostAddress  -- ^ Addres to bind to.
+    , listenPort :: PortNumber   -- ^ Port to listen on.
+    , backlog    :: Int          -- ^ TCP backlog.
+    }
 
 {- |
 The default server configuration sets some safe default values. The server will
@@ -29,16 +27,13 @@ because of the translation from a `String` to a `HostAddress` using
 `inet_addr`.
 -}
 
-defaultConfig :: IO HttpdConfig
-defaultConfig = do
-  addr <- inet_addr "0.0.0.0"
-  return
-    $ HttpdConfig {
-      hostname   = "hostname"
+defaultConfig :: Config
+defaultConfig =
+  Config
+    { hostname   = "localhost"
     , email      = "admin@localhost"
-    , listenAddr = addr
+    , listenAddr = 0
     , listenPort = 80
     , backlog    = 4
-    , bufferSize = 64 * 1024
     }
 

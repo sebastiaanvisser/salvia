@@ -2,26 +2,28 @@
 module Network.Salvia.Core.Context
   ( SendAction
   , SendQueue
+
   , Context (..)
-  , mkContext
 
   , config
+  , payload
   , request
   , response
   , rawSock
   , sock
-  , address
+  , peer
   , queue
+
+  , mkContext
 
   ) where
 
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Core.Config
 import Network.Socket (SockAddr, Socket)
 import System.IO
 
--- | A send action is some thing that works on an IO handle.
+-- | A send action is some thing that works on a socket or handle.
 type SendAction = (Socket, Handle) -> IO ()
 
 {- |
@@ -41,65 +43,47 @@ to perform their task and to set up a proper response. All the fields in the
 context are accessible using the read/write labels defined below.
 -}
 
-data Context =
+data Context c p =
   Context {
-    _config   :: HttpdConfig -- ^ The HTTP server configuration.
-  , _request  :: Message     -- ^ The HTTP request header.
-  , _response :: Message     -- ^ The HTTP response header.
-  , _rawSock  :: Socket      -- ^ The raw socket for the connection with the client.
-  , _sock     :: Handle      -- ^ The socket handle for the connection with the client.
-  , _address  :: SockAddr    -- ^ The client addres.
-  , _queue    :: SendQueue   -- ^ The queue of send actions.
+    _config   :: c            -- ^ The client or server configuration.
+  , _payload  :: p            -- ^ Connection wide payload.
+
+  , _request  :: Message      -- ^ The HTTP request header.
+  , _response :: Message      -- ^ The HTTP response header.
+
+  , _rawSock  :: Socket       -- ^ The raw socket for the connection with the other endpoint. 
+  , _sock     :: Handle       -- ^ The socket handle for the connection with the other endpoint.
+  , _peer     :: SockAddr     -- ^ The address of the other endpoint.
+
+  , _queue    :: SendQueue    -- ^ The queue of send actions.
   }
 
 $(mkLabels [''Context])
 
-{- | The queue containing all send actions. -}
-queue :: Label Context SendQueue
-
-{- | The client address.  -}
-address :: Label Context SockAddr
-
-{- | The raw socket to the client. -}
-rawSock :: Label Context Socket
-
-{- | The socket handle to the client. -}
-sock :: Label Context Handle
-
-{- |
-The server response. Using the appropriate handler the response can be sent to
-the client after processing the request.
--}
-
-response :: Label Context Message
-
-{- |
-The client request. This request is initially empty and only available after
-the message has been parsed by the appropriate handler.
--}
-
-request :: Label Context Message
-
-{- |
-The global server configuration. Modifying this has no effect on consecutive
-requests.
--}
-
-config :: Label Context HttpdConfig
+config   :: Label (Context c p) c
+payload  :: Label (Context c p) p
+queue    :: Label (Context c p) SendQueue
+peer     :: Label (Context c p) SockAddr
+rawSock  :: Label (Context c p) Socket
+sock     :: Label (Context c p) Handle
+response :: Label (Context c p) Message
+request  :: Label (Context c p) Message
 
 {- |
 Create and default server context with the specified server configuration,
 client address and socket.
 -}
 
-mkContext :: HttpdConfig -> SockAddr -> Socket -> Handle -> Context
-mkContext c a r s = Context {
-    _config   = c
-  , _request  = emptyRequest
-  , _response = emptyResponse  -- 200 OK, by default.
-  , _rawSock  = r
-  , _sock     = s
-  , _address  = a
-  , _queue    = []
-  }
+mkContext :: c -> p -> SockAddr -> Socket -> Handle -> Context c p
+mkContext c p a r s =
+  Context
+    { _config   = c
+    , _payload  = p
+    , _request  = emptyRequest
+    , _response = emptyResponse  -- 200 OK, by default.
+    , _rawSock  = r
+    , _sock     = s
+    , _peer     = a
+    , _queue    = []
+    }
 

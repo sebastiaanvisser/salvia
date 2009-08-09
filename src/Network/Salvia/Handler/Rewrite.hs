@@ -32,22 +32,22 @@ remains untouched.
 -}
 
 hRewrite :: Request m => (URI -> URI) -> m a -> m a
-hRewrite = hLocalRequest uri
+hRewrite = hLocalRequest asURI
 
 {- | Run handler in a context with a modified host. -}
 
 hRewriteHost :: Request m => (String -> String) -> m a -> m a
-hRewriteHost = hLocalRequest (host % uri)
+hRewriteHost = hLocalRequest (host % asURI)
 
 {- | Run handler in a context with a modified path. -}
 
 hRewritePath :: Request m => (FilePath -> FilePath) -> m a -> m a
-hRewritePath = hLocalRequest (path % uri)
+hRewritePath = hLocalRequest (path % asURI)
 
 {- | Run handler in a context with a modified file extension. -}
 
 hRewriteExt :: Request m => (Maybe String -> Maybe String) -> m a -> m a
-hRewriteExt = hLocalRequest (extension % path % uri)
+hRewriteExt = hLocalRequest (extension % path % asURI)
 
 {- |
 Run handler in a context with a modified path. The specified prefix will be

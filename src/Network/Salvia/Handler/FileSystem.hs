@@ -29,7 +29,7 @@ hFileTypeDispatcher
   :: (MonadIO m, Request m, Response m, Send m)
   => (FilePath -> m ()) -> (FilePath -> m ()) -> FilePath -> m ()
 hFileTypeDispatcher hdir hfile dir =
-  request (getM (path % uri)) >>=
+  request (getM (path % asURI)) >>=
     hJailedDispatch dir hdir hfile . (dir ++)
 
 {- |

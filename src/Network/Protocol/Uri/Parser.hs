@@ -24,6 +24,10 @@ path = mkLabel
   (decode . show . lget _path)
   (lset _path . either (const (Path True [])) id . parsePath . encode)
 
+
+toURI :: String -> URI
+toURI = either (const mkURI) id . parseURI
+
 {- | Parse string into a `URI`. -}
 
 parseURI :: String -> Either ParseError URI

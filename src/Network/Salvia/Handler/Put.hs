@@ -16,7 +16,7 @@ and 'contentLength' header fields are not available the entire payload of the
 request is spooled to the resource.
 -}
 
-hPut :: (MonadIO m, Response m, Send m, Receive m) => FilePath -> m ()
+hPut :: (MonadIO m, Response m, Send m, Contents m) => FilePath -> m ()
 hPut name =
   hSafeIO (openBinaryFile name WriteMode)
     $ (contents >>=) . maybe putError . putOk

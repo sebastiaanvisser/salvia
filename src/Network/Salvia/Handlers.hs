@@ -9,11 +9,15 @@ module Network.Salvia.Handlers (
 
     -- ** Parse client requests.
 
+    , hRequestParser
+    , hResponseParser
     , hParser
+    , readHeaders
 
     -- ** Print server responses.
 
-    , hPrinter
+    , hRequestPrinter
+    , hResponsePrinter
 
     -- ** HTTP header banner.
 

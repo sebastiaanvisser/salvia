@@ -58,6 +58,7 @@ module Network.Protocol.Uri (
 
   -- * Parsing URIs.
 
+  , toURI
   , parseURI
   , parseAbsoluteURI
   , parseAuthority

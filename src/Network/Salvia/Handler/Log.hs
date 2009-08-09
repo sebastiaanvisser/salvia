@@ -17,18 +17,18 @@ specified file handle.
 -}
 
 hLog
-  :: (Client m, MonadIO m, Response m, Request m)
+  :: (Socket m, MonadIO m, Response m, Request m)
   => Handle -> m ()
 hLog = logger Nothing
 
 {- | Like `hLog` but also prints the request count since server startup. -}
 
 hLogWithCounter
-  :: (Client m, MonadIO m, Response m, Request m)
+  :: (Socket m, MonadIO m, Response m, Request m)
   => TVar Int -> Handle -> m ()
 hLogWithCounter a = logger (Just a)
 
-logger :: (Client m, MonadIO m, Response m, Request m) => Maybe (TVar Int) -> Handle -> m ()
+logger :: (Socket m, MonadIO m, Response m, Request m) => Maybe (TVar Int) -> Handle -> m ()
 logger count handle = do
   c <- case count of
     Nothing -> return ""
@@ -36,7 +36,7 @@ logger count handle = do
   mt   <- request  (getM method)
   ur   <- request  (getM uri)
   st   <- response (getM status)
-  addr <- address
+  addr <- peer
   let code = codeFromStatus st
       clr  = if code >= 400 then red else green
   liftIO $ hPutStrLn handle $ concat [

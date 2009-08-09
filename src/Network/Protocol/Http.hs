@@ -28,6 +28,7 @@ module Network.Protocol.Http(
   , direction
   , method
   , uri
+  , asURI
   , status
 
   -- * Accessing specific header fields.
@@ -46,6 +47,7 @@ module Network.Protocol.Http(
   , keepAlive
   , location
   , server
+  , userAgent
 
   -- * Parsing HTTP messages.
 
