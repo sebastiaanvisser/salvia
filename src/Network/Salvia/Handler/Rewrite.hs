@@ -16,7 +16,7 @@ import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- | Run a handler in a local environment in which the `Request' has been modified. -}
 

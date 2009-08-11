@@ -35,12 +35,12 @@ import Data.Digest.Pure.MD5 (md5)
 import Data.List (intercalate)
 import Data.Maybe (catMaybes)
 import Data.Record.Label
-import Misc.Misc (atomModTVar, safeHead)
-import Network.Protocol.Http (Status (Unauthorized, OK), status)
+import Safe
+import Network.Protocol.Http
+import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Error (hCustomError, hError)
 import Network.Salvia.Handler.Contents
 import Network.Salvia.Handler.Session
-import Network.Salvia.Httpd hiding (email)
 import Network.Protocol.Uri
 import Data.ByteString.Lazy.UTF8 (fromString)
 
@@ -157,7 +157,7 @@ freshUserInfo params us acts = do
   user <- "username" `lookup` p >>= id
   pass <- "password" `lookup` p >>= id
   mail <- "email"    `lookup` p >>= id
-  case safeHead $ filter ((==user).username) us of
+  case headMay $ filter ((==user).username) us of
     Nothing -> return $ User user (show $ md5 $ fromString pass) mail acts
     Just _  -> Nothing
 
@@ -183,7 +183,7 @@ authenticate params db = do
   p <- params
   user <- "username" `lookup` p >>= id
   pass <- "password" `lookup` p >>= id
-  case safeHead $ filter ((==user).username) (dbUsers db) of
+  case headMay $ filter ((==user).username) (dbUsers db) of
     Nothing -> Nothing
     Just u  ->
       if password u == (show $ md5 $ fromString pass)
@@ -193,9 +193,10 @@ authenticate params db = do
 -- Login user and create `Ok' response on successful user.
 loginSuccessful :: (MonadIO m, Response m, Send m) => TUserSession a -> User -> m ()
 loginSuccessful session user = do
-  liftIO $ atomModTVar (\s -> s {sPayload = Just (UserPayload user True Nothing)}) session
-  response (setM status OK)
-  sendStrLn "login successful"
+  do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
+     liftIO $ atomically (readTVar session >>= writeTVar session . f)
+     response (setM status OK)
+     sendStrLn "login successful"
 
 -------------------------------------------------------------------------------
 
@@ -203,8 +204,9 @@ loginSuccessful session user = do
 
 hLogout :: MonadIO m => TUserSession a -> m ()
 hLogout session = do
-  liftIO $ atomModTVar (\s -> s {sPayload = Nothing}) session
-  return ()
+  do let f =(\s -> s {sPayload = Nothing})
+     liftIO $ atomically (readTVar session >>= writeTVar session . f)
+     return ()
 
 -------------------------------------------------------------------------------
 

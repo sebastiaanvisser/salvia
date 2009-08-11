@@ -4,14 +4,16 @@ import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Uri
 import Network.Socket
-import Network.Salvia.Httpd hiding (hostname)
 import qualified Network.Salvia.Core.Context as C
 import Network.Salvia.Core.Handler
+import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Client
+import Network.Salvia.Handler.Contents
 import System.IO
 import Network.BSD
 
-hClient :: Handler a -> Handler b -> String -> IO Bool
-hClient hReq hRes uri = 
+client :: Handler c () a -> Handler c1 () b -> String -> IO b
+client hReq hRes uri = 
   do let u = toURI uri
      entry <- getHostByName (lget host u)
      sck <- socket (hostFamily entry) Stream 0
@@ -21,14 +23,22 @@ hClient hReq hRes uri =
      h <- socketToHandle sck ReadWriteMode
      name <- getSocketName sck
 
-     let ctx = C.mkContext (error "no server config") name sck h
+     let ctx = C.mkContext (error "no server config") () name sck h
      ss <- execStateT (unHandler hReq) ctx
 
-     let ctx' = C.mkContext (error "no server config") name sck h
+     let ctx' = C.mkContext (error "no server config") () name sck h
      let k = request (put (lget C.request ss)) >> hRes
      evalStateT (unHandler k) ctx'
-     return True
 
--- test :: IO (Either () Message)
--- test = client $ either undefined id $ parseURI "http://17.149.160.31/" -- "http://www.google.nl/search?q=aap"
+
+
+
+getRequest :: String -> IO (Maybe String)
+getRequest u = join `liftM`
+  client 
+    (hGetRequest u)
+    (hClientEnvironment
+      (const (return Nothing))
+      (asASCII hResponseContents)
+    ) u
 

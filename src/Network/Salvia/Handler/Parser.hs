@@ -8,7 +8,7 @@ module Network.Salvia.Handler.Parser (
 
 import Control.Monad.State
 import Network.Protocol.Http
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.IO
 import System.Timeout
 import Text.Parsec.Error (ParseError)
@@ -26,27 +26,27 @@ first argument the function silently returns.
 hRequestParser
   :: (Socket m, Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
-  -> (String -> m ())  -- ^ The fail handler.
-  -> m ()
-  -> m ()
+  -> (String -> m a)   -- ^ The fail handler.
+  -> m a
+  -> m (Maybe a)
 hRequestParser = hParser (request . put) parseRequest
 
 hResponseParser
   :: (Socket m, Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
-  -> (String -> m ())  -- ^ The fail handler.
-  -> m ()
-  -> m ()
+  -> (String -> m a)   -- ^ The fail handler.
+  -> m a
+  -> m (Maybe a)
 hResponseParser = hParser (response . put) parseResponse
 
 hParser
   :: (Socket m, MonadIO m)
-  => (Message -> m a)
+  => (Message -> m b)
   -> (String -> Either ParseError Message)
   -> Int
-  -> (String -> m ())
-  -> m ()
-  -> m ()
+  -> (String -> m a)
+  -> m a
+  -> m (Maybe a)
 hParser action p t onfail onsuccess =
   do h <- sock
      -- TODO use try and fail with bad request or reject silently.
@@ -56,11 +56,11 @@ hParser action p t onfail onsuccess =
        do hSetBuffering h (BlockBuffering (Just (64*1024)))
           fmap Just (readHeaders h) `catch` const (return Nothing)
      case join mMsg of
-       Nothing -> return ()  -- TODO: io error, what to do?
+       Nothing -> return Nothing
        Just msg -> 
          case p (msg "") of
-            Left err -> onfail (show err)
-            Right x  -> action x >> onsuccess
+            Left err -> Just `liftM` (onfail (show err))
+            Right x  -> Just `liftM` (action x >> onsuccess)
 
 -- Read all lines until the first empty line.
 readHeaders :: Handle -> IO (String -> String)

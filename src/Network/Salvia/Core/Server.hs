@@ -1,4 +1,4 @@
-module Network.Salvia.Core.Server (start) where
+module Network.Salvia.Core.Server (server) where
 
 import Control.Concurrent
 import Control.Monad.State
@@ -23,8 +23,8 @@ listening socket and pass execution to the application specific connection
 handler.
 -}
 
-start :: Config -> Handler Config p () -> p -> IO ()
-start c h p = do
+server :: Config -> Handler Config p () -> p -> IO ()
+server c h p = do
   s <- socket AF_INET Stream 0
   setSocketOption s ReuseAddr 1
   bindSocket s $ SockAddrInet (listenPort c) (listenAddr c)

@@ -13,13 +13,15 @@ module Network.Salvia.Handler.Session (
 import Control.Applicative hiding (empty)
 import Control.Concurrent.STM
 import Control.Monad.State
+import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
-import Misc.Misc (safeRead, atomModTVar, atomReadTVar, now, later)
+import Data.Time.LocalTime
 import Network.Protocol.Cookie hiding (empty)
+import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Cookie
-import Network.Salvia.Httpd
 import Prelude hiding (lookup)
+import Safe
 import System.Random
 import qualified Data.Map as M
 
@@ -46,15 +48,12 @@ data Session a = Session {
 
 type TSession a = TVar (Session a)
 
-                        {- | A handler that expects a session. -}
-                        -- type SessionHandler a m b = TSession a -> m b
-
 {- | Create a new, empty, shared session. -}
 
 mkSession :: SessionID -> LocalTime -> IO (TSession a)
 mkSession sid e =
   do s <- now
-     atomically $ newTVar $ Session sid s e Nothing
+     atomically (newTVar $ Session sid s e Nothing)
 
 -------------------------------------------------------------------------------
 
@@ -65,7 +64,7 @@ type Sessions a = TVar (M.Map SessionID (TSession a))
 {- | Create a new, empty, store of sessions. -}
 
 mkSessions :: IO (Sessions a)
-mkSessions = atomically $ newTVar M.empty
+mkSessions = atomically (newTVar M.empty)
 
 -------------------------------------------------------------------------------
 
@@ -88,23 +87,23 @@ hSession
   => Sessions a            -- ^ Map of shared session variables.
   -> Integer               -- ^ Number of seconds to be added to the session expiritation time.
   -> m (TSession a)
-hSession smap expiration = do
+hSession smap expiration =
 
   -- Get the session identifier from an existing cookie or create a new one.
-  prev <- getSessionID <$> hGetCookies
+  do prev <- getSessionID <$> hGetCookies
 
-  -- Compute current time and expiration time.
-  (n, ex) <- liftIO $ liftM2 (,) now (later expiration)
+     -- Compute current time and expiration time.
+     (n, ex) <- liftIO $ liftM2 (,) now (later expiration)
 
-  -- Either create a new session or try to reuse current one.
-  tsession <- liftIO $
-    maybe
-    (newSession smap ex)
-    (existingSession smap ex n)
-    prev
+     -- Either create a new session or try to reuse current one.
+     tsession <- liftIO $
+       maybe
+         (newSession smap ex)
+         (existingSession smap ex n)
+         prev
 
-  setSessionCookie tsession ex
-  return tsession
+     setSessionCookie tsession ex
+     return tsession
 
 -------------------------------------------------------------------------------
 
@@ -117,7 +116,7 @@ getSessionID :: Maybe Cookies -> Maybe SessionID
 getSessionID prev =
   do ck  <- prev
      sid <- cookie "sid" ck
-     sid' <- safeRead $ value sid
+     sid' <- readMay $ value sid
      return (SID sid')
 
 {-
@@ -143,7 +142,7 @@ setSessionCookie
   => TSession a -> t -> m ()
 setSessionCookie tsession ex =
   do ck <- newCookie ex
-     sid <- liftIO $ liftM sID $ atomReadTVar tsession
+     sid <- liftIO (sID <$> atomically (readTVar tsession))
      hSetCookies $
        cookies [ck {
          name  = "sid"
@@ -164,7 +163,7 @@ newSession sessions ex =
      session <- mkSession sid ex
 
      -- Place in session mapping usinf session identifier as key.
-     atomModTVar (M.insert sid session) sessions
+     atomically (readTVar sessions >>= writeTVar sessions . M.insert sid session)
      return session
 
 {-
@@ -176,23 +175,37 @@ expiration date of the existing session is updated.
 -}
 
 existingSession :: Sessions a -> LocalTime -> LocalTime -> SessionID -> IO (TSession a)
-existingSession sessions ex n sid = do
+existingSession sessions ex n sid =
 
   -- Lookup the session in the session map given the session identifier.
-  mtsession <- liftM (M.lookup sid) (atomReadTVar sessions)
-  case mtsession of
+  do mtsession <- M.lookup sid <$> atomically (readTVar sessions)
+     case mtsession of
 
-    -- Unrecognized session identifiers are penalised by a fresh session.
-    Nothing -> newSession sessions ex
-    Just tsession -> do
-      expd <- liftM sExpire (atomReadTVar tsession)
-      if expd < n
+       -- Unrecognized session identifiers are penalised by a fresh session.
+       Nothing -> newSession sessions ex
+       Just tsession ->
+         do expd <- sExpire <$> atomically (readTVar tsession)
+            if expd < n
 
-        -- Session is expired, create a new one.
-        then newSession sessions ex
+              -- Session is expired, create a new one.
+              then newSession sessions ex
 
-        -- Existing session, update expiration date.
-        else do
-          atomModTVar (\s -> s {sExpire = ex}) tsession
-          return tsession
+              -- Existing session, update expiration date.
+              else
+                do atomically (readTVar tsession >>= writeTVar tsession . (\s -> s {sExpire = ex}))
+                   return tsession
+
+-- Concurrency utils.
+
+
+-- Time utilities.
+
+later :: Integer -> IO LocalTime
+later howlong =
+  do zone <- getCurrentTimeZone
+     time <- addUTCTime (fromInteger howlong) <$> getCurrentTime
+     return $ utcToLocalTime zone time
+
+now :: IO LocalTime
+now = later 0
 

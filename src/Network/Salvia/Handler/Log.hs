@@ -8,7 +8,7 @@ import Control.Monad.State
 import Data.Record.Label
 import Misc.Terminal (red, green, reset)
 import Network.Protocol.Http
-import Network.Salvia.Httpd hiding (reset)
+import Network.Salvia.Core.Aspects hiding (reset)
 import System.IO
 
 {- |

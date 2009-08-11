@@ -6,13 +6,12 @@ module Network.Salvia.Handler.FileSystem (
 
 import Control.Monad.State
 import Data.Record.Label
-import Misc.Misc (bool)
 import Network.Protocol.Http
 import Network.Protocol.Uri (jail, path)
 import Network.Salvia.Handler.Directory
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.File
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.Directory (doesDirectoryExist)
 
 {- |
@@ -54,6 +53,6 @@ hJailedDispatch
 hJailedDispatch dir hdir hfile file = do
   case jail dir file of
     Nothing -> hError Forbidden
-    Just f  -> bool (hdir file) (hfile file)
+    Just f  -> (\b -> (if b then hdir else hfile) file)
            =<< liftIO (doesDirectoryExist f) 
 

@@ -3,7 +3,7 @@ module Network.Salvia.Handler.Printer (
   , hResponsePrinter
   ) where
 
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- |
 The 'hPrinter' handler print the entire response including the headers to the

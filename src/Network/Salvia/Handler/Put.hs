@@ -3,7 +3,7 @@ module Network.Salvia.Handler.Put (hPut) where
 import Control.Monad.State
 import Network.Protocol.Http
 import Network.Salvia.Handler.Error
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.IO
 import qualified Data.ByteString.Lazy as B
 

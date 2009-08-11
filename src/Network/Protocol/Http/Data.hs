@@ -4,7 +4,9 @@ module Network.Protocol.Http.Data where
 import Data.List (intercalate)
 import Data.Map (lookup, insert, Map, empty)
 import Data.Record.Label
-import Misc.Misc (safeRead, normalCase, split)
+import Data.List.Split
+import Safe
+import Misc.Text
 import Network.Protocol.Http.Status (Status (..))
 import Network.Protocol.Uri
 import Prelude hiding (lookup)
@@ -127,7 +129,7 @@ status = _status % direction
 {- | Normalize the capitalization of an HTTP header key. -}
 
 normalizeHeader :: String -> String
-normalizeHeader = intercalate "-" . map normalCase . split '-'
+normalizeHeader = intercalate "-" . map normalCase . splitOn "-"
 
 {- | Generic label to access an HTTP header field by key. -}
 
@@ -144,7 +146,7 @@ utf8 = "utf-8"
 {- | Access the /Content-Length/ header field. -}
 
 contentLength :: (Read i, Integral i) => Label Message (Maybe i)
-contentLength = (safeRead, maybe "" show) `lmap` header "Content-Length"
+contentLength = (readMay, maybe "" show) `lmap` header "Content-Length"
 
 {- | Access the /Connection/ header field. -}
 
@@ -154,7 +156,7 @@ connection = header "Connection"
 {- | Access the /Keep-Alive/ header field. -}
 
 keepAlive :: (Read i, Integral i) => Label Message (Maybe i)
-keepAlive = (safeRead, maybe "" show) `lmap` header "Keep-Alive"
+keepAlive = (readMay, maybe "" show) `lmap` header "Keep-Alive"
 
 {- | Access the /Cookie/ and /Set-Cookie/ header fields. -}
 

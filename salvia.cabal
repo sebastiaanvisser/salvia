@@ -19,28 +19,29 @@ Author:           Sebastiaan Visser
 Maintainer:       sfvisser@cs.uu.nl
 Build-Type:       Simple
 Build-Depends:    base ==3.0.*,
-                  network ==2.2.*,
-                  containers ==0.2.*,
-                  parsec ==3.0.*,
-                  filepath == 1.1.*,
-                  fclabels ==0.2.*,
-                  utf8-string ==0.3.*,
-                  bytestring ==0.9.*,
-                  old-locale ==1.0.*,
-                  time ==1.1.*,
-                  encoding ==0.5.*,
-                  process ==1.0.*,
-                  stm ==2.1.*,
-                  pureMD5 ==0.2.*,
-                  directory ==1.0.*,
                   bimap ==0.2.*,
+                  bytestring ==0.9.*,
+                  containers ==0.2.*,
+                  directory ==1.0.*,
+                  encoding ==0.5.*,
+                  fclabels ==0.2.*,
+                  filepath == 1.1.*,
                   monads-fd ==0.0.*,
+                  network ==2.2.*,
+                  old-locale ==1.0.*,
+                  parsec ==3.0.*,
+                  process ==1.0.*,
+                  pureMD5 ==0.2.*,
                   random ==1.0.*,
-                  transformers ==0.1.*
-
+                  safe ==0.2.*,
+                  stm ==2.1.*,
+                  time ==1.1.*,
+                  transformers ==0.1.*,
+                  utf8-string ==0.3.*,
+                  split ==0.1.*
 GHC-Options:      -threaded -Wall -fno-warn-orphans
 HS-Source-Dirs:   src
-Other-modules:    Misc.Misc,
+Other-modules:    Misc.Text
                   Misc.Terminal
 Exposed-modules:  Network.Protocol.Cookie,
                   Network.Protocol.Http,

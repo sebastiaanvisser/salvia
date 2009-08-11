@@ -5,7 +5,7 @@ module Network.Salvia.Handler.MethodRouter (
 
 import Network.Protocol.Http
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- | Request dispatcher based on the HTTP request `Method`.  -}
 

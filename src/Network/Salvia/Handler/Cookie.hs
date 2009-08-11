@@ -11,7 +11,8 @@ import Data.Record.Label
 import Data.Time.Format
 import Network.Protocol.Cookie hiding (cookie)
 import Network.Protocol.Http
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Config
+import Network.Salvia.Core.Aspects
 import System.Locale
 
 {- | Set the `cookie` HTTP response header (Set-Cookie) with the specified `Cookies`. -}

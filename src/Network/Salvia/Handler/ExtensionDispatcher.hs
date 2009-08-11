@@ -7,7 +7,7 @@ import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- | Request dispatcher based on the request path file extenstion. -}
 

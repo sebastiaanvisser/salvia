@@ -14,7 +14,7 @@ import Network.Protocol.Http
 import Network.Protocol.Uri (path, queryParams, Parameters)
 import Network.Salvia.Handler.Rewrite
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- | Request dispatcher based on the request path. -}
 

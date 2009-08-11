@@ -74,7 +74,11 @@ module Network.Salvia.Httpd (
   , uriEncodedPostParamsUTF8-}
 
   -- Httpd.Core.Server
-  , start
+  , server
+
+  -- Httpd.Core.Client
+  , client
+  , getRequest
 
   ) where
 
@@ -86,4 +90,5 @@ import Network.Salvia.Core.Aspects
 -- import Network.Salvia.Core.Context
 -- import Network.Salvia.Core.Handler
 import Network.Salvia.Core.Server
+import Network.Salvia.Core.Client
 

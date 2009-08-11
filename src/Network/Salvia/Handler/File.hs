@@ -16,7 +16,7 @@ import Network.Protocol.Http
 import Network.Protocol.Mime
 import Network.Protocol.Uri
 import Network.Salvia.Handler.Error
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.IO
 
 {- |

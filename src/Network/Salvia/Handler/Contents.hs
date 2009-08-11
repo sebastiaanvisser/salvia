@@ -4,11 +4,13 @@ module Network.Salvia.Handler.Contents
   , hResponseContents
   , hContents
   
+  , asASCII
   , asUTF8
   , asParameters
   ) where
 
 import Network.Protocol.Uri
+import Data.Encoding.ASCII
 import Data.Encoding.UTF8
 import Data.Encoding (decodeLazyByteString)
 import Control.Monad.State
@@ -41,12 +43,17 @@ hContents
 hContents dir =
   do len <- dir (getM contentLength)
      kpa <- dir (getM keepAlive)
+--      enc <- dir (getM contentType)
      s   <- sock
      liftIO $
        case (kpa :: Maybe Integer, len :: Maybe Integer) of
          (_,       Just n)  -> liftM Just (B.hGet s (fromIntegral n))
          (Nothing, Nothing) -> liftM Just (B.hGetContents s)
          _                  -> return Nothing
+
+
+asASCII :: Monad m => m (Maybe B.ByteString) -> m (Maybe String)
+asASCII = liftM (fmap (decodeLazyByteString ASCII))
 
 {- |
 Like the `contents' function but decodes the data as UTF-8. Soon, time will

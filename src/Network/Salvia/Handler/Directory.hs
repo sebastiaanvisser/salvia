@@ -6,12 +6,11 @@ module Network.Salvia.Handler.Directory (
 import Control.Monad.State
 import Data.List (sort)
 import Data.Record.Label
-import Misc.Misc (bool)
 import Network.Protocol.Http
 import Network.Protocol.Uri (path)
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 
 {- |
@@ -48,7 +47,9 @@ dirHandler dirName =
 
 -- Add trailing slash to a directory name.
 processFilename :: FilePath -> FilePath -> IO FilePath
-processFilename d f = bool (f ++ "/") f `liftM` doesDirectoryExist (d ++ f)
+processFilename d f =
+  (\b -> (if b then (++"/") else id) f)
+  `liftM` doesDirectoryExist (d ++ f)
 
 -- Turn a list of filenames into HTML directory listing.
 listing :: FilePath -> [FilePath] -> String

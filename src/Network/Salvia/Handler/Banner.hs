@@ -6,7 +6,7 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import Data.Time.LocalTime (getCurrentTimeZone, utcToLocalTime)
 import Network.Protocol.Http
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.Locale (defaultTimeLocale)
 
 {- |

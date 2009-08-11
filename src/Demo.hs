@@ -9,7 +9,7 @@ main :: IO ()
 main =
   do addr <- inet_addr "127.0.0.1"
      putStrLn "started"
-     start 
+     server 
        (defaultConfig { listenAddr = addr, listenPort = 8080 })
        (hDefaultEnv myHandler)
        ()
@@ -18,4 +18,10 @@ main =
 
 myHandler :: (MonadIO m, Request m, Response m, Send m) => m ()
 myHandler = hFileSystem "."
+
+
+
+test :: IO (Maybe String)
+test = getRequest "http://www.google.nl/search?q=aap"
+
 

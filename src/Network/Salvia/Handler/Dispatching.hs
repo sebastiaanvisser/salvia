@@ -10,7 +10,7 @@ module Network.Salvia.Handler.Dispatching (
 import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 
 {- |
 The dispatcher type takes one value to dispatch on and two handlers. The first

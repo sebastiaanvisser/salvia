@@ -21,7 +21,6 @@ import Data.List (intercalate)
 import Data.Map (insert, empty)
 import Network.Protocol.Http.Data
 import Network.Protocol.Http.Status
--- import Network.Protocol.Uri
 import Text.Parsec hiding (many, (<|>))
 import Text.Parsec.Prim (Stream, ParsecT)
 

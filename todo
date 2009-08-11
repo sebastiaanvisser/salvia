@@ -1,3 +1,4 @@
+more <$> less liftM
 proxy?
 cgi?
 streaming big files?
@@ -8,6 +9,7 @@ split config into ServerConfig + ClientConfig. this makes sense
 uri issues... using string except for operations? yeah, i think so.
 showing/parsing uris should be more safe
 IPv6?
+make HTTP header labels use Maybe, for removal.
 
 A.Request,A.RequestBody,A.Response,A.ResponseBody ??
 or TypeClass for direction.

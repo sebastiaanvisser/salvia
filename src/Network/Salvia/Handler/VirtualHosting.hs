@@ -9,7 +9,7 @@ import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Httpd hiding (hostname)
+import Network.Salvia.Core.Aspects
 
 {- |
 List dispatcher based on the host part of the hostname request header.

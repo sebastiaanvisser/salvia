@@ -7,7 +7,7 @@ import Control.Monad.State
 import Data.Maybe
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.IO
 
 {- |

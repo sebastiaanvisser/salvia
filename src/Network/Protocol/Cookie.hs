@@ -18,7 +18,7 @@ import Control.Applicative hiding (empty)
 import Control.Monad ()
 import Data.Char (toLower)
 import Data.List (intercalate)
-import Misc.Misc (intersperseS, (@@), trim)
+import Misc.Text
 import Network.Protocol.Uri (URI)
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import qualified Data.Map as M
@@ -134,7 +134,7 @@ be recognized.
 -}
 
 parseCookies :: String -> Maybe Cookies
-parseCookies = fmap cookies . (pCookie @@)
+parseCookies = either (const Nothing) (Just . cookies) . parse pCookie ""
 
 pCookie :: GenParser Char st [Cookie]
 pCookie = map ck <$> pCookieValues

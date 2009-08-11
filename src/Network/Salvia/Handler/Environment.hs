@@ -15,7 +15,7 @@ import Network.Salvia.Handler.Log
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
-import Network.Salvia.Httpd
+import Network.Salvia.Core.Aspects
 import System.IO
 
 {- |
