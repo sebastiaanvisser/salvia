@@ -3,6 +3,7 @@ module Network.Salvia.Handler.Log {- doc ok -}
   , hLogWithCounter
   ) where
 
+import Control.Applicative
 import Control.Concurrent.STM
 import Control.Monad.State
 import Data.Record.Label
@@ -28,7 +29,7 @@ logger :: (SocketM m, MonadIO m, ResponseM m, RequestM m) => Maybe (TVar Int) ->
 logger count handle =
   do c <- case count of
        Nothing -> return ""
-       Just c' -> liftIO (show `liftM` atomically (readTVar c'))
+       Just c' -> liftIO (show <$> atomically (readTVar c'))
      mt   <- request  (getM method)
      ur   <- request  (getM uri)
      st   <- response (getM status)

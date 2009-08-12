@@ -1,5 +1,6 @@
 module Network.Salvia.Handler.Banner (hBanner) where {- doc ok -}
 
+import Control.Applicative
 import Control.Monad.State
 import Data.Record.Label
 import Data.Time.Clock
@@ -21,7 +22,7 @@ hBanner
 hBanner sv = do
   dt <- liftIO $
     do zone <- getCurrentTimeZone
-       time <- liftM (utcToLocalTime zone) getCurrentTime
+       time <- utcToLocalTime zone <$> getCurrentTime
        return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" time
   response $
     do setM date   (Just dt)

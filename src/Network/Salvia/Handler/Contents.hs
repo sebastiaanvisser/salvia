@@ -9,13 +9,14 @@ module Network.Salvia.Handler.Contents       {- todo: fix encoding + docs -}
   , asParameters
   ) where
 
-import Network.Protocol.Uri
+import Control.Applicative
+import Control.Monad.State
+import Data.Encoding (decodeLazyByteString)
 import Data.Encoding.ASCII
 import Data.Encoding.UTF8
-import Data.Encoding (decodeLazyByteString)
-import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
+import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import qualified Data.ByteString.Lazy as B
 
@@ -47,18 +48,9 @@ hContents dir =
      s   <- sock
      liftIO $
        case (kpa :: Maybe Integer, len :: Maybe Integer) of
-         (_,       Just n)  -> liftM Just (B.hGet s (fromIntegral n))
-         (Nothing, Nothing) -> liftM Just (B.hGetContents s)
+         (_,       Just n)  -> Just <$> B.hGet s (fromIntegral n)
+         (Nothing, Nothing) -> Just <$> B.hGetContents s
          _                  -> return Nothing
-
-
-
-
-
-
-
-
-
 
 asASCII :: Monad m => m (Maybe B.ByteString) -> m (Maybe String)
 asASCII = liftM (fmap (decodeLazyByteString ASCII))

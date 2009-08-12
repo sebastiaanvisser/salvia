@@ -10,16 +10,10 @@ server running on multiple TCP ports
 remove -----------
 fix virtualhosting
 comet?
-typyer message with response or request.
 move setBuffering to hContents?
-split config into ServerConfig + ClientConfig. this makes sense
 uri issues... using string except for operations? yeah, i think so.
 showing/parsing uris should be more safe
 IPv6?
-make HTTP header labels use Maybe, for removal.
-
-A.Request,A.RequestBody,A.Response,A.ResponseBody ??
-or TypeClass for direction.
 
 
 dir layout:
@@ -33,8 +27,6 @@ dir layout:
       Client (is now Handler.Client)
     Handler
       Proxy (running client from server)
-
-
 
 
 Cool:

@@ -2,7 +2,6 @@
 module Network.Protocol.Uri.Query where
 
 import Data.Record.Label
-import Control.Monad
 import Control.Applicative hiding (empty)
 import Network.Protocol.Uri.Data
 import Text.Parsec hiding (many, (<|>))
@@ -21,7 +20,7 @@ pParam = (,)
   <*> pMaybe (char '=' *> (translateParam <$> many (noneOf "&")))
       
 pMaybe :: Stream s m t => ParsecT s u m a -> ParsecT s u m (Maybe a)
-pMaybe a = option Nothing . liftM Just $ a
+pMaybe a = option Nothing (Just <$> a)
 
 {- | Parse a pre-decoded query string into key value pairs parameters. -}
 

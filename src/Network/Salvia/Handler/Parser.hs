@@ -5,6 +5,7 @@ module Network.Salvia.Handler.Parser {- doc ok -}
   , readNonEmptyLines
   ) where
 
+import Control.Applicative
 import Control.Monad.State
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
@@ -62,8 +63,8 @@ hParser action p t onfail onsuccess =
        Nothing -> return Nothing
        Just msg -> 
          case p (msg "") of
-            Left err -> Just `liftM` (onfail (show err))
-            Right x  -> Just `liftM` (action x >> onsuccess)
+            Left err -> Just <$> (onfail (show err))
+            Right x  -> Just <$> (action x >> onsuccess)
 
 -- Read all lines until the first empty line.
 readNonEmptyLines :: Handle -> IO (String -> String)
@@ -72,5 +73,5 @@ readNonEmptyLines h =
      let lf = showChar '\n'
      if l `elem` ["", "\r"]
        then return lf
-       else liftM ((showString l . lf) .) (readNonEmptyLines h)
+       else ((showString l . lf) .) <$> readNonEmptyLines h
 

@@ -29,6 +29,7 @@ module Network.Salvia.Handler.Login
 
   ) where
 
+import Control.Applicative
 import Control.Concurrent.STM
 import Control.Monad.State
 import Data.ByteString.Lazy.UTF8 hiding (lines)
@@ -100,7 +101,7 @@ type TUserSession a = TSession (UserPayload a)
 readUserDatabase :: FilePath -> IO (TUserDatabase FilePath)
 readUserDatabase file =
   do -- First line contains the default `guest` actions, tail lines contain users.
-     gst:ls <- lines `liftM` readFile file
+     gst:ls <- lines <$> readFile file
 
      atomically $ newTVar $ UserDatabase
        (catMaybes $ map parseUserLine ls)
@@ -231,7 +232,7 @@ hAuthorized
   -> m ()  
 
 hAuthorized db action handler session =
-  do load <- liftM sPayload (liftIO $ atomically $ readTVar session)
+  do load <- liftIO (sPayload <$> atomically (readTVar session))
      case load of
        Just (UserPayload user _ _)
          | action `elem` actions user -> handler (Just user)
@@ -254,7 +255,7 @@ hAuthorizedUser
   -> m ()    
 
 hAuthorizedUser action handler session =
-  do load <- liftM sPayload (liftIO $ atomically $ readTVar session)
+  do load <- liftIO (sPayload <$> atomically (readTVar session))
      case load of
        Just (UserPayload user _ _)
          | action `elem` actions user -> handler user

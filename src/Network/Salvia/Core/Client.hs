@@ -1,5 +1,6 @@
 module Network.Salvia.Core.Client where
 
+import Control.Applicative
 import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Uri
@@ -34,7 +35,7 @@ client hReq hRes uri =
 
 
 getRequest :: String -> IO (Maybe String)
-getRequest u = join `liftM`
+getRequest u = join <$>
   client 
     (hGetRequest u)
     (hClientEnvironment

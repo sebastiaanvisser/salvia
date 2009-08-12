@@ -50,13 +50,13 @@ instance A.ConfigM (Handler Config p) where
 
 instance A.RequestM (Handler c p) where
   request st =
-    do (a, s') <- runState st `liftM` getM request
+    do (a, s') <- runState st <$> getM request
        setM request s'
        return a
 
 instance A.ResponseM (Handler c p) where
   response st =
-    do (a, s') <- runState st `liftM` getM response
+    do (a, s') <- runState st <$> getM response
        setM response s'
        return a
 

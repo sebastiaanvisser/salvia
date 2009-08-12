@@ -90,7 +90,7 @@ ls = " \t"
 -- Optional parser with maybe result.
 
 pMaybe :: Stream s m t => ParsecT s u m a -> ParsecT s u m (Maybe a)
-pMaybe a = option Nothing . liftM Just $ a
+pMaybe a = option Nothing (Just <$> a)
 
 -- Parse end of line, \r, \n or \r\n.
 
