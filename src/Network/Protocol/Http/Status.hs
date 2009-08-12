@@ -1,7 +1,7 @@
-module Network.Protocol.Http.Status where
+module Network.Protocol.Http.Status where {- doc ko -}
 
-import Data.Bimap (Bimap, fromList, lookup, lookupR)
-import Data.Maybe (fromMaybe)
+import Data.Bimap
+import Data.Maybe
 import Prelude hiding (lookup)
 
 {- | HTTP status codes. -}

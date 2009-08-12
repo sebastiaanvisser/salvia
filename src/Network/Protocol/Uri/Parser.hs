@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TypeOperators #-}
 module Network.Protocol.Uri.Parser where
 
 import Control.Applicative hiding (empty)
@@ -14,15 +14,11 @@ import Text.Parsec.Prim (Stream, ParsecT)
 
 import Network.Protocol.Uri.Data
 
-host :: Label URI String
-host = mkLabel
-  (show . lget (_host % authority))
-  (lset (_host % authority) . either (const (Hostname [])) id . parseHost)
+host :: URI :-> String
+host = (show, either (const (Hostname [])) id . parseHost) `lmap` (_host % authority)
 
-path :: Label URI FilePath
-path = mkLabel
-  (decode . show . lget _path)
-  (lset _path . either (const (Path True [])) id . parsePath . encode)
+path :: URI :-> FilePath
+path = (decode . show, either (const (Path True [])) id . parsePath . encode) `lmap` _path
 
 
 toURI :: String -> URI

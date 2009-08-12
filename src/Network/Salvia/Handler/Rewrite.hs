@@ -1,4 +1,5 @@
-module Network.Salvia.Handler.Rewrite
+{-# LANGUAGE TypeOperators #-}
+module Network.Salvia.Handler.Rewrite {- doc ok -}
   ( hLocalRequest
 
   , hRewrite
@@ -18,9 +19,12 @@ import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 
-{- | Run a handler in a local environment in which the `Request' has been modified. -}
+{- |
+Run a handler in a local environment in which the `HTTP' `Request' has
+been modified.
+-}
 
-hLocalRequest :: Request m => Label Message b -> (b -> b) -> m a -> m a
+hLocalRequest :: RequestM m => (HTTP Request :-> b) -> (b -> b) -> m a -> m a
 hLocalRequest p f m =
   do u <- request (getM p) <* request (modM p f)
      m <* request (setM p u)
@@ -31,22 +35,22 @@ changed by the specified modifier function. After the handler completes the `URI
 remains untouched.
 -}
 
-hRewrite :: Request m => (URI -> URI) -> m a -> m a
+hRewrite :: RequestM m => (URI -> URI) -> m a -> m a
 hRewrite = hLocalRequest asURI
 
 {- | Run handler in a context with a modified host. -}
 
-hRewriteHost :: Request m => (String -> String) -> m a -> m a
+hRewriteHost :: RequestM m => (String -> String) -> m a -> m a
 hRewriteHost = hLocalRequest (host % asURI)
 
 {- | Run handler in a context with a modified path. -}
 
-hRewritePath :: Request m => (FilePath -> FilePath) -> m a -> m a
+hRewritePath :: RequestM m => (FilePath -> FilePath) -> m a -> m a
 hRewritePath = hLocalRequest (path % asURI)
 
 {- | Run handler in a context with a modified file extension. -}
 
-hRewriteExt :: Request m => (Maybe String -> Maybe String) -> m a -> m a
+hRewriteExt :: RequestM m => (Maybe String -> Maybe String) -> m a -> m a
 hRewriteExt = hLocalRequest (extension % path % asURI)
 
 {- |
@@ -54,7 +58,7 @@ Run handler in a context with a modified path. The specified prefix will be
 prepended to the path.
 -}
 
-hWithDir :: Request m => String -> m a -> m a
+hWithDir :: RequestM m => String -> m a -> m a
 hWithDir d = hRewritePath (d++)
 
 {- |
@@ -62,7 +66,7 @@ Run handler in a context with a modified path. The specified prefix will be
 stripped from the path.
 -}
 
-hWithoutDir :: Request m => String -> m a -> m a
+hWithoutDir :: RequestM m => String -> m a -> m a
 hWithoutDir d = hRewritePath $
   \p -> if d `isPrefixOf` p then drop (length d) p else p
 

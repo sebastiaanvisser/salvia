@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Redirect (hRedirect) where
+module Network.Salvia.Handler.Redirect (hRedirect) where {- doc ok -}
 
 import Data.Record.Label
 import Network.Protocol.Http
@@ -9,9 +9,9 @@ Redirect a client to another location by creating a `MovedPermanently` response
 message with the specified `URI` in the `location' header.
 -}
 
-hRedirect :: Response m => String -> m ()
+hRedirect :: ResponseM m => String -> m ()
 hRedirect u =
   response $
-    do setM location u
+    do setM location (Just u)
        setM status MovedPermanently
 

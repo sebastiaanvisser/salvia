@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
 module Network.Salvia.Core.Context
   ( SendAction
   , SendQueue
@@ -43,31 +43,30 @@ to perform their task and to set up a proper response. All the fields in the
 context are accessible using the read/write labels defined below.
 -}
 
-data Context c p =
-  Context {
-    _config   :: c            -- ^ The client or server configuration.
-  , _payload  :: p            -- ^ Connection wide payload.
-
-  , _request  :: Message      -- ^ The HTTP request header.
-  , _response :: Message      -- ^ The HTTP response header.
-
-  , _rawSock  :: Socket       -- ^ The raw socket for the connection with the other endpoint. 
-  , _sock     :: Handle       -- ^ The socket handle for the connection with the other endpoint.
-  , _peer     :: SockAddr     -- ^ The address of the other endpoint.
-
-  , _queue    :: SendQueue    -- ^ The queue of send actions.
+data Context c p = Context
+  { _config   :: c             -- ^ The client or server configuration.
+  , _payload  :: p             -- ^ Connection wide payload.
+                               
+  , _request  :: HTTP Request  -- ^ The HTTP request header.
+  , _response :: HTTP Response -- ^ The HTTP response header.
+                               
+  , _rawSock  :: Socket        -- ^ The raw socket for the connection with the other endpoint. 
+  , _sock     :: Handle        -- ^ The socket handle for the connection with the other endpoint.
+  , _peer     :: SockAddr      -- ^ The address of the other endpoint.
+                               
+  , _queue    :: SendQueue     -- ^ The queue of send actions.
   }
 
 $(mkLabels [''Context])
 
-config   :: Label (Context c p) c
-payload  :: Label (Context c p) p
-queue    :: Label (Context c p) SendQueue
-peer     :: Label (Context c p) SockAddr
-rawSock  :: Label (Context c p) Socket
-sock     :: Label (Context c p) Handle
-response :: Label (Context c p) Message
-request  :: Label (Context c p) Message
+config   :: Context c p :-> c
+payload  :: Context c p :-> p
+queue    :: Context c p :-> SendQueue
+peer     :: Context c p :-> SockAddr
+rawSock  :: Context c p :-> Socket
+sock     :: Context c p :-> Handle
+request  :: Context c p :-> HTTP Request
+response :: Context c p :-> HTTP Response
 
 {- |
 Create and default server context with the specified server configuration,

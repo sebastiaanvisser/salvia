@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 module Network.Protocol.Uri.Path where
 
 import Data.List
@@ -6,7 +7,7 @@ import Data.Record.Label
 
 {- | Label to access the extension of a filename. -}
 
-extension :: Label FilePath (Maybe String)
+extension :: FilePath :-> Maybe String
 extension = mkLabel getExt setExt
   where
     splt     p = (\(a,b) -> (reverse a, reverse b)) $ break (=='.') $ reverse p

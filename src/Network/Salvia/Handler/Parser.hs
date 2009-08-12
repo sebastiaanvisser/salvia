@@ -1,9 +1,8 @@
-{-# LANGUAGE FlexibleContexts #-}
-module Network.Salvia.Handler.Parser (
-    hRequestParser
+module Network.Salvia.Handler.Parser {- doc ok -}
+  ( hRequestParser
   , hResponseParser
   , hParser
-  , readHeaders
+  , readNonEmptyLines
   ) where
 
 import Control.Monad.State
@@ -13,39 +12,43 @@ import System.IO
 import System.Timeout
 import Text.Parsec.Error (ParseError)
 
-{- |
-The 'hParser' handler is used to parse the raw request message into the
-'Message' data type. This handler is generally used as (one of) the first
-handlers in an environment. The first handler argument is executed when the
-request is invalid, possibly due to parser errors, and is parametrized with the
-error string. The second handler argument is executed when the request is
-valid. When the message could be parsed within the time specified with the
-first argument the function silently returns.
--}
+-- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (Socket m, Request m, MonadIO m)
+  :: (SocketM m, RequestM m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
-  -> m a
+  -> m a               -- ^ The success handler.
   -> m (Maybe a)
 hRequestParser = hParser (request . put) parseRequest
 
+-- | Like the `hParser' but always parses `HTTP` `Response`s.
+
 hResponseParser
-  :: (Socket m, Response m, MonadIO m)
+  :: (SocketM m, ResponseM m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
-  -> m a
+  -> m a               -- ^ The success handler.
   -> m (Maybe a)
 hResponseParser = hParser (response . put) parseResponse
 
+{- |
+The 'hParser' handler is used to parse the raw `HTTP` message into the
+'Message' data type. This handler is generally used as (one of) the first
+handlers in a client or server environment. The first handler argument is
+executed when the message is invalid, possibly due to parser errors, and is
+parametrized with the error string. The second handler argument is executed
+when the message is valid. When the message could not be parsed within the time
+specified with the first argument the function silently returns.
+-}
+
 hParser
-  :: (Socket m, MonadIO m)
-  => (Message -> m b)
-  -> (String -> Either ParseError Message)
-  -> Int
-  -> (String -> m a)
-  -> m a
+  :: (SocketM m, MonadIO m)
+  => (HTTP d -> m b)                        -- ^ What to do with message.
+  -> (String -> Either ParseError (HTTP d)) -- ^ Custom message parser.
+  -> Int                                    -- ^ Timeout in milliseconds.
+  -> (String -> m a)                        -- ^ The fail handler.
+  -> m a                                    -- ^ The success handler.
   -> m (Maybe a)
 hParser action p t onfail onsuccess =
   do h <- sock
@@ -54,7 +57,7 @@ hParser action p t onfail onsuccess =
        -- TODO: Using NoBuffering here may crash the entire program (GHC
        -- runtime?) when processing more requests than just a few:
        do hSetBuffering h (BlockBuffering (Just (64*1024)))
-          fmap Just (readHeaders h) `catch` const (return Nothing)
+          fmap Just (readNonEmptyLines h) `catch` const (return Nothing)
      case join mMsg of
        Nothing -> return Nothing
        Just msg -> 
@@ -63,11 +66,11 @@ hParser action p t onfail onsuccess =
             Right x  -> Just `liftM` (action x >> onsuccess)
 
 -- Read all lines until the first empty line.
-readHeaders :: Handle -> IO (String -> String)
-readHeaders h =
+readNonEmptyLines :: Handle -> IO (String -> String)
+readNonEmptyLines h =
   do l <- hGetLine h
      let lf = showChar '\n'
      if l `elem` ["", "\r"]
        then return lf
-       else liftM ((showString l . lf) .) (readHeaders h)
+       else liftM ((showString l . lf) .) (readNonEmptyLines h)
 

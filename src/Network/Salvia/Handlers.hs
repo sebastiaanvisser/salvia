@@ -1,10 +1,10 @@
-module Network.Salvia.Handlers (
+module Network.Salvia.Handlers
 
   -- * Fundamental protocol handlers.
 
     -- ** Default handler environments.
 
-      hDefaultEnv
+    ( hDefaultEnv
     , hSessionEnv
 
     -- ** Parse client requests.
@@ -12,7 +12,7 @@ module Network.Salvia.Handlers (
     , hRequestParser
     , hResponseParser
     , hParser
-    , readHeaders
+    , readNonEmptyLines
 
     -- ** Print server responses.
 
@@ -102,7 +102,7 @@ module Network.Salvia.Handlers (
 
     , Dispatcher
     , ListDispatcher
-    , hGenericDispatch
+    , hDispatch
     , hRequestDispatch
     , hListDispatch
 
@@ -125,7 +125,6 @@ module Network.Salvia.Handlers (
 
     -- ** Dispatch based on host name.
 
-    , hHostRouter
     , hVirtualHosting
 
   -- * Session and user management.
@@ -144,6 +143,9 @@ module Network.Salvia.Handlers (
     , Session (..)
     , TSession
     , Sessions
+
+    , hSessionID
+    , hSetSessionCookie
 
     , mkSessions
 

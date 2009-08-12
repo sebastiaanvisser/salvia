@@ -1,5 +1,5 @@
-module Network.Salvia.Handler.FileSystem (
-    hFileSystem
+module Network.Salvia.Handler.FileSystem {- doc ok -}
+  ( hFileSystem
   , hFileSystemNoIndexes
   , hFileTypeDispatcher
   ) where
@@ -25,7 +25,7 @@ parts of the file system.
 -}
 
 hFileTypeDispatcher
-  :: (MonadIO m, Request m, Response m, Send m)
+  :: (MonadIO m, RequestM m, ResponseM m, SendM m)
   => (FilePath -> m ()) -> (FilePath -> m ()) -> FilePath -> m ()
 hFileTypeDispatcher hdir hfile dir =
   request (getM (path % asURI)) >>=
@@ -36,7 +36,7 @@ Serve single directory by combining the `hDirectoryResource` and
 `hFileResource` handlers in the `hFileTypeDispatcher`.
 -}
 
-hFileSystem :: (MonadIO m, Request m, Response m, Send m) => FilePath -> m ()
+hFileSystem :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
 hFileSystem = hFileTypeDispatcher hDirectoryResource hFileResource
 
 {- |
@@ -44,15 +44,15 @@ Serve single directory like `hFileSystem` but do not show directory indices.
 Instead of an directory index an `Forbidden` response will be created.
 -}
 
-hFileSystemNoIndexes :: (MonadIO m, Request m, Response m, Send m) => FilePath -> m ()
+hFileSystemNoIndexes :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
 hFileSystemNoIndexes = hFileTypeDispatcher (const $ hError Forbidden) hFileResource
 
 hJailedDispatch
-  :: (MonadIO m, Request m, Response m, Send m)
+  :: (MonadIO m, RequestM m, ResponseM m, SendM m)
   => FilePath -> (FilePath -> m ()) -> (FilePath -> m ()) -> FilePath -> m () 
-hJailedDispatch dir hdir hfile file = do
-  case jail dir file of
-    Nothing -> hError Forbidden
-    Just f  -> (\b -> (if b then hdir else hfile) file)
-           =<< liftIO (doesDirectoryExist f) 
+hJailedDispatch dir hdir hfile file =
+  do case jail dir file of
+       Nothing -> hError Forbidden
+       Just f -> (\b -> (if b then hdir else hfile) file)
+                 =<< liftIO (doesDirectoryExist f) 
 

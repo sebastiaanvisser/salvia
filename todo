@@ -1,7 +1,14 @@
+:=  iso   setM
 more <$> less liftM
 proxy?
 cgi?
 streaming big files?
+standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
+generalize hPut for client/server
+all Dispatching -> Routing
+server running on multiple TCP ports
+remove -----------
+fix virtualhosting
 comet?
 typyer message with response or request.
 move setBuffering to hContents?

@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
-module Network.Salvia.Handler.Contents
+module Network.Salvia.Handler.Contents       {- todo: fix encoding + docs -}
   ( hRequestContents
   , hResponseContents
   , hContents
@@ -31,15 +31,15 @@ probably only useful in the case of 'PUT' request, because no decoding of
 -}
 
 
-hRequestContents :: (Request m, MonadIO m, Socket m) => m (Maybe B.ByteString)
+hRequestContents :: (RequestM m, MonadIO m, SocketM m) => m (Maybe B.ByteString)
 hRequestContents  = hContents request
 
-hResponseContents :: (Response m, MonadIO m, Socket m) => m (Maybe B.ByteString)
+hResponseContents :: (ResponseM m, MonadIO m, SocketM m) => m (Maybe B.ByteString)
 hResponseContents = hContents response
 
 hContents
-  :: (MonadIO m, Socket m)
-  => (forall a. State Message a -> m a) -> m (Maybe B.ByteString)
+  :: (MonadIO m, SocketM m)
+  => (forall a. State (HTTP d) a -> m a) -> m (Maybe B.ByteString)
 hContents dir =
   do len <- dir (getM contentLength)
      kpa <- dir (getM keepAlive)
@@ -50,6 +50,14 @@ hContents dir =
          (_,       Just n)  -> liftM Just (B.hGet s (fromIntegral n))
          (Nothing, Nothing) -> liftM Just (B.hGetContents s)
          _                  -> return Nothing
+
+
+
+
+
+
+
+
 
 
 asASCII :: Monad m => m (Maybe B.ByteString) -> m (Maybe String)

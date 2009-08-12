@@ -4,38 +4,29 @@ module Network.Salvia.Core.Aspects where
 import Control.Applicative
 import Control.Monad.State
 import Network.Protocol.Http
+import Network.Salvia.Core.Config
+import Network.Socket
 import System.IO
-import qualified Network.Salvia.Core.Config as Server
 import qualified Data.ByteString.Lazy as B
-import qualified Network.Socket as S
 
-class (Applicative m, Monad m) => ServerConfig m where
-  config :: m Server.Config
+class (Applicative m, Monad m) => ConfigM m where
+  config :: m Config
 
+class (Applicative m, Monad m) => RequestM m where
+  request :: State (HTTP Request) a -> m a
 
-
-
-
-class (Applicative m, Monad m) => Request m where
-  request :: State Message a -> m a
-
-class (Applicative m, Monad m) => Response m where
-  response :: State Message a -> m a
-
-
+class (Applicative m, Monad m) => ResponseM m where
+  response :: State (HTTP Response) a -> m a
 
 -- Access to the raw socket to the other end point.
 
-class (Applicative m, Monad m) => Socket m where
-  rawSock :: m S.Socket
+class (Applicative m, Monad m) => SocketM m where
+  rawSock :: m Socket
   sock    :: m Handle
-  raw     :: ((S.Socket, Handle) -> IO ()) -> m ()
-  peer    :: m S.SockAddr
+  raw     :: ((Socket, Handle) -> IO ()) -> m ()
+  peer    :: m SockAddr
 
-
-
-
-class (Applicative m, Monad m) => Send m where
+class (Applicative m, Monad m) => SendM m where
   sendStr       :: String                                   -> m ()
   sendBs        :: B.ByteString                             -> m ()
   spoolStr      :: (String       -> String)       -> Handle -> m ()
@@ -45,16 +36,16 @@ class (Applicative m, Monad m) => Send m where
   flushQueue    :: m ()
   emptyQueue    :: m ()
 
-class (Applicative m, Monad m) => Contents m where
+class (Applicative m, Monad m) => ContentsM m where
   contents :: m (Maybe B.ByteString)
 
 {- | Reset both the send queue and the generated server response. -}
 
-reset :: (Response m, Send m) => m ()
+reset :: (ResponseM m, SendM m) => m ()
 reset =
   do response (put emptyResponse)
      emptyQueue
 
-sendStrLn :: Send m => String -> m ()
+sendStrLn :: SendM m => String -> m ()
 sendStrLn = sendStr . (++"\n")
 

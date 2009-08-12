@@ -1,5 +1,5 @@
-module Network.Salvia.Handler.Directory (
-    hDirectory
+module Network.Salvia.Handler.Directory {- doc ok -}
+  ( hDirectory
   , hDirectoryResource
   ) where
 
@@ -18,29 +18,29 @@ Serve a simple HTML directory listing for the specified directory on the
 filesystem.
 -}
 
-hDirectoryResource :: (MonadIO m, Request m, Response m, Send m) => FilePath -> m ()
+hDirectoryResource :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
 hDirectoryResource dirName =
   do u <- request (getM asURI)
      let p = lget path u
      if (null p) || last p /= '/'
-      then hRedirect (show $ lmod path (++"/") u)
-      else dirHandler dirName
+       then hRedirect (show $ lmod path (++"/") u)
+       else dirHandler dirName
 
 {- |
 Like `hDirectoryResource` but uses the path of the current request URI.
 -}
 
-hDirectory :: (MonadIO m, Request m, Response m, Send m) => m ()
+hDirectory :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
 hDirectory = hResource hDirectoryResource
 
-dirHandler :: (MonadIO m, Request m, Response m, Send m) => FilePath -> m ()
+dirHandler :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
 dirHandler dirName =
   do p <- request (getM (path % asURI))
      filenames <- liftIO $ getDirectoryContents dirName
      processed <- liftIO $ mapM (processFilename dirName) (sort filenames)
      let b = listing p processed
      response $
-       do setM contentType ("text/html", Nothing)
+       do setM contentType (Just ("text/html", Nothing))
           setM contentLength (Just $ length b)
           setM status OK
      sendStr b

@@ -1,11 +1,14 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-module Network.Salvia.Handler.Session (
-    hSession
+{-# LANGUAGE MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
+module Network.Salvia.Handler.Session {- doc ok -}
+  ( hSession
 
   , SessionID
   , Session (..)
   , TSession
   , Sessions
+
+  , hSessionID
+  , hSetSessionCookie
 
   , mkSessions
   ) where
@@ -25,12 +28,10 @@ import Safe
 import System.Random
 import qualified Data.Map as M
 
--------------------------------------------------------------------------------
-
 {- | A session identifier. Should be unique for every session. -}
 
 newtype SessionID = SID Integer
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Random)
 
 instance Show SessionID where
   show (SID sid) = show sid
@@ -55,8 +56,6 @@ mkSession sid e =
   do s <- now
      atomically (newTVar $ Session sid s e Nothing)
 
--------------------------------------------------------------------------------
-
 {- | A mapping from unique session IDs to shared session variables. -}
 
 type Sessions a = TVar (M.Map SessionID (TSession a))
@@ -65,14 +64,6 @@ type Sessions a = TVar (M.Map SessionID (TSession a))
 
 mkSessions :: IO (Sessions a)
 mkSessions = atomically (newTVar M.empty)
-
--------------------------------------------------------------------------------
-
-{-class (Applicative m, Monad m, MonadIO m) => SessionM m a where
-  sessions :: m (Maybe (Sessions a))
-  session  :: m (Maybe (Session a))-}
-
--------------------------------------------------------------------------------
 
 {- |
 The session handler. This handler will try to return an existing session from
@@ -83,17 +74,17 @@ A cookie will be set that informs the client of the current session.
 -}
 
 hSession
-  :: (MonadIO m, Request m, ServerConfig m, Response m)
+  :: (MonadIO m, RequestM m, ConfigM m, ResponseM m)
   => Sessions a            -- ^ Map of shared session variables.
   -> Integer               -- ^ Number of seconds to be added to the session expiritation time.
   -> m (TSession a)
 hSession smap expiration =
 
   -- Get the session identifier from an existing cookie or create a new one.
-  do prev <- getSessionID <$> hGetCookies
+  do prev <- hSessionID
 
      -- Compute current time and expiration time.
-     (n, ex) <- liftIO $ liftM2 (,) now (later expiration)
+     (n, ex) <- liftIO ((,) <$> now <*> later expiration)
 
      -- Either create a new session or try to reuse current one.
      tsession <- liftIO $
@@ -102,62 +93,46 @@ hSession smap expiration =
          (existingSession smap ex n)
          prev
 
-     setSessionCookie tsession ex
+     hSetSessionCookie tsession ex
      return tsession
 
--------------------------------------------------------------------------------
-
-{-
-Given the (possible wrong) request cookie, try to recover the existing --
-session identifier.
+{- |
+Given the (possible wrong) request cookie, try to recover the existing session
+identifier.
 -}
 
-getSessionID :: Maybe Cookies -> Maybe SessionID
-getSessionID prev =
-  do ck  <- prev
-     sid <- cookie "sid" ck
-     sid' <- readMay $ value sid
-     return (SID sid')
+hSessionID :: RequestM m => m (Maybe SessionID)
+hSessionID =
+  let f prev =
+        do ck  <- prev
+           sid <- cookie "sid" ck
+           sid' <- readMay (value sid)
+           return (SID sid')
+  in f <$> hGetCookies
 
-{-
-Generate a fresh, random session identifier using the default system random
-generator.
--}
-
-genSessionID :: IO SessionID
-genSessionID =
-  do g <- getStdGen
-     let (sid, g') = random g
-     setStdGen g'
-     return (SID (abs sid))
-
-{-
+{- |
 This handler sets the HTTP cookie for the specified session. It will use a
 default cookie with an additional `sid' attribute with the session identifier
 as value. The session expiration date will be used as the cookie expire field.
 -}
 
-setSessionCookie
-  :: (ServerConfig m, FormatTime t, Response m, MonadIO m)
+hSetSessionCookie
+  :: (ConfigM m, FormatTime t, ResponseM m, MonadIO m)
   => TSession a -> t -> m ()
-setSessionCookie tsession ex =
+hSetSessionCookie tsession ex =
   do ck <- newCookie ex
      sid <- liftIO (sID <$> atomically (readTVar tsession))
-     hSetCookies $
-       cookies [ck {
-         name  = "sid"
-       , value = show sid
-       }]
+     hSetCookies $ cookies [ck {name = "sid", value = show sid}]
 
-{-
-Handler when no (valid) session is available. Create a new session with a
-specified expiration date. The session will be stored in the session map.
+{- |
+Create a new session with a specified expiration date. The session will be
+stored in the session map.
 -}
 
 newSession :: Sessions a -> LocalTime -> IO (TSession a)
 newSession sessions ex =
   do -- Fresh session identifier.
-     sid <- genSessionID
+     sid <- randomIO
 
      -- Fresh session.
      session <- mkSession sid ex
@@ -166,12 +141,11 @@ newSession sessions ex =
      atomically (readTVar sessions >>= writeTVar sessions . M.insert sid session)
      return session
 
-{-
-TODO: no handler!!!
-Handler for existing sessions. Given an existing session identifier lookup a
-session from the session map. When no session is available, or the session is
-expired, create a new one using the `newSession' function. Otherwise the
-expiration date of the existing session is updated.
+{- |
+Given an existing session identifier lookup a session from the session map.
+When no session is available, or the session is expired, create a new one using
+the `newSession' function. Otherwise the expiration date of the existing
+session is updated.
 -}
 
 existingSession :: Sessions a -> LocalTime -> LocalTime -> SessionID -> IO (TSession a)
@@ -194,9 +168,6 @@ existingSession sessions ex n sid =
               else
                 do atomically (readTVar tsession >>= writeTVar tsession . (\s -> s {sExpire = ex}))
                    return tsession
-
--- Concurrency utils.
-
 
 -- Time utilities.
 

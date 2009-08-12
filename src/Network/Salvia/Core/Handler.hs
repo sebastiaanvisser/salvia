@@ -6,12 +6,13 @@ import Control.Monad.State
 import Data.Monoid
 import Data.Record.Label
 import Network.Protocol.Http
+import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
+import Network.Salvia.Handler.Contents
+import Network.Salvia.Handler.Printer
 import System.IO
 import qualified Data.ByteString.Lazy as B
-import qualified Network.Salvia.Core.Config as Server
 import qualified Network.Salvia.Core.Aspects as A
-import Network.Salvia.Handler.Contents
 import qualified System.IO.UTF8 as U
 
 {- |
@@ -44,25 +45,25 @@ instance MonadPlus (Handler c p) where
 
 -- This Handler allows for a concrete implementation of all server aspects.
 
-instance A.ServerConfig (Handler Server.Config p) where
+instance A.ConfigM (Handler Config p) where
   config  = getM config
 
-instance A.Request (Handler c p) where
+instance A.RequestM (Handler c p) where
   request st =
     do (a, s') <- runState st `liftM` getM request
        setM request s'
        return a
 
-instance A.Response (Handler c p) where
+instance A.ResponseM (Handler c p) where
   response st =
     do (a, s') <- runState st `liftM` getM response
        setM response s'
        return a
 
-instance A.Socket (Handler c p) where
+instance A.SocketM (Handler c p) where
   rawSock = getM rawSock
   sock    = getM sock
-  raw     = send
+  raw f   = modM queue (++[f])
   peer    = getM peer
 
 {- |
@@ -70,38 +71,16 @@ Queue one potential send action in the send queue. This will not (yet) be sent
 over the socket.
 -}
 
-send :: SendAction -> (Handler c p) ()
-send f = modM queue (++[f])
+instance A.SendM (Handler c p) where
+  sendStr s     = A.raw (flip U.hPutStr s . snd)
+  sendBs bs     = A.raw (flip B.hPutStr bs . snd)
+  spoolStr f fd = A.raw (\(_, h) -> U.hGetContents fd >>= \d -> U.hPutStr h (f d))
+  spoolBs  f fd = A.raw (\(_, h) -> B.hGetContents fd >>= \d -> B.hPut h (f d))
 
-instance A.Send (Handler c p) where
-  sendStr s     = send (flip U.hPutStr s . snd)
-  sendBs bs     = send (flip B.hPutStr bs . snd)
-  spoolStr f fd = send (\(_, h) -> U.hGetContents fd >>= \d -> U.hPutStr h (f d))
-  spoolBs  f fd = send (\(_, h) -> B.hGetContents fd >>= \d -> B.hPut h (f d))
-
-  flushRequest  = flushRequest
-  flushResponse = flushResponse
+  flushRequest  = hFlushRequest
+  flushResponse = hFlushResponse
   flushQueue    = flushQueue
-  emptyQueue    = emptyQueue
-
-{- | Reset the send queue by throwing away all potential send actions. -}
-
-emptyQueue :: Handler c p ()
-emptyQueue = setM queue []
-
-{- | Send all the response headers directly over the socket. -}
-
-flushRequest :: (A.Request m, MonadIO m, A.Socket m) => m ()
-flushRequest =
-  do r <- A.request get
-     h <- A.sock 
-     liftIO (hPutStr h (showMessageHeader r) >> hFlush h)
-
-flushResponse :: (A.Response m, MonadIO m, A.Socket m) => m ()
-flushResponse =
-  do r <- A.response get
-     h <- A.sock 
-     liftIO (hPutStr h (showMessageHeader r) >> hFlush h)
+  emptyQueue    = setM queue []
 
 {- | Apply all send actions successively to the client socket. -}
 
@@ -112,6 +91,6 @@ flushQueue =
      q <- getM queue
      liftIO (mapM_ ($ (s, h)) q >> hFlush h)
 
-instance A.Contents (Handler c p) where
+instance A.ContentsM (Handler c p) where
   contents = hRequestContents
 

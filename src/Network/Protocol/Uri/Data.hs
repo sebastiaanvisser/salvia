@@ -1,12 +1,12 @@
-{- | See rfc2396 for more info. -}
-
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
 module Network.Protocol.Uri.Data where
 
 import Data.Record.Label
 import Network.Protocol.Uri.Encode
 
--------[ data type definition of URIs ]----------------------------------------
+{- | See rfc2396 for more info. -}
+
+--- URI data type definition. 
 
 type Scheme      = String
 type IPv4        = [Int] -- actually 4-tupel
@@ -50,27 +50,27 @@ data URI = URI
 
 $(mkLabels [''Path, ''Host, ''Authority, ''URI])
 
-_domain   :: Label Host Domain
-_ipv4     :: Label Host IPv4
-_regname  :: Label Host String
-_host     :: Label Authority Host
-_port     :: Label Authority Port
-_userinfo :: Label Authority UserInfo
-_path     :: Label URI Path
-_query    :: Label URI Query
+_domain   :: Host :-> Domain
+_ipv4     :: Host :-> IPv4
+_regname  :: Host :-> String
+_host     :: Authority :-> Host
+_port     :: Authority :-> Port
+_userinfo :: Authority :-> UserInfo
+_path     :: URI :-> Path
+_query    :: URI :-> Query
 
-absolute  :: Label Path Bool
-segments  :: Label Path [PathSegment]
-authority :: Label URI Authority
-domain    :: Label URI Domain
-fragment  :: Label URI Fragment
-ipv4      :: Label URI IPv4
-port      :: Label URI Port
-query     :: Label URI Query
-regname   :: Label URI String
-relative  :: Label URI Bool
-scheme    :: Label URI Scheme
-userinfo  :: Label URI UserInfo
+absolute  :: Path :-> Bool
+segments  :: Path :-> [PathSegment]
+authority :: URI :-> Authority
+domain    :: URI :-> Domain
+fragment  :: URI :-> Fragment
+ipv4      :: URI :-> IPv4
+port      :: URI :-> Port
+query     :: URI :-> Query
+regname   :: URI :-> String
+relative  :: URI :-> Bool
+scheme    :: URI :-> Scheme
+userinfo  :: URI :-> UserInfo
 
 -- Public label based on private labels.
 
@@ -79,12 +79,9 @@ regname   = _regname  % _host % authority
 ipv4      = _ipv4     % _host % authority
 userinfo  = _userinfo % authority
 port      = _port     % authority
+query     = (decode, encode) `lmap` _query
 
-query = mkLabel
-  (decode . lget _query)
-  (lset _query . encode)
-
--------[ creating, selection and modifying URIs ]------------------------------
+-- Creating, selection and modifying URIs.
 
 {- | Constructors for making empty URI. -}
 

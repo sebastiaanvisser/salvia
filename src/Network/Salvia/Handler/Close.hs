@@ -1,5 +1,5 @@
-module Network.Salvia.Handler.Close (
-    hCloseConn
+module Network.Salvia.Handler.Close {- doc ok -}
+  ( hCloseConn
   , hKeepAlive
   ) where
 
@@ -10,11 +10,9 @@ import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
 import System.IO
 
-{- |
-Run a handler once and close the connection afterwards.
--}
+-- | Run a handler once and close the connection afterwards.
 
-hCloseConn :: (Socket m, MonadIO m) => m a -> m ()
+hCloseConn :: (SocketM m, MonadIO m) => m a -> m ()
 hCloseConn h = h >> sock >>= liftIO . hClose
 
 {- |
@@ -32,7 +30,7 @@ the following criteria are met:
 * The HTTP version is HTTP/1.0.
 -}
 
-hKeepAlive :: (MonadIO m, Send m, Socket m, Request m, Response m) => m a -> m ()
+hKeepAlive :: (MonadIO m, SendM m, SocketM m, RequestM m, ResponseM m) => m a -> m ()
 hKeepAlive handler =
   do handler
      h      <- sock
@@ -41,14 +39,14 @@ hKeepAlive handler =
      len    <- response (getM contentLength)
      closed <- liftIO (hIsClosed h)
      if or [ closed
-           , conn == "Close"
+           , conn == Just "Close"
            , isNothing (len :: Maybe Integer)
            , ver == http10
            ]
        then liftIO (hClose h)
        else resetContext >> hKeepAlive handler
 
-resetContext :: (Socket m, Send m, Request m, Response m) => m ()
+resetContext :: (SocketM m, SendM m, RequestM m, ResponseM m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)

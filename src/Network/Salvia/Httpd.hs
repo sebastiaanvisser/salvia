@@ -5,23 +5,22 @@ module Network.Salvia.Httpd (
   , defaultConfig
 
   -- Httpd.Core.Aspects
-
-  , ServerConfig
+  , ConfigM
   , config
 
-  , Request
+  , RequestM
   , request
 
-  , Response
+  , ResponseM
   , response
 
-  , Socket
+  , SocketM
   , rawSock
   , sock
   , raw
   , peer
 
-  , Send
+  , SendM
   , sendStr
   , sendStrLn
   , sendBs
@@ -31,47 +30,10 @@ module Network.Salvia.Httpd (
   , flushRequest
   , flushResponse
   , emptyQueue
-
   , reset
 
-
-  , Contents
+  , ContentsM
   , contents
-
-
-  -- Httpd.Core.Handler
-{-  , Context
-  , config
-  , request
-  , response
-  , sock
-  , address
-  , queue-}
-
-{-  , mkContext-}
-
-{-  , Handler
-  , ResourceHandler
-  , UriHandler-}
-
-  -- Httpd.Core.IO
-{-  , send
-  , sendStr
-  , sendStrLn
-  , sendBs-}
-
-{-  , spool
-  , spoolBs-}
-
-{-  , flushHeaders
-  , flushQueue-}
-
-{-  , emptyQueue
-  , reset-}
-
-{-  , contents
-  , contentsUtf8
-  , uriEncodedPostParamsUTF8-}
 
   -- Httpd.Core.Server
   , server
@@ -87,8 +49,6 @@ import Network.Salvia.Core.Config
 import Network.Salvia.Core.Aspects
 
 -- Concrete implementation.
--- import Network.Salvia.Core.Context
--- import Network.Salvia.Core.Handler
 import Network.Salvia.Core.Server
 import Network.Salvia.Core.Client
 

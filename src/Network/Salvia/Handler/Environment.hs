@@ -1,5 +1,5 @@
-module Network.Salvia.Handler.Environment (
-    hDefaultEnv
+module Network.Salvia.Handler.Environment {- doc ok -}
+  ( hDefaultEnv
   , hSessionEnv
   ) where
 
@@ -20,13 +20,13 @@ import System.IO
 
 {- |
 This is the default stateless handler evnironment. It takes care of request
-parsing (`hParser`), response printing (`hResponsePrinter`), request logging (`hLog`),
-connection keep-alives (`hKeepAlive`), handling `HEAD` requests (`hHead`) and
-printing the `salvia-httpd` server banner (`hBanner`).
+parsing (`hRequestParser`), response printing (`hResponsePrinter`), request
+logging (`hLog`), connection keep-alives (`hKeepAlive`), handling `HEAD`
+requests (`hHead`) and printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, Socket m, Request m, Response m, ServerConfig m, Send m)
+  :: (MonadIO m, SocketM m, RequestM m, ResponseM m, ConfigM m, SendM m)
   => m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
@@ -40,11 +40,11 @@ This function is a more advanced version of the `hDefaultEnv` handler
 environment that takes a global state into account. It takes a shared variable
 containg the connection counter (used by `hCounter`) and a variable containing
 all session information (used by `hSession`). Handlers that run in this
-environment take should be parametrized with a session.
+environment should be parametrized with a session.
 -}
 
 hSessionEnv
-  :: (MonadIO m, Send m, Socket m, Request m, Response m, ServerConfig m)
+  :: (MonadIO m, SendM m, SocketM m, RequestM m, ResponseM m, ConfigM m)
   => TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
@@ -58,12 +58,13 @@ hSessionEnv count sessions handler =
           hHead (handler session))
 
 -- Helper functions.
+-- todo: cleanup.
 
-before :: (MonadIO m, Response m) => m ()
+before :: (MonadIO m, ResponseM m) => m ()
 before = hBanner "salvia-httpd"
 
 after
-  :: (Send m, Socket m, Request m, ServerConfig m, MonadIO m, Response m)
+  :: (SendM m, SocketM m, RequestM m, ConfigM m, MonadIO m, ResponseM m)
   => Maybe (TVar Int) -> m ()
 after mc = 
   do hResponsePrinter
@@ -73,11 +74,11 @@ after mc =
        mc
 
 wrapper
-  :: (MonadIO m, Response m, ServerConfig m, Send m, Socket m, Request m)
+  :: (MonadIO m, ResponseM m, ConfigM m, SendM m, SocketM m, RequestM m)
   => Maybe (TVar Int) -> m a -> m ()
 wrapper c h = before >> h >> after c
 
-parseError :: (Response m, Send m) => String -> m ()
+parseError :: (ResponseM m, SendM m) => String -> m ()
 parseError err = 
   do hError BadRequest
      sendStrLn []

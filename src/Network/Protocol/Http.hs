@@ -1,51 +1,50 @@
-module Network.Protocol.Http(
+module Network.Protocol.Http {- doc ok -}
 
   -- * HTTP message data types.
 
-    Method (..)
-  , methods
-  , Version (Version)
-  , HeaderKey
-  , HeaderValue
-  , Headers
-  , Direction (Request, Response)
-  , Message (Message)
+  ( Method (..)
+  , Version (..)
+  , Key
+  , Value
+  , Headers (..)
+  , Request (..)
+  , Response (..)
+  , HTTP (..)
 
   -- * Creating (parts of) messages.
 
-  , emptyRequest
-  , emptyResponse
   , http10
   , http11
+  , emptyHeaders
+  , emptyRequest
+  , emptyResponse
 
   -- * Accessing fields.
 
+  , methods
   , major
   , minor
-  , body
   , headers
   , version
-  , direction
+  , headline
   , method
   , uri
   , asURI
   , status
-
-  -- * Accessing specific header fields.
-
   , normalizeHeader
   , header
 
-  , utf8
+  -- * Accessing specific header fields.
 
-  , connection
   , contentLength
-  , contentType
+  , connection
+  , keepAlive
   , cookie
+  , setCookie
+  , location
+  , contentType
   , date
   , hostname
-  , keepAlive
-  , location
   , server
   , userAgent
 
@@ -54,9 +53,12 @@ module Network.Protocol.Http(
   , parseRequest
   , parseResponse
 
-  -- * Printing HTTP messages.
-
-  , showMessageHeader
+  -- * Exposure of internal parsec parsers.
+  , pRequest
+  , pResponse
+  , pHeaders
+  , pVersion
+  , pMethod
 
   -- * Handling HTTP status codes.
 
@@ -70,6 +72,7 @@ module Network.Protocol.Http(
 
 import Network.Protocol.Http.Data
 import Network.Protocol.Http.Parser
-import Network.Protocol.Http.Printer
+import Network.Protocol.Http.Printer ()
+import Network.Protocol.Http.Headers
 import Network.Protocol.Http.Status
 

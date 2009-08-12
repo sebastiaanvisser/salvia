@@ -7,19 +7,21 @@ module Network.Protocol.Mime where
 
 import Data.Map
 
+type Mime = String
+
 {- | Get the mimetype for the specified extension. -}
 
-mime :: String -> Maybe String
+mime :: String -> Maybe Mime
 mime ext = Data.Map.lookup ext extensionToMime
 
 {- | The default mimetype is /text/plain/. -}
 
-defaultMime :: String
+defaultMime :: Mime
 defaultMime = "text/plain"
 
 {- | The mapping from extension to mimetype. -}
 
-extensionToMime :: Map String String
+extensionToMime :: Map String Mime
 extensionToMime = fromList [
     ("123",       "application/vnd.lotus-1-2-3")
   , ("3dml",      "text/vnd.in3d.3dml")

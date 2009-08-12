@@ -1,5 +1,5 @@
-module Network.Salvia.Handler.File (
-    hFile
+module Network.Salvia.Handler.File  {- doc ok -}
+  ( hFile
   , hFileResource
   , fileMime
 
@@ -28,17 +28,17 @@ be set the file's size.
 -}
 
 -- TODO: what to do with encoding?
-hFileResource :: (MonadIO m, Response m, Send m) => FilePath -> m ()
+hFileResource :: (MonadIO m, ResponseM m, SendM m) => FilePath -> m ()
 hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
        response $
-         do setM contentType (fileMime file, Just utf8)
+         do setM contentType (Just (fileMime file, Just "utf-8"))
             setM contentLength (Just fs)
             setM status OK
        spoolBs id fd
 
-fileMime :: String -> String
+fileMime :: FilePath -> Mime
 fileMime file =
     maybe defaultMime id
   $ (either (const Nothing) Just (parseURI file)
@@ -46,46 +46,43 @@ fileMime file =
 
 {- |
 Like the `hFileResource` handler, but with a custom filter over the content.
-This function will assume the content is an UTF-8 encoded text file. No
-`contentLength` header will be set using this handler.
+This function will assume the content is an UTF-8 encoded text file. Because of
+the possibly unpredictable behavior of the filter, no `contentLength` header
+will be set using this handler.
 -}
 
 -- TODO: what to do with encoding?
-hFileResourceFilter :: (MonadIO m, Response m, Send m) => (String -> String) -> FilePath -> m ()
+hFileResourceFilter :: (MonadIO m, ResponseM m, SendM m) => (String -> String) -> FilePath -> m ()
 hFileResourceFilter fFilter file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do response $
-         do setM contentType (fileMime file, Just utf8)
+         do setM contentType (Just (fileMime file, Just "utf-8"))
             setM status OK
        spoolStr fFilter fd
 
 {- |
-Turn a resource handler into a regular handler that utilizes the path part of
-the request URI as the resource identifier.
+Turn a handler that is parametrized by a file resources into a regular handler
+that utilizes the path part of the request URI as the resource identifier.
 -}
 
-hResource :: Request m => (FilePath -> m a) -> m a
+hResource :: RequestM m => (FilePath -> m a) -> m a
 hResource rh = request (getM (path % asURI)) >>= rh
 
 {- |
-Turn a URI handler into a regular handler that utilizes the request URI as the
-resource identifier.
+Turn a handler that is parametrized by a URI into a regular handler that
+utilizes the request URI as the resource identifier.
 -}
 
-hUri :: Request m => (URI -> m a) -> m a
+hUri :: RequestM m => (URI -> m a) -> m a
 hUri rh = request (getM asURI) >>= rh
 
-{- |
-Like `hFileResource` but uses the path of the current request URI.
--}
+-- | Like `hFileResource` but uses the path of the current request URI.
 
-hFile :: (MonadIO m, Request m, Response m, Send m) => m ()
+hFile :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
 hFile = hResource hFileResource
 
-{- |
-Like `hFileResourceFilter` but uses the path of the current request URI.
--}
+-- | Like `hFileResourceFilter` but uses the path of the current request URI.
 
-hFileFilter :: (MonadIO m, Request m, Response m, Send m) => (String -> String) -> m ()
+hFileFilter :: (MonadIO m, RequestM m, ResponseM m, SendM m) => (String -> String) -> m ()
 hFileFilter = hResource . hFileResourceFilter
 

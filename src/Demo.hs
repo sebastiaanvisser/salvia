@@ -16,7 +16,7 @@ main =
 
 -- Serve the current directory.
 
-myHandler :: (MonadIO m, Request m, Response m, Send m) => m ()
+myHandler :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
 myHandler = hFileSystem "."
 
 
