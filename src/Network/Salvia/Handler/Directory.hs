@@ -41,9 +41,9 @@ dirHandler dirName =
      processed <- liftIO $ mapM (processFilename dirName) (sort filenames)
      let b = listing p processed
      response $
-       do setM contentType (Just ("text/html", Nothing))
-          setM contentLength (Just $ length b)
-          setM status OK
+       do contentType   =: Just ("text/html", Nothing)
+          contentLength =: Just (length b)
+          status        =: OK
      sendStr b
 
 -- Add trailing slash to a directory name.

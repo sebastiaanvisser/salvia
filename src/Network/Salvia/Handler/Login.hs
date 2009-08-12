@@ -182,7 +182,7 @@ loginSuccessful :: (MonadIO m, ResponseM m, SendM m) => TUserSession a -> User -
 loginSuccessful session user =
   do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
      liftIO $ atomically (readTVar session >>= writeTVar session . f)
-     response (setM status OK)
+     response (status =: OK)
      sendStrLn "login successful"
 
 {- | Logout the current user by emptying the session payload. -}

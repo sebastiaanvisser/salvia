@@ -11,7 +11,7 @@ import System.Process
 
 hCGI :: (MonadIO m, ResponseM m, SocketM m) => FilePath -> m ()
 hCGI fn =
-  do response (setM status OK)
+  do response (status =: OK)
      h <- sock
      liftIO $
        do p <- runProcess fn [] Nothing Nothing (Just h) (Just h) (Just stderr)

@@ -34,7 +34,7 @@ instance Alternative (Handler c p) where
 
 instance MonadPlus (Handler c p) where
   mzero = Handler $
-    do setM (status % response) BadRequest
+    do status % response =: BadRequest
        return (error "mzero/empty")
   a `mplus` b =
     do r <- a
@@ -51,13 +51,13 @@ instance A.ConfigM (Handler Config p) where
 instance A.RequestM (Handler c p) where
   request st =
     do (a, s') <- runState st <$> getM request
-       setM request s'
+       request =: s'
        return a
 
 instance A.ResponseM (Handler c p) where
   response st =
     do (a, s') <- runState st <$> getM response
-       setM response s'
+       response =: s'
        return a
 
 instance A.SocketM (Handler c p) where
@@ -80,7 +80,7 @@ instance A.SendM (Handler c p) where
   flushRequest  = hFlushRequest
   flushResponse = hFlushResponse
   flushQueue    = flushQueue
-  emptyQueue    = setM queue []
+  emptyQueue    = queue =: []
 
 {- | Apply all send actions successively to the client socket. -}
 

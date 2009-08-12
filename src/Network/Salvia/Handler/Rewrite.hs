@@ -27,7 +27,7 @@ been modified.
 hLocalRequest :: RequestM m => (HTTP Request :-> b) -> (b -> b) -> m a -> m a
 hLocalRequest p f m =
   do u <- request (getM p) <* request (modM p f)
-     m <* request (setM p u)
+     m <* request (p =: u)
 
 {- |
 Run an handler in a modified context in which the request `URI` has been

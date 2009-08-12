@@ -25,9 +25,9 @@ hError e = hCustomError e
 hCustomError :: (ResponseM m, SendM m) => Status -> String -> m ()
 hCustomError e m =
   do response $
-       do setM status e
-          setM contentLength (Just (length m))
-          setM contentType (Just ("text/plain", Nothing))
+       do status        =: e
+          contentLength =: Just (length m)
+          contentType   =: Just ("text/plain", Nothing)
      sendStr m
 
 {- |

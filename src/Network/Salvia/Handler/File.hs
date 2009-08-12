@@ -33,9 +33,9 @@ hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
        response $
-         do setM contentType (Just (fileMime file, Just "utf-8"))
-            setM contentLength (Just fs)
-            setM status OK
+         do contentType   =: Just (fileMime file, Just "utf-8")
+            contentLength =: Just fs
+            status        =: OK
        spoolBs id fd
 
 fileMime :: FilePath -> Mime
@@ -56,8 +56,8 @@ hFileResourceFilter :: (MonadIO m, ResponseM m, SendM m) => (String -> String) -
 hFileResourceFilter fFilter file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do response $
-         do setM contentType (Just (fileMime file, Just "utf-8"))
-            setM status OK
+         do contentType =: Just (fileMime file, Just "utf-8")
+            status      =: OK
        spoolStr fFilter fd
 
 {- |

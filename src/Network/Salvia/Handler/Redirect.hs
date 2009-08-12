@@ -12,6 +12,6 @@ message with the specified `URI` in the `location' header.
 hRedirect :: ResponseM m => String -> m ()
 hRedirect u =
   response $
-    do setM location (Just u)
-       setM status MovedPermanently
+    do location =: Just u
+       status   =: MovedPermanently
 

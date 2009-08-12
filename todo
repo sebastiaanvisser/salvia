@@ -1,5 +1,3 @@
-:=  iso   setM
-more <$> less liftM
 proxy?
 cgi?
 streaming big files?

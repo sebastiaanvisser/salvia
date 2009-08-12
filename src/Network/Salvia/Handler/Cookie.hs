@@ -18,7 +18,7 @@ import System.Locale
 {- | Set the `cookie` HTTP response header (Set-Cookie) with the specified `Cookies`. -}
 
 hSetCookies :: ResponseM m => Cookies -> m ()
-hSetCookies = response . setM setCookie . Just . showCookies
+hSetCookies = response . (setCookie =:) . Just . showCookies
 
 {- | Try to get the cookies from the HTTP `cookie` request header. -}
 

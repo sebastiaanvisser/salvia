@@ -25,6 +25,6 @@ hBanner sv = do
        time <- utcToLocalTime zone <$> getCurrentTime
        return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" time
   response $
-    do setM date   (Just dt)
-       setM server (Just sv)
+    do date   =: Just dt
+       server =: Just sv
 
