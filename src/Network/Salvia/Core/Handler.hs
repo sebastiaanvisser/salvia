@@ -5,6 +5,7 @@ import Control.Applicative
 import Control.Monad.State
 import Data.Monoid
 import Data.Record.Label
+import Misc.Util
 import Network.Protocol.Http
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
@@ -89,7 +90,7 @@ flushQueue =
   do s <- getM rawSock
      h <- getM sock
      q <- getM queue
-     liftIO (mapM_ ($ (s, h)) q >> hFlush h)
+     catchIO (mapM_ ($ (s, h)) q >> hFlush h) ()
 
 instance A.ContentsM (Handler c p) where
   contents = hRequestContents

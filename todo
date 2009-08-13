@@ -12,26 +12,5 @@ move setBuffering to hContents?
 uri issues... using string except for operations? yeah, i think so.
 showing/parsing uris should be more safe
 IPv6?
+get a good notion of all true IO actions (SocketM) and create debug error catcher.
 
-
-dir layout:
-
-  Salvia
-    Core
-      Abstract   (now Aspects)
-      Context
-      Handler (Client + Server)
-      Server (is now Main)
-      Client (is now Handler.Client)
-    Handler
-      Proxy (running client from server)
-
-
-Cool:
-
-      Executable gnuplot-demo
-        If !flag(buildExamples)
-          Buildable: False
-        GHC-Options: -Wall
-        Hs-Source-Dirs: src, execute/tmp
-        Main-Is: Demo.hs

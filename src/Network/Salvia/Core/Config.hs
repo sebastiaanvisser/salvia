@@ -34,6 +34,6 @@ defaultConfig =
     , email      = "admin@localhost"
     , listenAddr = 0
     , listenPort = 80
-    , backlog    = 4
+    , backlog    = 16
     }
 

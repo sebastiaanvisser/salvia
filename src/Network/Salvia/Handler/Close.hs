@@ -3,6 +3,7 @@ module Network.Salvia.Handler.Close {- doc ok -}
   , hKeepAlive
   ) where
 
+import Misc.Util
 import Control.Monad.State
 import Data.Maybe
 import Data.Record.Label
@@ -13,7 +14,7 @@ import System.IO
 -- | Run a handler once and close the connection afterwards.
 
 hCloseConn :: (SocketM m, MonadIO m) => m a -> m ()
-hCloseConn h = h >> sock >>= liftIO . hClose
+hCloseConn h = h >> sock >>= flip catchIO () . hClose
 
 {- |
 Run a handler and keep the connection open for potential consecutive requests.
@@ -43,7 +44,7 @@ hKeepAlive handler =
            , isNothing (len :: Maybe Integer)
            , ver == http10
            ]
-       then liftIO (hClose h)
+       then catchIO (hClose h) ()
        else resetContext >> hKeepAlive handler
 
 resetContext :: (SocketM m, SendM m, RequestM m, ResponseM m) => m ()

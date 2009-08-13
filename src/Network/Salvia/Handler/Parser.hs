@@ -6,12 +6,15 @@ module Network.Salvia.Handler.Parser {- doc ok -}
   ) where
 
 import Control.Applicative
-import Control.Monad.State
+import Control.Monad.State hiding (sequence)
+import Data.Traversable
+import Misc.Util
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
 import System.IO
 import System.Timeout
 import Text.Parsec.Error (ParseError)
+import Prelude hiding (sequence)
 
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
@@ -51,27 +54,24 @@ hParser
   -> (String -> m a)                        -- ^ The fail handler.
   -> m a                                    -- ^ The success handler.
   -> m (Maybe a)
-hParser action p t onfail onsuccess =
+hParser action parse t onfail onsuccess =
   do h <- sock
-     -- TODO use try and fail with bad request or reject silently.
-     mMsg <- liftIO $ timeout (t * 1000) $
-       -- TODO: Using NoBuffering here may crash the entire program (GHC
-       -- runtime?) when processing more requests than just a few:
-       do hSetBuffering h (BlockBuffering (Just (64*1024)))
-          fmap Just (readNonEmptyLines h) `catch` const (return Nothing)
-     case join mMsg of
-       Nothing -> return Nothing
-       Just msg -> 
-         case p (msg "") of
-            Left err -> Just <$> (onfail (show err))
-            Right x  -> Just <$> (action x >> onsuccess)
+     mmsg <-
+       liftM join
+         . flip catchIO Nothing
+         . timeout (t * 1000)
+         $ do hSetBuffering h (BlockBuffering (Just (64*1024)))
+              Just <$> readNonEmptyLines h
+     let hndl = (onfail . show) `either` (\x -> action x >> onsuccess)
+     sequence (hndl . parse <$> mmsg)
 
 -- Read all lines until the first empty line.
-readNonEmptyLines :: Handle -> IO (String -> String)
-readNonEmptyLines h =
-  do l <- hGetLine h
-     let lf = showChar '\n'
-     if l `elem` ["", "\r"]
-       then return lf
-       else ((showString l . lf) .) <$> readNonEmptyLines h
+readNonEmptyLines :: Handle -> IO String
+readNonEmptyLines h = ($"") <$> f
+  where f =
+          do l <- hGetLine h
+             let lf = showChar '\n'
+             if null l || l == "\r"
+               then return lf
+               else ((showString l . lf) .) <$> f
 

@@ -18,81 +18,94 @@ License-file:     LICENSE
 Author:           Sebastiaan Visser
 Maintainer:       sfvisser@cs.uu.nl
 Build-Type:       Simple
-Build-Depends:    base ==3.0.*,
-                  bimap ==0.2.*,
-                  bytestring ==0.9.*,
-                  containers ==0.2.*,
-                  directory ==1.0.*,
-                  encoding ==0.5.*,
-                  fclabels ==0.2.*,
-                  filepath == 1.1.*,
-                  monads-fd ==0.0.*,
-                  network ==2.2.*,
-                  old-locale ==1.0.*,
-                  parsec ==3.0.*,
-                  process ==1.0.*,
-                  pureMD5 ==0.2.*,
-                  random ==1.0.*,
-                  safe ==0.2.*,
-                  stm ==2.1.*,
-                  time ==1.1.*,
-                  transformers ==0.1.*,
-                  utf8-string ==0.3.*,
-                  split ==0.1.*
-GHC-Options:      -threaded -Wall -fno-warn-orphans
-HS-Source-Dirs:   src
-Other-modules:    Misc.Text
-                  Misc.Terminal
-Exposed-modules:  Network.Protocol.Cookie,
-                  Network.Protocol.Http,
-                  Network.Protocol.Http.Data,
-                  Network.Protocol.Http.Headers,
-                  Network.Protocol.Http.Parser,
-                  Network.Protocol.Http.Printer,
-                  Network.Protocol.Http.Status
-                  Network.Protocol.Mime,
-                  Network.Protocol.Uri,
-                  Network.Protocol.Uri.Chars,
-                  Network.Protocol.Uri.Data,
-                  Network.Protocol.Uri.Encode,
-                  Network.Protocol.Uri.Parser,
-                  Network.Protocol.Uri.Path,
-                  Network.Protocol.Uri.Printer,
-                  Network.Protocol.Uri.Query,
-                  Network.Salvia.Core.Aspects,
-                  Network.Salvia.Core.Config,
-                  Network.Salvia.Core.Context,
-                  Network.Salvia.Core.Handler,
-                  Network.Salvia.Core.Server,
-                  Network.Salvia.Handler.Banner,
-                  Network.Salvia.Handler.CGI,
-                  Network.Salvia.Handler.Close,
-                  Network.Salvia.Handler.Cookie,
-                  Network.Salvia.Handler.Counter,
-                  Network.Salvia.Handler.Directory,
-                  Network.Salvia.Handler.Dispatching,
-                  Network.Salvia.Handler.Environment,
-                  Network.Salvia.Handler.Error,
-                  Network.Salvia.Handler.ExtensionDispatcher,
-                  Network.Salvia.Handler.File,
-                  Network.Salvia.Handler.FileSystem,
-                  Network.Salvia.Handler.Head,
-                  Network.Salvia.Handler.Log,
-                  Network.Salvia.Handler.Login,
-                  Network.Salvia.Handler.MethodRouter,
-                  Network.Salvia.Handler.Parser,
-                  Network.Salvia.Handler.PathRouter,
-                  Network.Salvia.Handler.Printer,
-                  Network.Salvia.Handler.Put,
-                  Network.Salvia.Handler.Redirect,
-                  Network.Salvia.Handler.Rewrite,
-                  Network.Salvia.Handler.Session,
-                  Network.Salvia.Handler.VirtualHosting,
-                  Network.Salvia.Handlers,
-                  Network.Salvia.Httpd
 
-Executable:       salvia-demo
-Main-is:          Demo.hs
-GHC-Options:      -threaded -Wall -fno-warn-orphans
-HS-Source-Dirs:   src 
+Library
+  GHC-Options:      -threaded -Wall -fno-warn-orphans
+  HS-Source-Dirs:   src
+
+  Build-Depends:    base ==4.1.*,
+                    bimap ==0.2.*,
+                    bytestring ==0.9.*,
+                    containers ==0.2.*,
+                    directory ==1.0.*,
+                    encoding ==0.5.*,
+                    fclabels ==0.2.*,
+                    filepath == 1.1.*,
+                    monads-fd ==0.0.*,
+                    network ==2.2.*,
+                    old-locale ==1.0.*,
+                    parsec ==3.0.*,
+                    process ==1.0.*,
+                    pureMD5 ==0.2.*,
+                    random ==1.0.*,
+                    safe ==0.2.*,
+                    stm ==2.1.*,
+                    time ==1.1.*,
+                    transformers ==0.1.*,
+                    utf8-string ==0.3.*,
+                    split ==0.1.*
+
+  Other-modules:    Misc.Text
+                    Misc.Terminal
+
+  Exposed-modules:  Network.Protocol.Cookie
+                    Network.Protocol.Http
+                    Network.Protocol.Http.Data
+                    Network.Protocol.Http.Headers
+                    Network.Protocol.Http.Parser
+                    Network.Protocol.Http.Printer
+                    Network.Protocol.Http.Status
+                    Network.Protocol.Mime
+                    Network.Protocol.Uri
+                    Network.Protocol.Uri.Chars
+                    Network.Protocol.Uri.Data
+                    Network.Protocol.Uri.Encode
+                    Network.Protocol.Uri.Parser
+                    Network.Protocol.Uri.Path
+                    Network.Protocol.Uri.Printer
+                    Network.Protocol.Uri.Query
+                    Network.Salvia.Core.Aspects
+                    Network.Salvia.Core.Client
+                    Network.Salvia.Core.Config
+                    Network.Salvia.Core.Context
+                    Network.Salvia.Core.Handler
+                    Network.Salvia.Core.Server
+                    Network.Salvia.Handler.Banner
+                    Network.Salvia.Handler.CGI
+                    Network.Salvia.Handler.Client
+                    Network.Salvia.Handler.Close
+                    Network.Salvia.Handler.Contents
+                    Network.Salvia.Handler.Cookie
+                    Network.Salvia.Handler.Counter
+                    Network.Salvia.Handler.Directory
+                    Network.Salvia.Handler.Dispatching
+                    Network.Salvia.Handler.Environment
+                    Network.Salvia.Handler.Error
+                    Network.Salvia.Handler.ExtensionDispatcher
+                    Network.Salvia.Handler.File
+                    Network.Salvia.Handler.FileSystem
+                    Network.Salvia.Handler.Head
+                    Network.Salvia.Handler.Log
+                    Network.Salvia.Handler.Login
+                    Network.Salvia.Handler.MethodRouter
+                    Network.Salvia.Handler.Parser
+                    Network.Salvia.Handler.PathRouter
+                    Network.Salvia.Handler.Printer
+                    Network.Salvia.Handler.Put
+                    Network.Salvia.Handler.Redirect
+                    Network.Salvia.Handler.Rewrite
+                    Network.Salvia.Handler.Session
+                    Network.Salvia.Handler.VirtualHosting
+                    Network.Salvia.Handlers
+                    Network.Salvia.Httpd
+
+Flag buildDemo
+  description: Build Salvia demo program.
+  default:     False
+
+Executable salvia-demo
+  Buildable:        True
+  GHC-Options:      -threaded -Wall -fno-warn-orphans
+  HS-Source-Dirs:   src 
+  Main-is:          Demo.hs
 
