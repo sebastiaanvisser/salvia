@@ -3,6 +3,7 @@ module Network.Protocol.Uri.Parser where
 
 import Control.Applicative hiding (empty)
 import Data.Char
+import Safe
 import Data.List (intercalate)
 import Data.Maybe
 import Network.Protocol.Uri.Data
@@ -119,7 +120,7 @@ pHost = diff <$> pRegName -- <|> RegName <$> pRegName
     diff  a = either (const (RegName a)) sep (parse pHostname "" a)
     sep   a = if hst a then Hostname a else ipreg a
     ipreg a = if ip a then IPv4 (map read a) else RegName (intercalate "." a)
-    hst     = not . all isDigit . head . dropWhile null . reverse
+    hst     = not . all isDigit . headDef "" . dropWhile null . reverse
     ip    a = length a == 4 && length (mapMaybe (either (const Nothing) Just . parse pDecOctet "") a) == 4
 
 {-
