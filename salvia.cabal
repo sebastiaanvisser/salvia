@@ -65,6 +65,7 @@ Library
                     Network.Protocol.Uri.Path
                     Network.Protocol.Uri.Printer
                     Network.Protocol.Uri.Query
+                    Network.Salvia
                     Network.Salvia.Core.Aspects
                     Network.Salvia.Core.Config
                     Network.Salvia.Core.Context
@@ -97,24 +98,6 @@ Library
                     Network.Salvia.Handler.VirtualHosting
                     Network.Salvia.Handlers
                     Network.Salvia.Httpd
-
-  Extensions:       FlexibleContexts
-                    FlexibleInstances 
-                    RankNTypes
-                    ScopedTypeVariables
-                    TypeOperators
-                    MultiParamTypeClasses
-                    GeneralizedNewtypeDeriving
-
-Flag buildDemo
-  description: Build Salvia demo program.
-  default:     False
-
-Executable salvia-demo
-  Buildable:        True
-  GHC-Options:      -threaded -Wall -fno-warn-orphans
-  HS-Source-Dirs:   src 
-  Main-is:          Demo.hs
 
   Extensions:       FlexibleContexts
                     FlexibleInstances 
