@@ -9,8 +9,6 @@ import Network.Protocol.Uri.Encode
 --- URI data type definition. 
 
 type Scheme      = String
-type IPv4        = [Int] -- actually 4-tupel
-type Domain      = [String]
 type RegName     = String
 type Port        = Int
 type Query       = String
@@ -25,16 +23,23 @@ data Path = Path
   }
   deriving (Eq, Ord)
 
+data IPv4 = IPv4 Int Int Int Int -- actually 4-tupel
+  deriving (Eq, Ord)
+
+newtype Domain = Domain [String]
+  deriving (Eq, Ord)
+
 data Host =
     Hostname { __domain  :: Domain }
   | RegName  { __regname :: RegName }
-  | IPv4     { __ipv4    :: IPv4   }
+  | IP       { __ipv4    :: IPv4   }
+--  | IPv6     { __ipv6    :: IPv6   }
   deriving (Eq, Ord)
 
 data Authority = Authority
   { __userinfo :: UserInfo
   , __host     :: Host
-  , __port     :: Port
+  , __port     :: Maybe Port
   }
   deriving (Eq, Ord)
 
@@ -54,7 +59,7 @@ _domain   :: Host :-> Domain
 _ipv4     :: Host :-> IPv4
 _regname  :: Host :-> String
 _host     :: Authority :-> Host
-_port     :: Authority :-> Port
+_port     :: Authority :-> Maybe Port
 _userinfo :: Authority :-> UserInfo
 _path     :: URI :-> Path
 _query    :: URI :-> Query
@@ -65,7 +70,7 @@ authority :: URI :-> Authority
 domain    :: URI :-> Domain
 fragment  :: URI :-> Fragment
 ipv4      :: URI :-> IPv4
-port      :: URI :-> Port
+port      :: URI :-> Maybe Port
 query     :: URI :-> Query
 regname   :: URI :-> String
 relative  :: URI :-> Bool
@@ -121,10 +126,10 @@ mkUserinfo = ""
 {- | Constructors for making empty `Host`. -}
 
 mkHost :: Host
-mkHost = Hostname []
+mkHost = Hostname (Domain [])
 
 {- | Constructors for making empty `Port`. -}
 
-mkPort :: Port
-mkPort = (-1)
+mkPort :: Maybe Port
+mkPort = Nothing
 

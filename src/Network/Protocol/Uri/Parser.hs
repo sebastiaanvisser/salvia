@@ -15,10 +15,10 @@ import Text.Parsec.Prim (Stream, ParsecT)
 import Network.Protocol.Uri.Data
 
 host :: URI :-> String
-host = (show, either (const (Hostname [])) id . parseHost) `lmap` (_host % authority)
+host = (show, either (const mkHost) id . parseHost) `lmap` (_host % authority)
 
 path :: URI :-> FilePath
-path = (decode . show, either (const (Path True [])) id . parsePath . encode) `lmap` _path
+path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _path
 
 
 toURI :: String -> URI
@@ -101,7 +101,7 @@ pAuthority :: Stream s m Char => ParsecT s u m Authority
 pAuthority = Authority
   <$> option mkUserinfo (try (pUserinfo <* string "@"))
   <*> pHost
-  <*> option mkPort (string ":" *> pPort)
+  <*> option Nothing (string ":" *> pPort)
 
 -- 3.2.1.  User Information
 pUserinfo :: Stream s m Char => ParsecT s u m String
@@ -117,10 +117,12 @@ pHost :: Stream s m Char => ParsecT s u m Host
 pHost = diff <$> pRegName -- <|> RegName <$> pRegName
   where
     diff  a = either (const (RegName a)) sep (parse pHostname "" a)
-    sep   a = if hst a then Hostname a else ipreg a
-    ipreg a = if ip a then IPv4 (map read a) else RegName (intercalate "." a)
+    sep   a = if hst a then Hostname (Domain a) else ipreg a
+    ipreg a = if ip a then IP (toIP a) else RegName (intercalate "." a)
     hst     = not . all isDigit . headDef "" . dropWhile null . reverse
     ip    a = length a == 4 && length (mapMaybe (either (const Nothing) Just . parse pDecOctet "") a) == 4
+    toIP [a, b, c, d] = IPv4 (read a) (read b) (read c) (read d)
+    toIP _            = IPv4 0 0 0 0
 
 {-
 pfff, ipv6 is sooo not gonna make it..
@@ -166,15 +168,15 @@ pRegName = concat <$> many1 (
 
 -- Not actually part of the rfc3986, but comptability with the rfc2396.
 -- This information can be useful, so why throw away.
-pHostname :: Stream s m Char => ParsecT s u m Domain
+pHostname :: Stream s m Char => ParsecT s u m [String]
 pHostname = sepBy (option "" pDomainlabel) (string ".")
 
 pDomainlabel :: Stream s m Char => ParsecT s u m String
 pDomainlabel = intercalate "-" <$> sepBy1 (some pAlphanum) (string "-")
 
 -- 3.2.3.  Port
-pPort :: Stream s m Char => ParsecT s u m Port
-pPort = read <$> some pDigit
+pPort :: Stream s m Char => ParsecT s u m (Maybe Port)
+pPort = readMay <$> some pDigit
 
 -- 3.4.  Query
 pQuery :: Stream s m Char => ParsecT s u m String

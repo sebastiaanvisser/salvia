@@ -1,7 +1,11 @@
+uri issues... using string except for operations? yeah, i think so.
+showing/parsing uris should be more safe
+
 .///favicon.ico -> 404 Not Found
 Http iso HTTP, Uri is URI ??
 proxy?
 cgi?
+security: drop request for different hosts:ports
 streaming big files?
 standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
 cleanup Environment mess: after/before/wrapper/etc...
@@ -9,11 +13,7 @@ generalize hPut for client/server
 all Dispatching -> Routing
 server running on multiple TCP ports
 remove -----------
-fix virtualhosting
 comet?
-move setBuffering to hContents?
-uri issues... using string except for operations? yeah, i think so.
-showing/parsing uris should be more safe
 IPv6?
 get a good notion of all true IO actions (SocketM) and create debug error catcher.
 

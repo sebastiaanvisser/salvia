@@ -128,6 +128,7 @@ module Network.Salvia.Handlers
   -- ** Dispatch based on host name.
 
   , hVirtualHosting
+  , hPortRouter
 
   -- * Session and user management.
 

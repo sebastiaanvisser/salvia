@@ -17,7 +17,21 @@ main =
 -- Serve the current directory.
 
 myHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
-myHandler = hFileSystem "."
+myHandler = 
+  hPortRouter
+    [ ( 8080
+      , hVirtualHosting
+          [ ("127.0.0.1", hRedirect "http://localhost:8080/")
+          , ("localhost", hFileSystem ".")
+          , (".host",     hFileSystem "/Users/sebas/Pictures")
+          , ("phony",     hCustomError NotFound "phony!")
+          ] (hError Forbidden)
+      )
+    ] (hCustomError Forbidden "Public service running on port 8080.")
+
+
+
+
 
 -- test :: IO (Maybe String)
 -- test = getRequest "http://www.google.nl/search?q=aap"

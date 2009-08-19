@@ -4,8 +4,6 @@
 module Network.Protocol.Uri (
 
     Scheme
-  , IPv4
-  , Domain
   , RegName
   , Port
   , Query
@@ -14,10 +12,13 @@ module Network.Protocol.Uri (
   , UserInfo
   , PathSegment
   , Parameters
-  , Path
-  , Host
-  , Authority
-  , URI
+
+  , Domain (..)
+  , IPv4 (..)
+  , Path (..)
+  , Host (..)
+  , Authority (..)
+  , URI (..)
 
   -- * Creating (parts of) URIs.
 

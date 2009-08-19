@@ -1,36 +1,49 @@
-module Network.Salvia.Handler.VirtualHosting {- todo -}
-  ( -- hHostRouter
-    hVirtualHosting
+module Network.Salvia.Handler.VirtualHosting {- doc oK -}
+  ( hVirtualHosting
+  , hPortRouter
   )
 where
 
+import Data.List.Split
+import Data.List
+import Data.Maybe
+import Network.Protocol.Uri
 import Network.Protocol.Http
 import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Core.Aspects
 
--- todo: add PortRouter.
-
 {- |
-List dispatcher based on the host part of the hostname request header.
-Everything not part of the real hostname (like the port number) will be
-ignored.
+Dispatcher based on the host part of the `hostname' request header. Everything
+not part of the real hostname (like the port number) will be ignored. When the
+expected hostname starts with a dot (like ".mydomain.com")  this indicates that
+all sub-domains of this domain will match as well.
 -}
 
 hVirtualHosting :: HttpM Request m => [(String, m b)] -> m b -> m b
-hVirtualHosting = hListDispatch (hRequestDispatch hostname ((==) . Just))
+hVirtualHosting = hListDispatch (hRequestDispatch hostname (\a -> maybe False (match a)))
 
-{-hVirtualHosting :: HttpM Request m => [(String, m b)] -> m b -> m b
-hVirtualHosting = hListDispatch disp . parse
   where
-    disp    = hRequestDispatch hostname cmp
-    parse   = map (\(a, b) -> (either (const mkAuthority) id $ parseAuthority a, b))
-    cmp a b = (==EQ) $ comparing (lget _host) a b-}
+    match e f = 
+      case parseAuthority f of
+        Right (Authority _ hst _) -> 
+          case (e, hst) of
+            ('.':_, Hostname (Domain d)) -> filter (not . null) (splitOn "." e) `isSuffixOf` d
+            (_,     Hostname d)          -> e == show d
+            (_,     RegName r)           -> e == r
+            (_,     IP i)                -> e == show i
+        _ -> False
 
 {- |
-List dispatcher based on the hostname request header. This header field is
-parsed and interpreted as an `Authority` field.
+Dispatcher based on the port number of the `hostname' request header. When no
+port number is available in the hostname header port 80 will be assumed.
 -}
 
--- hHostRouter :: HttpM Request m => [(Authority, m b)] -> m b -> m b
--- hHostRouter = hListDispatch $ hRequestDispatch hostname (==)
+hPortRouter :: HttpM Request m => [(Int, m b)] -> m b -> m b
+hPortRouter = hListDispatch (hRequestDispatch hostname (\a -> maybe False (match a)))
+
+  where
+    match e f = 
+      case parseAuthority f of
+        Right (Authority _ _ prt) -> fromMaybe 80 prt == e
+        _                         -> False
 

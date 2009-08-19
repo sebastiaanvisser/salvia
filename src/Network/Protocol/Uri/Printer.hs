@@ -13,20 +13,19 @@ instance Show Path where
        (if a then "/" else "")
     ++ (intercalate "/" s)
 
+instance Show IPv4 where
+  show (IPv4 a b c d) = intercalate "." (map show [a, b, c, d])
+
+instance Show Domain where
+  show (Domain d) = intercalate "." d
+
 instance Show Host where
-  show (Hostname d) = if null d then "" else intercalate "." d
-  show (IPv4     a) = intercalate "." $ map show a
-  show (RegName  r) = r
+  show (Hostname d) = show d
+  show (IP i)       = show i 
+  show (RegName r)  = r
 
 instance Show Authority where
-  show (Authority u h p) =
---        (if hst h then "//" else "")
-       (if null u then "" else u ++ "@")
-    ++  show h
-    ++ (if p == -1 then "" else ":" ++ show p)
---     where hst (Hostname d) = not $ null d
---           hst (RegName  d) = not $ null d
---           hst _            = True
+  show (Authority u h p) = (if null u then "" else u ++ "@") ++ show h ++ maybe "" ((":" ++) . show) p
 
 instance Show URI where
   show (URI r s a p q f) =
