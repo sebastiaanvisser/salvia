@@ -35,8 +35,8 @@ the socket. The function is parametrized with a the direction of the HTTP
 message, client request or server response.
 -}
 
-hRawBody :: forall m d. (MonadIO m, SocketM m, HttpM d m) => Side d -> m (Maybe B.ByteString)
-hRawBody Side =
+hRawBody :: forall m d. (MonadIO m, SocketM m, HttpM d m) => d -> m (Maybe B.ByteString)
+hRawBody _ =
   do let h = http :: State (HTTP d) a -> m a
      len <- h (getM contentLength)
      kpa <- h (getM keepAlive)
@@ -65,7 +65,7 @@ encoding supplied as the function's argument can be used to specify what
 encoding to use in the absence of a proper encoding in the HTTP message itself.
 -}
 
-hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => Side d -> String -> m (Maybe String)
+hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe String)
 hBody d def = 
   do let h = http :: State (HTTP d) a -> m a
      c <- body d
@@ -88,7 +88,7 @@ Try to parse the supplied request, as a result of `hBody', as URI encoded
 fails.
 -}
 
-hParameters :: (MonadIO m, BodyM d m, HttpM d m) => Side d -> String -> m (Maybe Parameters)
+hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
 hParameters d def =
   (>>= either (const Nothing) Just . parseQueryParams . decode) <$> hBody d def
 

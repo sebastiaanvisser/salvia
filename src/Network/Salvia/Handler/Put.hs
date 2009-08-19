@@ -13,7 +13,7 @@ import qualified Data.ByteString.Lazy as B
 
 hPut
   :: (MonadIO m, HttpM Response m, SendM m, BodyM d m)
-  => Side d -> FilePath -> m ()
+  => d -> FilePath -> m ()
 hPut d name =
   hSafeIO (openBinaryFile name WriteMode)
     $ (body d >>=) . maybe putError . putOk

@@ -5,7 +5,6 @@ module Network.Salvia.Httpd
   , defaultConfig
 
   -- Httpd.Core.Aspects
-  , Side
   , forRequest
   , forResponse
 

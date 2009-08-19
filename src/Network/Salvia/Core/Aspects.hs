@@ -8,13 +8,11 @@ import Network.Socket
 import System.IO
 import qualified Data.ByteString.Lazy as B
 
-data Side s = Side
+forRequest :: Request
+forRequest = undefined
 
-forRequest :: Side Request
-forRequest = Side
-
-forResponse :: Side Response
-forResponse = Side
+forResponse :: Response
+forResponse = undefined
 
 class (Applicative m, Monad m) => ConfigM m where
   config :: m Config
@@ -46,9 +44,9 @@ class (Applicative m, Monad m) => SendM m where
   spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
 
 class (Applicative m, Monad m) => FlushM d m where
-  flushHeaders  :: Side d -> m ()
-  flushQueue    :: Side d -> m ()
+  flushHeaders  :: d -> m ()
+  flushQueue    :: d -> m ()
 
 class (Applicative m, Monad m) => BodyM d m where
-  body :: Side d -> m (Maybe B.ByteString)
+  body :: d -> m (Maybe B.ByteString)
 
