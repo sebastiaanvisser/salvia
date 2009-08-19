@@ -1,7 +1,8 @@
 module Network.Salvia.Handler.VirtualHosting {- todo -}
   ( -- hHostRouter
     hVirtualHosting
-  ) where
+  )
+where
 
 import Network.Protocol.Http
 import Network.Salvia.Handler.Dispatching
@@ -15,10 +16,10 @@ Everything not part of the real hostname (like the port number) will be
 ignored.
 -}
 
-hVirtualHosting :: RequestM m => [(String, m b)] -> m b -> m b
+hVirtualHosting :: HttpM Request m => [(String, m b)] -> m b -> m b
 hVirtualHosting = hListDispatch (hRequestDispatch hostname ((==) . Just))
 
-{-hVirtualHosting :: RequestM m => [(String, m b)] -> m b -> m b
+{-hVirtualHosting :: HttpM Request m => [(String, m b)] -> m b -> m b
 hVirtualHosting = hListDispatch disp . parse
   where
     disp    = hRequestDispatch hostname cmp
@@ -30,6 +31,6 @@ List dispatcher based on the hostname request header. This header field is
 parsed and interpreted as an `Authority` field.
 -}
 
--- hHostRouter :: RequestM m => [(Authority, m b)] -> m b -> m b
+-- hHostRouter :: HttpM Request m => [(Authority, m b)] -> m b -> m b
 -- hHostRouter = hListDispatch $ hRequestDispatch hostname (==)
 

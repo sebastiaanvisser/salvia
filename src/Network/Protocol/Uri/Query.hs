@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Network.Protocol.Uri.Query where
 
 import Data.Record.Label

@@ -8,7 +8,8 @@ module Network.Salvia.Handler.File  {- doc ok -}
 
   , hResource
   , hUri
-  ) where
+  )
+where
 
 import Control.Monad.State
 import Data.Record.Label
@@ -28,7 +29,7 @@ be set the file's size.
 -}
 
 -- TODO: what to do with encoding?
-hFileResource :: (MonadIO m, ResponseM m, SendM m) => FilePath -> m ()
+hFileResource :: (MonadIO m, HttpM Response m, SendM m) => FilePath -> m ()
 hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
@@ -52,7 +53,7 @@ will be set using this handler.
 -}
 
 -- TODO: what to do with encoding?
-hFileResourceFilter :: (MonadIO m, ResponseM m, SendM m) => (String -> String) -> FilePath -> m ()
+hFileResourceFilter :: (MonadIO m, HttpM Response m, SendM m) => (String -> String) -> FilePath -> m ()
 hFileResourceFilter fFilter file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do response $
@@ -65,7 +66,7 @@ Turn a handler that is parametrized by a file resources into a regular handler
 that utilizes the path part of the request URI as the resource identifier.
 -}
 
-hResource :: RequestM m => (FilePath -> m a) -> m a
+hResource :: HttpM Request m => (FilePath -> m a) -> m a
 hResource rh = request (getM (path % asURI)) >>= rh
 
 {- |
@@ -73,16 +74,16 @@ Turn a handler that is parametrized by a URI into a regular handler that
 utilizes the request URI as the resource identifier.
 -}
 
-hUri :: RequestM m => (URI -> m a) -> m a
+hUri :: HttpM Request m => (URI -> m a) -> m a
 hUri rh = request (getM asURI) >>= rh
 
 -- | Like `hFileResource` but uses the path of the current request URI.
 
-hFile :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
+hFile :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
 hFile = hResource hFileResource
 
 -- | Like `hFileResourceFilter` but uses the path of the current request URI.
 
-hFileFilter :: (MonadIO m, RequestM m, ResponseM m, SendM m) => (String -> String) -> m ()
+hFileFilter :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => (String -> String) -> m ()
 hFileFilter = hResource . hFileResourceFilter
 

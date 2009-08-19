@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts, TypeOperators #-}
 module Network.Protocol.Uri.Parser where
 
 import Control.Applicative hiding (empty)

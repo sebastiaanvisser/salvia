@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Network.Salvia.Core.Context
   ( SendAction
   , SendQueue
@@ -15,8 +15,8 @@ module Network.Salvia.Core.Context
   , queue
 
   , mkContext
-
-  ) where
+  )
+where
 
 import Data.Record.Label
 import Network.Protocol.Http

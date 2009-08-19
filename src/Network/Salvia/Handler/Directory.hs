@@ -1,7 +1,8 @@
 module Network.Salvia.Handler.Directory {- doc ok -}
   ( hDirectory
   , hDirectoryResource
-  ) where
+  )
+where
 
 import Control.Applicative
 import Control.Monad.State
@@ -19,7 +20,7 @@ Serve a simple HTML directory listing for the specified directory on the
 filesystem.
 -}
 
-hDirectoryResource :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
+hDirectoryResource :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 hDirectoryResource dirName =
   do u <- request (getM asURI)
      let p = lget path u
@@ -31,10 +32,10 @@ hDirectoryResource dirName =
 Like `hDirectoryResource` but uses the path of the current request URI.
 -}
 
-hDirectory :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
+hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
 hDirectory = hResource hDirectoryResource
 
-dirHandler :: (MonadIO m, RequestM m, ResponseM m, SendM m) => FilePath -> m ()
+dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 dirHandler dirName =
   do p <- request (getM (path % asURI))
      filenames <- liftIO $ getDirectoryContents dirName

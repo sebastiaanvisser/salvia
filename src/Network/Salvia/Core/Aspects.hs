@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Core.Aspects where
 
 import Control.Applicative
@@ -9,43 +8,45 @@ import Network.Socket
 import System.IO
 import qualified Data.ByteString.Lazy as B
 
+data Side s = Side
+
+forRequest :: Side Request
+forRequest = Side
+
+forResponse :: Side Response
+forResponse = Side
+
 class (Applicative m, Monad m) => ConfigM m where
   config :: m Config
 
-class (Applicative m, Monad m) => RequestM m where
-  request :: State (HTTP Request) a -> m a
+class (Applicative m, Monad m) => HttpM d m where
+  http :: State (HTTP d) a -> m a
 
-class (Applicative m, Monad m) => ResponseM m where
-  response :: State (HTTP Response) a -> m a
+request :: HttpM Request m => State (HTTP Request) a -> m a
+request = http
 
--- Access to the raw socket to the other end point.
+response :: HttpM Response m => State (HTTP Response) a -> m a
+response = http
 
 class (Applicative m, Monad m) => SocketM m where
   rawSock :: m Socket
   sock    :: m Handle
-  raw     :: ((Socket, Handle) -> IO ()) -> m ()
   peer    :: m SockAddr
 
+-- TODO:  queue and dequeue are probably enough.
 class (Applicative m, Monad m) => SendM m where
-  sendStr       :: String                                   -> m ()
-  sendBs        :: B.ByteString                             -> m ()
-  spoolStr      :: (String       -> String)       -> Handle -> m ()
-  spoolBs       :: (B.ByteString -> B.ByteString) -> Handle -> m ()
-  flushRequest  :: m ()
-  flushResponse :: m ()
-  flushQueue    :: m ()
-  emptyQueue    :: m ()
+  queue    :: ((Socket, Handle) -> IO ()) -> m ()
+  dequeue  :: m (Maybe ((Socket, Handle) -> IO ()))
 
-class (Applicative m, Monad m) => ContentsM m where
-  contents :: m (Maybe B.ByteString)
+  sendStr  :: String                                   -> m ()
+  sendBs   :: B.ByteString                             -> m ()
+  spoolStr :: (String       -> String)       -> Handle -> m ()
+  spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
 
-{- | Reset both the send queue and the generated server response. -}
+class (Applicative m, Monad m) => FlushM d m where
+  flushHeaders  :: Side d -> m ()
+  flushQueue    :: Side d -> m ()
 
-reset :: (ResponseM m, SendM m) => m ()
-reset =
-  do response (put emptyResponse)
-     emptyQueue
-
-sendStrLn :: SendM m => String -> m ()
-sendStrLn = sendStr . (++"\n")
+class (Applicative m, Monad m) => BodyM d m where
+  body :: Side d -> m (Maybe B.ByteString)
 

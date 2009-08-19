@@ -1,4 +1,3 @@
-{-# LANGUAGE  FlexibleInstances #-}
 module Network.Protocol.Http.Printer () where {- doc ok -}
 
 import Data.Bimap hiding (elems, fold)

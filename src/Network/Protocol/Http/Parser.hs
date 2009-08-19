@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Network.Protocol.Http.Parser {- doc ok -}
 
   -- * Top level message parsers.

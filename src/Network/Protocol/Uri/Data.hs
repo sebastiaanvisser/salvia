@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Network.Protocol.Uri.Data where
 
 import Data.Record.Label

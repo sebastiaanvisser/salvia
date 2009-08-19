@@ -2,179 +2,181 @@ module Network.Salvia.Handlers
 
   -- * Fundamental protocol handlers.
 
-    -- ** Default handler environments.
+  -- ** Default handler environments.
 
-    ( hDefaultEnv
-    , hSessionEnv
+  ( hDefaultEnv
+  , hSessionEnv
 
-    -- ** Parse client requests.
+  -- ** Parse client requests.
 
-    , hRequestParser
-    , hResponseParser
-    , hParser
-    , readNonEmptyLines
+  , hRequestParser
+  , hResponseParser
+  , hParser
+  , readNonEmptyLines
 
-    -- ** Print server responses.
+  -- ** Print server responses.
+  
+  , hResponsePrinter
+  , hFlushRequest
+  , hFlushResponse
+  , hFlushHeaders
 
-    , hRequestPrinter
-    , hResponsePrinter
+  -- ** HTTP header banner.
 
-    -- ** HTTP header banner.
+  , hBanner
 
-    , hBanner
+  -- ** Closing or keeping alive connections.
 
-    -- ** Closing or keeping alive connections.
+  , hCloseConn
+  , hKeepAlive
 
-    , hCloseConn
-    , hKeepAlive
-
-    -- ** Enable HTTP HEAD requests.
-    
-    , hHead
+  -- ** Enable HTTP HEAD requests.
+  
+  , hHead
 
   -- * Error handling and logging.
 
-    -- ** Default error handlers.
+  -- ** Default error handlers.
 
-    , hError
-    , hCustomError
-    , hIOError
-    , hSafeIO
+  , hError
+  , hCustomError
+  , hIOError
+  , hSafeIO
 
-    -- ** Logging of client requests.
+  -- ** Logging of client requests.
 
-    , hLog
-    , hLogWithCounter
+  , hLog
+  , hLogWithCounter
 
-    -- ** Request counter.
+  -- ** Request counter.
 
-    , hCounter
+  , hCounter
 
-  -- * Redirecting and rewriting.
+-- * Redirecting and rewriting.
 
-    -- ** Redirecting the client.
+  -- ** Redirecting the client.
 
-    , hRedirect
+  , hRedirect
 
-    -- ** Request URI rewriting.
+  -- ** Request URI rewriting.
 
-    , hRewrite
-    , hRewriteHost
-    , hRewritePath
-    , hRewriteExt
-    , hWithDir
-    , hWithoutDir
+  , hRewrite
+  , hRewriteHost
+  , hRewritePath
+  , hRewriteExt
+  , hWithDir
+  , hWithoutDir
 
   -- * File and directory serving.
 
-    -- ** Serve static file resources.
+  -- ** Serve static file resources.
 
-    , hFileResource
-    , hFileResourceFilter
-    , hResource
-    , fileMime
-    , hUri
-    , hFile
-    , hFileFilter
+  , hFileResource
+  , hFileResourceFilter
+  , hResource
+  , fileMime
+  , hUri
+  , hFile
+  , hFileFilter
 
-    -- ** Serve directory indices.
+  -- ** Serve directory indices.
 
-    , hDirectory
-    , hDirectoryResource
+  , hDirectory
+  , hDirectoryResource
 
-    -- ** Serve file system directory.
+  -- ** Serve file system directory.
 
-    , hFileTypeDispatcher
-    , hFileSystem
-    , hFileSystemNoIndexes
+  , hFileTypeDispatcher
+  , hFileSystem
+  , hFileSystemNoIndexes
 
-    -- ** Enable PUTing resources to the files ystem.
+  -- ** Enable PUTing resources to the files ystem.
 
-    , hPut
+  , hPut
 
-    -- ** Serving CGI scripts.
+  -- ** Serving CGI scripts.
 
-    , hCGI
+  , hCGI
 
   -- * Dispatching.
 
-    -- ** Custom request dispatchers.
+  -- ** Custom request dispatchers.
 
-    , Dispatcher
-    , ListDispatcher
-    , hDispatch
-    , hRequestDispatch
-    , hListDispatch
+  , Dispatcher
+  , ListDispatcher
+  , hDispatch
+  , hRequestDispatch
+  , hListDispatch
 
-    -- ** Dispatch based on request method.
+  -- ** Dispatch based on request method.
 
-    , hMethodRouter
+  , hMethodRouter
 
-    -- ** Dispatch based on request path.
+  -- ** Dispatch based on request path.
 
-    , hPath
-    , hPathRouter
-    , hPrefix
-    , hPrefixRouter
-    , hParameters
+  , hPath
+  , hPathRouter
+  , hPrefix
+  , hPrefixRouter
+  , hParameters
 
-    -- ** Dispatch based on filename extension.
+  -- ** Dispatch based on filename extension.
 
-    , hExtension
-    , hExtensionRouter
+  , hExtension
+  , hExtensionRouter
 
-    -- ** Dispatch based on host name.
+  -- ** Dispatch based on host name.
 
-    , hVirtualHosting
+  , hVirtualHosting
 
   -- * Session and user management.
 
-    -- ** Cookie handling.
+  -- ** Cookie handling.
 
-    , hSetCookies
-    , hGetCookies
-    , newCookie
+  , hSetCookies
+  , hGetCookies
+  , newCookie
 
-    -- ** Session management.
+  -- ** Session management.
 
-    , hSession
+  , hSession
 
-    , SessionID
-    , Session (..)
-    , TSession
-    , Sessions
+  , SessionID
+  , Session (..)
+  , TSession
+  , Sessions
 
-    , hSessionID
-    , hSetSessionCookie
+  , hSessionID
+  , hSetSessionCookie
 
-    , mkSessions
+  , mkSessions
 
-    -- ** User management.
+  -- ** User management.
 
-    , Username
-    , Password
-    , Action
-    , Actions
-    , User (..)
-    , Users
-    , UserDatabase
-    , TUserDatabase
+  , Username
+  , Password
+  , Action
+  , Actions
+  , User (..)
+  , Users
+  , UserDatabase
+  , TUserDatabase
 
-    , UserPayload (..)
-    , UserSession
-    , TUserSession
+  , UserPayload (..)
+  , UserSession
+  , TUserSession
 
-    , hSignup
-    , hLogin
-    , hLogout
-    , hLoginfo
+  , hSignup
+  , hLogin
+  , hLogout
+  , hLoginfo
 
-    , hAuthorized
-    , hAuthorizedUser
+  , hAuthorized
+  , hAuthorizedUser
 
-    , readUserDatabase
-
-  ) where
+  , readUserDatabase
+  )
+where
 
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.CGI

@@ -5,12 +5,12 @@ import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
-import Network.Salvia.Handler.Contents
+import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Printer
 import System.IO
 
-hGetRequest :: (RequestM m, SendM m) => String -> m ()
+hGetRequest :: (HttpM Request m, SendM m) => String -> m ()
 hGetRequest s =
   do let u = toURI s
      request $
@@ -23,12 +23,12 @@ hGetRequest s =
      return ()
 
 hClientEnvironment
-  :: (SocketM m, ResponseM m, MonadIO m) =>
+  :: (SocketM m, HttpM Response m, MonadIO m) =>
      (String -> m a) -> m a -> m (Maybe a)
 hClientEnvironment = hResponseParser (4 * 1000)
 
 
-cHandler :: (RequestM m, SocketM m, MonadIO m, ResponseM m) => m ()
+cHandler :: (HttpM Request m, SocketM m, MonadIO m, HttpM Response m) => m ()
 cHandler =
   do q <- request get
      liftIO (print q)

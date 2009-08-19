@@ -3,7 +3,8 @@ module Network.Salvia.Handler.Parser {- doc ok -}
   , hResponseParser
   , hParser
   , readNonEmptyLines
-  ) where
+  )
+where
 
 import Control.Applicative
 import Control.Monad.State hiding (sequence)
@@ -19,7 +20,7 @@ import Prelude hiding (sequence)
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (SocketM m, RequestM m, MonadIO m)
+  :: (SocketM m, HttpM Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -29,7 +30,7 @@ hRequestParser = hParser (request . put) parseRequest
 -- | Like the `hParser' but always parses `HTTP` `Response`s.
 
 hResponseParser
-  :: (SocketM m, ResponseM m, MonadIO m)
+  :: (SocketM m, HttpM Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.

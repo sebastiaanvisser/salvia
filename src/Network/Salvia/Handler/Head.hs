@@ -1,10 +1,11 @@
 module Network.Salvia.Handler.Head (hHead) where {- doc ok -}
 
 import Control.Monad.Trans
-import Control.Applicative
+import Control.Applicative hiding (empty)
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Handler.Rewrite
+import Network.Salvia.Handler.Close
 import Network.Salvia.Core.Aspects
 
 {- |
@@ -14,11 +15,11 @@ specified sub handler will be executed under the assumption that the request
 was a 'GET' request, otherwise this handler will act as the identify function.
 -}
 
-hHead :: (MonadIO m, SendM m, RequestM m) => m a -> m a
+hHead :: (MonadIO m, SendM m, HttpM Request m) => m a -> m a
 hHead handler =
   do m <- request (getM method)
      case m of
        HEAD -> hLocalRequest method (const GET) $
-                 handler <* emptyQueue
+                 handler <* empty
        _    -> handler
 

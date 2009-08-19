@@ -9,7 +9,7 @@ import System.Process
 
 -- | Handle CGI scripts, not yet working properly.
 
-hCGI :: (MonadIO m, ResponseM m, SocketM m) => FilePath -> m ()
+hCGI :: (HttpM Response m, MonadIO m, SocketM m) => FilePath -> m ()
 hCGI fn =
   do response (status =: OK)
      h <- sock

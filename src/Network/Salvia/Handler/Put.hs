@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Put (hPut) where {- doc ok -}
+module Network.Salvia.Handler.Put (hPut) where {- todo: doc + impl -}
 
 import Control.Monad.State
 import Network.Protocol.Http
@@ -11,10 +11,12 @@ import qualified Data.ByteString.Lazy as B
 
 -- | First naive handler for the HTTP `PUT` request. 
 
-hPut :: (MonadIO m, ResponseM m, SendM m, ContentsM m) => FilePath -> m ()
-hPut name =
+hPut
+  :: (MonadIO m, HttpM Response m, SendM m, BodyM d m)
+  => Side d -> FilePath -> m ()
+hPut d name =
   hSafeIO (openBinaryFile name WriteMode)
-    $ (contents >>=) . maybe putError . putOk
+    $ (body d >>=) . maybe putError . putOk
   where
     putError   = hError NotImplemented
     putOk fd c = liftIO (B.hPut fd c >> hClose fd)

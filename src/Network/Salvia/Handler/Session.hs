@@ -1,4 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
 module Network.Salvia.Handler.Session {- doc ok -}
   ( hSession
 
@@ -11,7 +10,8 @@ module Network.Salvia.Handler.Session {- doc ok -}
   , hSetSessionCookie
 
   , mkSessions
-  ) where
+  )
+where
 
 import Control.Applicative hiding (empty)
 import Control.Concurrent.STM
@@ -20,6 +20,7 @@ import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
 import Data.Time.LocalTime
+import Network.Protocol.Http hiding (cookie)
 import Network.Protocol.Cookie hiding (empty)
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Cookie
@@ -74,7 +75,7 @@ A cookie will be set that informs the client of the current session.
 -}
 
 hSession
-  :: (MonadIO m, RequestM m, ConfigM m, ResponseM m)
+  :: (MonadIO m, HttpM Request m, ConfigM m, HttpM Response m)
   => Sessions a            -- ^ Map of shared session variables.
   -> Integer               -- ^ Number of seconds to be added to the session expiritation time.
   -> m (TSession a)
@@ -101,7 +102,7 @@ Given the (possible wrong) request cookie, try to recover the existing session
 identifier.
 -}
 
-hSessionID :: RequestM m => m (Maybe SessionID)
+hSessionID :: HttpM Request m => m (Maybe SessionID)
 hSessionID =
   let f prev =
         do ck  <- prev
@@ -117,7 +118,7 @@ as value. The session expiration date will be used as the cookie expire field.
 -}
 
 hSetSessionCookie
-  :: (ConfigM m, FormatTime t, ResponseM m, MonadIO m)
+  :: (ConfigM m, FormatTime t, HttpM Response m, MonadIO m)
   => TSession a -> t -> m ()
 hSetSessionCookie tsession ex =
   do ck <- newCookie ex

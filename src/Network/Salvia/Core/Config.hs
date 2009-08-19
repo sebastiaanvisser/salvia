@@ -1,7 +1,8 @@
-module Network.Salvia.Core.Config (
-    Config (..)
+module Network.Salvia.Core.Config
+  ( Config (..)
   , defaultConfig
-  ) where
+  )
+where
 
 import Network.Socket
 
@@ -13,7 +14,7 @@ server must know before being able to run. Most fields speak for themselves.
 data Config =
   Config
     { hostname   :: String       -- ^ Server hostname.
-    , email      :: String       -- ^ Server admin email address.
+    , admin      :: String       -- ^ Server admin email address.
     , listenAddr :: HostAddress  -- ^ Addres to bind to.
     , listenPort :: PortNumber   -- ^ Port to listen on.
     , backlog    :: Int          -- ^ TCP backlog.
@@ -31,7 +32,7 @@ defaultConfig :: Config
 defaultConfig =
   Config
     { hostname   = "localhost"
-    , email      = "admin@localhost"
+    , admin      = "admin@localhost"
     , listenAddr = 0
     , listenPort = 80
     , backlog    = 16

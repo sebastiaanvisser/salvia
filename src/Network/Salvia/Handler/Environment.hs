@@ -1,7 +1,8 @@
 module Network.Salvia.Handler.Environment {- doc ok -}
   ( hDefaultEnv
   , hSessionEnv
-  ) where
+  )
+where
 
 import Control.Monad.State
 import Control.Concurrent.STM
@@ -26,7 +27,7 @@ requests (`hHead`) and printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, SocketM m, RequestM m, ResponseM m, ConfigM m, SendM m)
+  :: (MonadIO m, FlushM Response m, SocketM m, HttpM Request m, HttpM Response m, ConfigM m, SendM m)
   => m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
@@ -44,7 +45,7 @@ environment should be parametrized with a session.
 -}
 
 hSessionEnv
-  :: (MonadIO m, SendM m, SocketM m, RequestM m, ResponseM m, ConfigM m)
+  :: (MonadIO m, FlushM Response m, SendM m, SocketM m, HttpM Request m, HttpM Response m, ConfigM m)
   => TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
@@ -60,11 +61,11 @@ hSessionEnv count sessions handler =
 -- Helper functions.
 -- todo: cleanup.
 
-before :: (MonadIO m, ResponseM m) => m ()
+before :: (MonadIO m, HttpM Response m) => m ()
 before = hBanner "salvia-httpd"
 
 after
-  :: (SendM m, SocketM m, RequestM m, ConfigM m, MonadIO m, ResponseM m)
+  :: (SendM m, SocketM m, FlushM Response m, HttpM Request m, ConfigM m, MonadIO m, HttpM Response m)
   => Maybe (TVar Int) -> m ()
 after mc = 
   do hResponsePrinter
@@ -74,13 +75,12 @@ after mc =
        mc
 
 wrapper
-  :: (MonadIO m, ResponseM m, ConfigM m, SendM m, SocketM m, RequestM m)
+  :: (MonadIO m, HttpM Response m, ConfigM m, SendM m, SocketM m, FlushM Response m, HttpM Request m)
   => Maybe (TVar Int) -> m a -> m ()
 wrapper c h = before >> h >> after c
 
-parseError :: (ResponseM m, SendM m) => String -> m ()
+parseError :: (HttpM Response m, SendM m) => String -> m ()
 parseError err = 
   do hError BadRequest
-     sendStrLn []
-     sendStrLn err
+     sendStr ("\n" ++ err ++ "\n")
 

@@ -3,15 +3,15 @@ module Network.Salvia.Core.Client where
 import Control.Applicative
 import Control.Monad.State
 import Data.Record.Label
-import Network.Protocol.Uri
-import Network.Socket
-import qualified Network.Salvia.Core.Context as C
-import Network.Salvia.Core.Handler
-import Network.Salvia.Core.Aspects
-import Network.Salvia.Handler.Client
-import Network.Salvia.Handler.Contents
-import System.IO
 import Network.BSD
+import Network.Protocol.Uri
+import Network.Salvia.Core.Aspects
+import Network.Salvia.Core.Handler
+import Network.Salvia.Handler.Client
+import Network.Salvia.Handler.Body
+import Network.Socket
+import System.IO
+import qualified Network.Salvia.Core.Context as C
 
 client :: Handler c () a -> Handler c1 () b -> String -> IO b
 client hReq hRes uri = 

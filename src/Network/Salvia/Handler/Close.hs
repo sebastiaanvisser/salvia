@@ -1,7 +1,9 @@
 module Network.Salvia.Handler.Close {- doc ok -}
   ( hCloseConn
   , hKeepAlive
-  ) where
+  , empty
+  )
+where
 
 import Misc.Util
 import Control.Monad.State
@@ -31,7 +33,9 @@ the following criteria are met:
 * The HTTP version is HTTP/1.0.
 -}
 
-hKeepAlive :: (MonadIO m, SendM m, SocketM m, RequestM m, ResponseM m) => m a -> m ()
+hKeepAlive
+  :: (SendM m, SocketM m, HttpM Request m, HttpM Response m, MonadIO m)
+  => m a -> m ()
 hKeepAlive handler =
   do handler
      h      <- sock
@@ -47,9 +51,12 @@ hKeepAlive handler =
        then catchIO (hClose h) ()
        else resetContext >> hKeepAlive handler
 
-resetContext :: (SocketM m, SendM m, RequestM m, ResponseM m) => m ()
+resetContext :: (HttpM Request m, HttpM Response m, SendM m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)
-     emptyQueue
+     empty
+
+empty :: SendM m => m ()
+empty = dequeue >>= maybe (return ()) (const empty)
 

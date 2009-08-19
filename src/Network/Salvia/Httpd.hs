@@ -1,48 +1,51 @@
-module Network.Salvia.Httpd (
+module Network.Salvia.Httpd
 
   -- Httpd.Core.Config
-    Config (..)
+  ( Config (..)
   , defaultConfig
 
   -- Httpd.Core.Aspects
+  , Side
+  , forRequest
+  , forResponse
+
   , ConfigM
   , config
 
-  , RequestM
+  , HttpM
+  , http
   , request
-
-  , ResponseM
   , response
 
   , SocketM
   , rawSock
   , sock
-  , raw
   , peer
 
   , SendM
+  , queue
+  , dequeue
   , sendStr
-  , sendStrLn
   , sendBs
   , spoolStr
   , spoolBs
-  , flushQueue
-  , flushRequest
-  , flushResponse
-  , emptyQueue
-  , reset
 
-  , ContentsM
-  , contents
+  , FlushM
+  , flushHeaders
+  , flushQueue
+
+  , BodyM 
+  , body
 
   -- Httpd.Core.Server
   , server
 
   -- Httpd.Core.Client
-  , client
-  , getRequest
+--   , client
+--   , getRequest
 
-  ) where
+  )
+where
 
 -- Abstract implementation.
 import Network.Salvia.Core.Config
@@ -50,5 +53,5 @@ import Network.Salvia.Core.Aspects
 
 -- Concrete implementation.
 import Network.Salvia.Core.Server
-import Network.Salvia.Core.Client
+-- import Network.Salvia.Core.Client
 

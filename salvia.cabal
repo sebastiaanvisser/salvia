@@ -1,23 +1,23 @@
-Name:             salvia
-Version:          0.3.0
-Description:      Lightweight Haskell Web Server Framework with modular support
-                  for serving static files, directories indices, default error
-                  responses, connection counting and logging, HEAD and PUT
-                  requests, keep-alives, custom banner printing, default
-                  handler environments for parsing request and printing
-                  responses, dispatching based on request methods, URI, paths
-                  and filename extension, URI rewriting and redirection,
-                  virtual hosting, cookie, session and user management and
-                  more...
-
-Synopsis:         Lightweight Haskell Web Server Framework 
-Cabal-version:    >= 1.6
-Category:         Network, Web
-License:          BSD3
-License-file:     LICENSE
-Author:           Sebastiaan Visser
-Maintainer:       sfvisser@cs.uu.nl
-Build-Type:       Simple
+Name:               salvia
+Version:            0.3.0
+Description:        Lightweight Haskell Web Server Framework with modular
+                    support for serving static files, directories indices,
+                    default error responses, connection counting and logging,
+                    HEAD and PUT requests, keep-alives, custom banner printing,
+                    default handler environments for parsing request and
+                    printing responses, dispatching based on request methods,
+                    URI, paths and filename extension, URI rewriting and
+                    redirection, virtual hosting, cookie, session and user
+                    management and more...
+                    
+Synopsis:           Lightweight Haskell Web Server Framework 
+Cabal-version:      >= 1.6
+Category:           Network, Web
+License:            BSD3
+License-file:       LICENSE
+Author:             Sebastiaan Visser
+Maintainer:         sfvisser@cs.uu.nl
+Build-Type:         Simple
 
 Library
   GHC-Options:      -threaded -Wall -fno-warn-orphans
@@ -66,16 +66,14 @@ Library
                     Network.Protocol.Uri.Printer
                     Network.Protocol.Uri.Query
                     Network.Salvia.Core.Aspects
-                    Network.Salvia.Core.Client
                     Network.Salvia.Core.Config
                     Network.Salvia.Core.Context
                     Network.Salvia.Core.Handler
                     Network.Salvia.Core.Server
                     Network.Salvia.Handler.Banner
                     Network.Salvia.Handler.CGI
-                    Network.Salvia.Handler.Client
                     Network.Salvia.Handler.Close
-                    Network.Salvia.Handler.Contents
+                    Network.Salvia.Handler.Body
                     Network.Salvia.Handler.Cookie
                     Network.Salvia.Handler.Counter
                     Network.Salvia.Handler.Directory
@@ -100,6 +98,14 @@ Library
                     Network.Salvia.Handlers
                     Network.Salvia.Httpd
 
+  Extensions:       FlexibleContexts
+                    FlexibleInstances 
+                    RankNTypes
+                    ScopedTypeVariables
+                    TypeOperators
+                    MultiParamTypeClasses
+                    GeneralizedNewtypeDeriving
+
 Flag buildDemo
   description: Build Salvia demo program.
   default:     False
@@ -109,4 +115,12 @@ Executable salvia-demo
   GHC-Options:      -threaded -Wall -fno-warn-orphans
   HS-Source-Dirs:   src 
   Main-is:          Demo.hs
+
+  Extensions:       FlexibleContexts
+                    FlexibleInstances 
+                    RankNTypes
+                    ScopedTypeVariables
+                    TypeOperators
+                    MultiParamTypeClasses
+                    GeneralizedNewtypeDeriving
 

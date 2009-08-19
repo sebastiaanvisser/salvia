@@ -2,8 +2,8 @@ module Main where
 
 import Control.Monad.Trans
 import Network.Socket
-import Network.Salvia.Httpd
-import Network.Salvia.Handlers
+import Network.Protocol.Http hiding (server)
+import Network.Salvia
 
 main :: IO ()
 main =
@@ -16,12 +16,10 @@ main =
 
 -- Serve the current directory.
 
-myHandler :: (MonadIO m, RequestM m, ResponseM m, SendM m) => m ()
+myHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
 myHandler = hFileSystem "."
 
-
-
-test :: IO (Maybe String)
-test = getRequest "http://www.google.nl/search?q=aap"
+-- test :: IO (Maybe String)
+-- test = getRequest "http://www.google.nl/search?q=aap"
 
 

@@ -3,7 +3,8 @@ module Network.Salvia.Handler.Cookie {- doc ok -}
   , hGetCookies
 
   , newCookie
-  ) where
+  )
+where
 
 import Control.Applicative hiding (empty)
 import Control.Monad.State
@@ -17,12 +18,12 @@ import System.Locale
 
 {- | Set the `cookie` HTTP response header (Set-Cookie) with the specified `Cookies`. -}
 
-hSetCookies :: ResponseM m => Cookies -> m ()
+hSetCookies :: HttpM Response m => Cookies -> m ()
 hSetCookies = response . (setCookie =:) . Just . showCookies
 
 {- | Try to get the cookies from the HTTP `cookie` request header. -}
 
-hGetCookies :: RequestM m => m (Maybe Cookies)
+hGetCookies :: HttpM Request m => m (Maybe Cookies)
 hGetCookies = join . fmap parseCookies <$> request (getM cookie)
 
 {- |

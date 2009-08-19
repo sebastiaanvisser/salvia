@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeOperators #-}
 module Network.Salvia.Handler.Dispatching {- doc ok -}
   ( Dispatcher
   , ListDispatcher
@@ -7,7 +6,8 @@ module Network.Salvia.Handler.Dispatching {- doc ok -}
 
   , hRequestDispatch
   , hResponseDispatch
-  ) where
+  )
+where
 
 import Control.Monad.State
 import Data.Record.Label
@@ -39,8 +39,8 @@ handler will be invoked, otherwise the second handler will be used.
 hDispatch
   :: (MonadState s m, Monad n)
   => (m b -> n b) -> (s :-> b) -> (t -> b -> Bool) -> t -> n c -> n c -> n c
-hDispatch g f match a handler _default =
-  do ctx <- g (getM f)
+hDispatch d f match a handler _default =
+  do ctx <- d (getM f)
      if a `match` ctx
        then handler
        else _default
@@ -59,7 +59,7 @@ Like the `hDispatch` but always dispatches on a (part of) the `HTTP
 Request' part of the context.
 -}
 
-hRequestDispatch :: RequestM m => (HTTP Request :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
+hRequestDispatch :: HttpM Request m => (HTTP Request :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
 hRequestDispatch = hDispatch request
 
 {- |
@@ -67,6 +67,6 @@ Like the `hDispatch` but always dispatches on a (part of) the `HTTP
 Response' part of the context.
 -}
 
-hResponseDispatch :: ResponseM m => (HTTP Response :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
+hResponseDispatch :: HttpM Response m => (HTTP Response :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
 hResponseDispatch = hDispatch response
 

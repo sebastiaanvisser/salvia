@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeOperators #-}
 module Network.Protocol.Uri.Path where
 
 import Data.List

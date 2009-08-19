@@ -27,7 +27,8 @@ module Network.Salvia.Handler.Login
   -- * Helper functions.
   , readUserDatabase
 
-  ) where
+  )
+where
 
 import Control.Applicative
 import Control.Concurrent.STM
@@ -40,7 +41,7 @@ import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
-import Network.Salvia.Handler.Contents
+import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Session
 import Safe
@@ -128,10 +129,12 @@ initial set of actions assigned. On failure an `Unauthorized' error will be
 produced.
 -}
 
-hSignup :: (MonadIO m, ContentsM m, ResponseM m, SendM m) => TUserDatabase FilePath -> Actions -> m ()
+hSignup
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
+  => TUserDatabase FilePath -> Actions -> m ()
 hSignup tdb acts =
   do db <- liftIO . atomically $ readTVar tdb
-     params <- (asParameters . asUTF8) contents
+     params <- hRequestParameters "utf-8"
      case freshUserInfo params (dbUsers db) acts of
        Nothing -> hCustomError Unauthorized "signup failed"
        Just u  -> liftIO $
@@ -157,9 +160,11 @@ the user is logged in and stored in the session payload. Otherwise a
 `Unauthorized' response will be sent and the user has not logged in.
 -}
 
-hLogin :: (MonadIO m, ContentsM m, ResponseM m, SendM m) => UserDatabase b -> TUserSession a -> m ()
+hLogin
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
+  => UserDatabase b -> TUserSession a -> m ()
 hLogin db session =
-  do params <- (asParameters . asUTF8) contents
+  do params <- hRequestParameters "utf-8"
      maybe
        (hCustomError Unauthorized "login failed")
        (loginSuccessful session)
@@ -178,12 +183,12 @@ authenticate params db =
          else Nothing
 
 -- Login user and create `Ok' response on successful user.
-loginSuccessful :: (MonadIO m, ResponseM m, SendM m) => TUserSession a -> User -> m ()
+loginSuccessful :: (MonadIO m, HttpM Response m, SendM m) => TUserSession a -> User -> m ()
 loginSuccessful session user =
   do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
      liftIO $ atomically (readTVar session >>= writeTVar session . f)
      response (status =: OK)
-     sendStrLn "login successful"
+     sendStr "login successful\n"
 
 {- | Logout the current user by emptying the session payload. -}
 
@@ -204,16 +209,16 @@ hLoginfo :: (MonadIO m, SendM m) => TUserSession a -> m ()
 hLoginfo session =
   do s' <- liftIO $ atomically $ readTVar session
 
-     sendStrLn ("sID="    ++ show (sID     s'))
-     sendStrLn ("start="  ++ show (sStart  s'))
-     sendStrLn ("expire=" ++ show (sExpire s'))
+     sendStr ("sID="    ++ show (sID     s') ++ "\n")
+     sendStr ("start="  ++ show (sStart  s') ++ "\n")
+     sendStr ("expire=" ++ show (sExpire s') ++ "\n")
 
      case sPayload s' of
        Nothing -> return ()
        Just (UserPayload (User uname _ mail acts) _ _) ->
-         do sendStrLn ("username=" ++ uname)
-            sendStrLn ("email="    ++ mail)
-            sendStrLn ("actions="  ++ intercalate " " acts)
+         do sendStr ("username=" ++ uname                ++ "\n")
+            sendStr ("email="    ++ mail                 ++ "\n")
+            sendStr ("actions="  ++ intercalate " " acts ++ "\n")
 
 {- |
 Execute a handler only when the user for the current session is authorized to
@@ -224,7 +229,7 @@ the guest account from the user database is used for authorization.
 -}
 
 hAuthorized
-  :: (MonadIO m, ResponseM m, SendM m)
+  :: (MonadIO m, HttpM Response m, SendM m)
   => UserDatabase b        -- ^ The user database to read guest account from.
   -> Action                -- ^ The actions that should be authorized.
   -> (Maybe User -> m ())  -- ^ The handler to perform when authorized.
@@ -248,7 +253,7 @@ guest user will not be used in any case.
 -}
 
 hAuthorizedUser
-  :: (MonadIO m, ResponseM m, SendM m)
+  :: (MonadIO m, HttpM Response m, SendM m)
   => Action          -- ^ The actions that should be authorized.
   -> (User -> m ())  -- ^ The handler to perform when authorized.
   -> TUserSession a  -- ^ This handler requires a user session

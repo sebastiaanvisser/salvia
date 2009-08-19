@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Network.Protocol.Http.Data where {- doc ok -}
 
 import Data.List hiding (lookup)

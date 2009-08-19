@@ -16,7 +16,7 @@ to the response headers.
 -}
 
 hBanner
-  :: (MonadIO m, ResponseM m)
+  :: (MonadIO m, HttpM Response m)
   => String -- ^ The HTTP server name.
   -> m ()
 hBanner sv = do

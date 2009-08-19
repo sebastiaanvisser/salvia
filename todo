@@ -1,7 +1,11 @@
+rename module COntents to Body
+get rid of network namespace prefix for protocols...?
+Http iso HTTP, Uri is URI ??
 proxy?
 cgi?
 streaming big files?
 standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
+cleanup Environment mess: after/before/wrapper/etc...
 generalize hPut for client/server
 all Dispatching -> Routing
 server running on multiple TCP ports

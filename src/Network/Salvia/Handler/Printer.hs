@@ -1,45 +1,52 @@
-module Network.Salvia.Handler.Printer {- doc ok -}
+module Network.Salvia.Handler.Printer {- todo doc -}
   ( hRequestPrinter
   , hResponsePrinter
   , hFlushRequest
   , hFlushResponse
-  ) where
+  , hFlushHeaders
+  , hFlushQueue
+  )
+where
 
 import Misc.Util
 import Control.Monad.State
 import Network.Salvia.Core.Aspects
+import Network.Protocol.Http
 import System.IO
 
 {- |
-The 'hRequestPrinter' handler prints the entire HTTP request message including
-the headers to the server.
+The 'hPrinter' handler prints the entire HTTP message including the headers to
+the other endpoint. This handler is generally used as (one of) the last handler
+in a client or server environment.
 -}
 
-hRequestPrinter :: SendM m => m ()
-hRequestPrinter = flushRequest >> flushQueue
+hRequestPrinter :: FlushM Request m => m ()
+hRequestPrinter = hFlushRequest >> flushQueue forRequest
 
-{- |
-The 'hResponsePrinter' handler prints the entire HTTP response message including
-the headers to the client. This handler is generally used as (one of) the last
-handler in a server environment.
--}
+hResponsePrinter :: FlushM Response m => m ()
+hResponsePrinter = hFlushResponse >> flushQueue forResponse
 
-hResponsePrinter :: SendM m => m ()
-hResponsePrinter = flushResponse >> flushQueue
+hFlushRequest :: FlushM Request m => m ()
+hFlushRequest = flushHeaders forRequest
 
--- | Send all the request headers directly over the socket.
+hFlushResponse :: FlushM Response m => m ()
+hFlushResponse = flushHeaders forResponse
 
-hFlushRequest :: (RequestM m, MonadIO m, SocketM m) => m ()
-hFlushRequest =
-  do r <- request get
+-- | Send all the message headers directly over the socket.
+
+hFlushHeaders :: forall m d. (Show (HTTP d), SocketM m, SendM m, MonadIO m, HttpM d m) => Side d -> m ()
+hFlushHeaders Side =
+  do r <- http get :: m (HTTP d)
      h <- sock 
      catchIO (hPutStr h (show r) >> hFlush h) ()
 
--- | Send all the response headers directly over the socket. 
-
-hFlushResponse :: (ResponseM m, MonadIO m, SocketM m) => m ()
-hFlushResponse =
-  do r <- response get
-     h <- sock 
-     catchIO (hPutStr h (show r) >> hFlush h) ()
+hFlushQueue :: (SendM m, SocketM m, MonadIO m) => m ()
+hFlushQueue =
+  do s <- rawSock
+     h <- sock
+     sendall s h
+     catchIO (hFlush h) ()
+  where sendall s h =
+          dequeue >>=
+          maybe (return ()) (\a -> catchIO (a (s, h)) () >> sendall s h)
 
