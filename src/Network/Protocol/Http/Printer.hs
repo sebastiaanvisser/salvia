@@ -16,7 +16,7 @@ instance Show (HTTP Response) where
       shows v . sh " "
     . maybe (sh "Unknown status") shows (lookupR s statusCodes)
     . sh " " . shows s . eol
-    . shows hs . eol . eol
+    . shows hs . eol
 
 instance Show Headers where
   showsPrec _ =

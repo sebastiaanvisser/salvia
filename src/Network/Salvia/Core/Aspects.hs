@@ -34,9 +34,11 @@ class (Applicative m, Monad m) => SocketM m where
   peer    :: m SockAddr
 
 -- TODO:  queue and dequeue are probably enough.
+type SendAction = (Socket, Handle) -> IO ()
+
 class (Applicative m, Monad m) => SendM m where
-  queue    :: ((Socket, Handle) -> IO ()) -> m ()
-  dequeue  :: m (Maybe ((Socket, Handle) -> IO ()))
+  enqueue  :: SendAction -> m ()
+  dequeue  :: m (Maybe SendAction)
 
   sendStr  :: String                                   -> m ()
   sendBs   :: B.ByteString                             -> m ()

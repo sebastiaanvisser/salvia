@@ -1,36 +1,35 @@
-module Network.Salvia.Handler.Printer {- todo doc -}
+module Network.Salvia.Handler.Printer {- doc ok -}
   ( hRequestPrinter
   , hResponsePrinter
-  , hFlushRequest
-  , hFlushResponse
   , hFlushHeaders
   , hFlushQueue
   )
 where
 
-import Misc.Util
+import Control.Applicative
 import Control.Monad.State
-import Network.Salvia.Core.Aspects
+import Misc.Util
 import Network.Protocol.Http
+import Network.Salvia.Core.Aspects
 import System.IO
 
 {- |
-The 'hPrinter' handler prints the entire HTTP message including the headers to
-the other endpoint. This handler is generally used as (one of) the last handler
-in a client or server environment.
+The 'hRequestPrinter' handler prints the entire HTTP request including the
+headers and the body to the socket towards the server. This handler is
+generally used as (one of) the last handler in a server environment.
 -}
 
 hRequestPrinter :: FlushM Request m => m ()
-hRequestPrinter = hFlushRequest >> flushQueue forRequest
+hRequestPrinter = flushHeaders forRequest >> flushQueue forRequest
+
+{- |
+The 'hResponsePrinter' handler prints the entire HTTP response including the
+headers and the body to the socket towards the client. This handler is
+generally used as (one of) the last handler in a client environment.
+-}
 
 hResponsePrinter :: FlushM Response m => m ()
-hResponsePrinter = hFlushResponse >> flushQueue forResponse
-
-hFlushRequest :: FlushM Request m => m ()
-hFlushRequest = flushHeaders forRequest
-
-hFlushResponse :: FlushM Response m => m ()
-hFlushResponse = flushHeaders forResponse
+hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 
 -- | Send all the message headers directly over the socket.
 
@@ -40,13 +39,14 @@ hFlushHeaders Side =
      h <- sock 
      catchIO (hPutStr h (show r) >> hFlush h) ()
 
+-- | One by one apply all enqueued send actions to the socket.
+
 hFlushQueue :: (SendM m, SocketM m, MonadIO m) => m ()
 hFlushQueue =
   do s <- rawSock
      h <- sock
-     sendall s h
-     catchIO (hFlush h) ()
-  where sendall s h =
-          dequeue >>=
-          maybe (return ()) (\a -> catchIO (a (s, h)) () >> sendall s h)
+     q <- queue
+     flip catchIO () $
+       sequence_ (map ($ (s, h)) q) >> hFlush h
+  where queue = dequeue >>= maybe (return []) ((<$> queue) . (:))
 

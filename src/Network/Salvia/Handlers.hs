@@ -17,9 +17,9 @@ module Network.Salvia.Handlers
   -- ** Print server responses.
   
   , hResponsePrinter
-  , hFlushRequest
-  , hFlushResponse
+  , hRequestPrinter
   , hFlushHeaders
+  , hFlushQueue
 
   -- ** HTTP header banner.
 

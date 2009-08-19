@@ -23,7 +23,7 @@ module Network.Salvia.Httpd
   , peer
 
   , SendM
-  , queue
+  , enqueue
   , dequeue
   , sendStr
   , sendBs

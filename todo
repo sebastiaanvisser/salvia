@@ -1,5 +1,3 @@
-rename module COntents to Body
-get rid of network namespace prefix for protocols...?
 Http iso HTTP, Uri is URI ??
 proxy?
 cgi?

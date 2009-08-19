@@ -59,13 +59,15 @@ instance A.SocketM (Handler c p) where
   sock    = getM sock
   peer    = getM peer
 
+-- toto: Encoding!!!!
 instance A.SendM (Handler c p) where
-  queue f       = modM queue (++[f])
+  enqueue f     = modM queue (++[f])
   dequeue       = headMay <$> getM queue <* modM queue (tailDef [])
-  sendStr s     = A.queue (flip U.hPutStr s . snd)
-  sendBs bs     = A.queue (flip B.hPutStr bs . snd)
-  spoolStr f fd = A.queue (\(_, h) -> U.hGetContents fd >>= \d -> U.hPutStr h (f d))
-  spoolBs  f fd = A.queue (\(_, h) -> B.hGetContents fd >>= \d -> B.hPut h (f d))
+
+  sendStr s     = A.enqueue (flip U.hPutStr s . snd)
+  sendBs bs     = A.enqueue (flip B.hPutStr bs . snd)
+  spoolStr f fd = A.enqueue (\(_, h) -> U.hGetContents fd >>= U.hPutStr h . f)
+  spoolBs  f fd = A.enqueue (\(_, h) -> B.hGetContents fd >>= B.hPut    h . f)
 
 instance A.FlushM Response (Handler c p) where
   flushHeaders = hFlushHeaders
