@@ -7,29 +7,29 @@ import Network.Protocol.Http.Status
 
 instance Show (HTTP Request) where
   showsPrec _ (HTTP (Request m u) v hs) =
-      shows m . sh " " . sh u . sh " "
+      shows m . ss " " . ss u . ss " "
     . shows v . eol
     . shows hs . eol . eol
 
 instance Show (HTTP Response) where
   showsPrec _ (HTTP (Response s) v hs) =
-      shows v . sh " "
-    . maybe (sh "Unknown status") shows (lookupR s statusCodes)
-    . sh " " . shows s . eol
+      shows v . ss " "
+    . maybe (ss "Unknown status") shows (lookupR s statusCodes)
+    . ss " " . shows s . eol
     . shows hs . eol
 
 instance Show Headers where
   showsPrec _ =
       fold (\a b -> a . eol . b) id
-    . mapWithKey (\k a -> sh k . sh ": " . sh a)
+    . mapWithKey (\k a -> ss k . ss ": " . ss a)
     . unHeaders
 
 instance Show Version where
-  showsPrec _ (Version a b) = sh "HTTP/" . shows a . sh "." . shows b
+  showsPrec _ (Version a b) = ss "HTTP/" . shows a . ss "." . shows b
 
 eol :: ShowS
-eol = sh "\r\n"
+eol = ss "\r\n"
 
-sh :: String -> ShowS
-sh = showString
+ss :: String -> ShowS
+ss = showString
 

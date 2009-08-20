@@ -19,8 +19,8 @@ expected hostname starts with a dot (like ".mydomain.com")  this indicates that
 all sub-domains of this domain will match as well.
 -}
 
-hVirtualHosting :: HttpM Request m => [(String, m b)] -> m b -> m b
-hVirtualHosting = hListDispatch (hRequestDispatch hostname (\a -> maybe False (match a)))
+hVirtualHosting :: HttpM Request m => ListDispatcher String m b
+hVirtualHosting = hListDispatch (hRequestDispatch hostname (\a -> False `maybe` (match a)))
 
   where
     match e f = 
@@ -38,8 +38,8 @@ Dispatcher based on the port number of the `hostname' request header. When no
 port number is available in the hostname header port 80 will be assumed.
 -}
 
-hPortRouter :: HttpM Request m => [(Int, m b)] -> m b -> m b
-hPortRouter = hListDispatch (hRequestDispatch hostname (\a -> maybe False (match a)))
+hPortRouter :: HttpM Request m => ListDispatcher Int m b
+hPortRouter = hListDispatch (hRequestDispatch hostname (\a -> False `maybe` (match a)))
 
   where
     match e f = 

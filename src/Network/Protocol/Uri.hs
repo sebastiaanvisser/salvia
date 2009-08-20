@@ -52,7 +52,6 @@ module Network.Protocol.Uri (
 
   -- * Helper labels.
 
-  , absolute
   , segments
   , _host
   , _port

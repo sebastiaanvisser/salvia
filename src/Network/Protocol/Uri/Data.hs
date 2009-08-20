@@ -17,16 +17,10 @@ type Hash        = String
 type UserInfo    = String
 type PathSegment = String
 
-data Path = Path 
-  { _absolute :: Bool
-  , _segments :: [PathSegment]
-  }
+data IPv4 = IPv4 Int Int Int Int
   deriving (Eq, Ord)
 
-data IPv4 = IPv4 Int Int Int Int -- actually 4-tupel
-  deriving (Eq, Ord)
-
-newtype Domain = Domain [String]
+newtype Domain = Domain { __parts :: [String] }
   deriving (Eq, Ord)
 
 data Host =
@@ -43,17 +37,20 @@ data Authority = Authority
   }
   deriving (Eq, Ord)
 
+data Path = Path { __segments :: [PathSegment] }
+  deriving (Eq, Ord)
+
 data URI = URI
   { _relative  :: Bool
   , _scheme    :: Scheme
   , _authority :: Authority
   , __path     :: Path
-  , __query     :: Query
+  , __query    :: Query
   , _fragment  :: Fragment
   }
   deriving (Eq, Ord)
 
-$(mkLabels [''Path, ''Host, ''Authority, ''URI])
+$(mkLabels [''Domain, ''Path, ''Host, ''Authority, ''URI])
 
 _domain   :: Host :-> Domain
 _ipv4     :: Host :-> IPv4
@@ -61,11 +58,10 @@ _regname  :: Host :-> String
 _host     :: Authority :-> Host
 _port     :: Authority :-> Maybe Port
 _userinfo :: Authority :-> UserInfo
+_segments :: Path :-> [PathSegment]
 _path     :: URI :-> Path
 _query    :: URI :-> Query
 
-absolute  :: Path :-> Bool
-segments  :: Path :-> [PathSegment]
 authority :: URI :-> Authority
 domain    :: URI :-> Domain
 fragment  :: URI :-> Fragment
@@ -75,6 +71,7 @@ query     :: URI :-> Query
 regname   :: URI :-> String
 relative  :: URI :-> Bool
 scheme    :: URI :-> Scheme
+segments  :: URI :-> [PathSegment]
 userinfo  :: URI :-> UserInfo
 
 -- Public label based on private labels.
@@ -84,6 +81,7 @@ regname   = _regname  % _host % authority
 ipv4      = _ipv4     % _host % authority
 userinfo  = _userinfo % authority
 port      = _port     % authority
+segments  = _segments % _path
 query     = (decode, encode) `lmap` _query
 
 -- Creating, selection and modifying URIs.
@@ -101,7 +99,7 @@ mkScheme = ""
 {- | Constructors for making empty `Path`. -}
 
 mkPath :: Path
-mkPath = Path False []
+mkPath = Path []
 
 {- | Constructors for making empty `Authority`. -}
 

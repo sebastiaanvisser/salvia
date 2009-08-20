@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>test</title>
+<script type="text/javascript">
+var r;
+function doit() {
+  r = new XMLHttpRequest();
+  doc = document.getElementById("doc").value;
+  text = document.getElementById("text").value;
+  r.onreadystatechange = resp;
+  r.open("PUT", "http://localhost:8080/" + doc);
+  var data = text;
+  r.setRequestHeader("Content-type", "text/xml");
+  r.setRequestHeader("Content-length", data.length);
+  document.getElementById("status").innerHTML = "";
+  document.getElementById("output").innerHTML = "";
+  r.send(data);
+}
+function resp() {
+  if (r.readyState === 4) {
+    document.getElementById("status").innerHTML = r.status;
+    document.getElementById("output").innerHTML = r.responseText;
+  }
+}
+</script>
+</head>
+<body>
+<form>
+doc: <input id="doc">
+text: <textarea id="text"></textarea>
+</form>
+<button onclick="doit()">do</button>
+<div id="status"></div>
+<div id="output"></div>
+</body>
+</html>

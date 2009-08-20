@@ -55,9 +55,6 @@ data HTTP a = HTTP
   , _headers  :: Headers
   } deriving Eq
 
-
-
-
 {- | All recognized `Method` constructors as a list. -}
 
 methods :: [Method]

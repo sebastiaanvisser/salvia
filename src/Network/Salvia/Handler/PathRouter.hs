@@ -4,7 +4,7 @@ module Network.Salvia.Handler.PathRouter {- doc ok -}
   , hPrefix
   , hPrefixRouter
 
-  , hParameters
+  , hQueryParameters
   )
 where
 
@@ -13,9 +13,9 @@ import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Handler.Rewrite
-import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Dispatching
+import Network.Salvia.Handler.Rewrite
 
 {- | Request dispatcher based on the request path. -}
 
@@ -39,12 +39,8 @@ hPrefixRouter = hListDispatch hPrefix
 
 {- | Helper function to fetch the URI parameters from the request. -}
 
-hParameters :: HttpM Request m => m Parameters
-hParameters = queryParams <$> request (getM asURI)
-
--- todo: query routing
-{- [(("this key", "isthisvalue"), myHandler)] -}
-
+hQueryParameters :: HttpM Request m => m Parameters
+hQueryParameters = queryParams <$> request (getM asURI)
 
 -- Helper.
 

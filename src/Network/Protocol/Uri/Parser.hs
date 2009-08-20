@@ -1,18 +1,18 @@
+{-# LANGUAGE StandaloneDeriving #-}
 module Network.Protocol.Uri.Parser where
 
 import Control.Applicative hiding (empty)
 import Data.Char
-import Safe
 import Data.List (intercalate)
 import Data.Maybe
+import Data.Record.Label
+import Network.Protocol.Uri.Data
 import Network.Protocol.Uri.Data
 import Network.Protocol.Uri.Encode
 import Network.Protocol.Uri.Printer ()
-import Data.Record.Label
+import Safe
 import Text.Parsec hiding (many, (<|>))
 import Text.Parsec.Prim (Stream, ParsecT)
-
-import Network.Protocol.Uri.Data
 
 host :: URI :-> String
 host = (show, either (const mkHost) id . parseHost) `lmap` (_host % authority)
@@ -20,6 +20,12 @@ host = (show, either (const mkHost) id . parseHost) `lmap` (_host % authority)
 path :: URI :-> FilePath
 path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _path
 
+-- deriving instance Show Domain
+-- deriving instance Show Authority
+-- deriving instance Show IPv4
+-- deriving instance Show Path
+-- deriving instance Show Host
+-- deriving instance Show URI
 
 toURI :: String -> URI
 toURI = either (const mkURI) id . parseURI
@@ -197,11 +203,11 @@ pPath =
   <|> try pPathRootless -- begins with a segment
   <|> pPathEmpty        -- zero characters
 
-pPathAbempty  = (Path True) <$> _pSlashSegments
-pPathAbsolute = (char '/' *>) $ (Path True) <$> (option [] $ (:) <$> pSegmentNz <*> _pSlashSegments)
-pPathNoscheme = (Path False) <$> ((:) <$> pSegmentNzNc <*> _pSlashSegments)
-pPathRootless = (Path False) <$> ((:) <$> pSegmentNz    <*> _pSlashSegments)
-pPathEmpty    = (Path False []) <$ string ""
+pPathAbempty  = Path . ("":) <$> _pSlashSegments
+pPathAbsolute = (char '/' *>) $ Path . ("":) <$> (option [] $ (:) <$> pSegmentNz <*> _pSlashSegments)
+pPathNoscheme = Path <$> ((:) <$> pSegmentNzNc <*> _pSlashSegments)
+pPathRootless = Path <$> ((:) <$> pSegmentNz    <*> _pSlashSegments)
+pPathEmpty    = Path [] <$ string ""
 
 pSegment, pSegmentNz, pSegmentNzNc :: Stream s m Char => ParsecT s u m String
 pSegment     = concat <$> many pPchar

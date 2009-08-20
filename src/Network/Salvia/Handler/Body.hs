@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Body   {- too doc, rename body -}
+module Network.Salvia.Handler.Body {- doc ok -}
   ( hRawRequestBody
   , hRawResponseBody
   , hRawBody
@@ -83,22 +83,24 @@ hResponseBody :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m 
 hResponseBody = hBody forResponse
 
 {- |
-Try to parse the supplied request, as a result of `hBody', as URI encoded
-`POST` parameters. Returns as a URI `Parameter' type or nothing when parsing
-fails.
+Try to parse the message body, as a result of `hBody', as URI encoded `POST`
+parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
 hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
 hParameters d def =
   (>>= either (const Nothing) Just . parseQueryParams . decode) <$> hBody d def
 
+-- | Like `hParameters' but specifically for `HTTP' `Request's.
+
 hRequestParameters :: (MonadIO m, BodyM Request m, HttpM Request m) => String -> m (Maybe Parameters)
 hRequestParameters = hParameters forRequest
+
+-- | Like `hParameters' but specifically for `HTTP' `Response's.
 
 hResponseParameters :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Parameters)
 hResponseParameters = hParameters forResponse
 
 decodeWith :: String -> String -> B.ByteString -> String
-decodeWith def enc = 
-  decodeLazyByteString (fromMaybe (encodingFromString def) (encodingFromStringExplicit enc))
+decodeWith def enc = decodeLazyByteString (fromMaybe (encodingFromString def) (encodingFromStringExplicit enc))
 

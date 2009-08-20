@@ -1,4 +1,4 @@
-module Network.Salvia.Handlers
+module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
   -- * Fundamental protocol handlers.
 
@@ -20,6 +20,20 @@ module Network.Salvia.Handlers
   , hRequestPrinter
   , hFlushHeaders
   , hFlushQueue
+
+  -- ** Accessing request and response bodies.
+
+  , hRawRequestBody
+  , hRawResponseBody
+  , hRawBody
+  
+  , hRequestBody
+  , hResponseBody
+  , hBody
+
+  , hRequestParameters
+  , hResponseParameters
+  , hParameters
 
   -- ** HTTP header banner.
 
@@ -92,7 +106,9 @@ module Network.Salvia.Handlers
 
   -- ** Enable PUTing resources to the files ystem.
 
-  , hPut
+  , hPutFileSystem
+  , hPutResource
+  , hStore
 
   -- ** Serving CGI scripts.
 
@@ -118,7 +134,7 @@ module Network.Salvia.Handlers
   , hPathRouter
   , hPrefix
   , hPrefixRouter
-  , hParameters
+  , hQueryParameters
 
   -- ** Dispatch based on filename extension.
 
@@ -180,6 +196,7 @@ module Network.Salvia.Handlers
 where
 
 import Network.Salvia.Handler.Banner
+import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.CGI
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Cookie

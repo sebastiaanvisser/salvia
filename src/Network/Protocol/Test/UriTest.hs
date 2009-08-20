@@ -1,6 +1,6 @@
 module Main where
 
-import Misc.Misc
+-- import Misc.Misc
 import Network.Protocol.Uri
 import Test.QuickCheck
 

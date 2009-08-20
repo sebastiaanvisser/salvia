@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Login
+module Network.Salvia.Handler.Login {- doc ok -}
 
   -- * Basic types.
   ( Username
