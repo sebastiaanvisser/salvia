@@ -37,7 +37,7 @@ message, client request or server response.
 
 hRawBody :: forall m d. (MonadIO m, SocketM m, HttpM d m) => d -> m (Maybe B.ByteString)
 hRawBody _ =
-  do let h = http :: State (HTTP d) a -> m a
+  do let h = http :: State (Http d) a -> m a
      len <- h (getM contentLength)
      kpa <- h (getM keepAlive)
      s   <- sock
@@ -47,12 +47,12 @@ hRawBody _ =
          (Nothing, Nothing) -> Just <$> B.hGetContents s
          _                  -> return Nothing
 
--- | Like `hRawBody' but specifically for `HTTP' `Request's.
+-- | Like `hRawBody' but specifically for `Http' `Request's.
 
 hRawRequestBody :: BodyM Request m => m (Maybe B.ByteString)
 hRawRequestBody = body forRequest
 
--- | Like `hRawBody' but specifically for `HTTP' `Request's.
+-- | Like `hRawBody' but specifically for `Http' `Request's.
 
 hRawResponseBody :: BodyM Response m => m (Maybe B.ByteString)
 hRawResponseBody = body forResponse
@@ -60,14 +60,14 @@ hRawResponseBody = body forResponse
 {- |
 Like the `hRawBody' but is will handle proper decoding based on the charset
 part of the `contentType' header line. When a valid encoding is found in the
-`HTTP' message it will be decoded with using the encodings package. The default
+`Http' message it will be decoded with using the encodings package. The default
 encoding supplied as the function's argument can be used to specify what
 encoding to use in the absence of a proper encoding in the HTTP message itself.
 -}
 
 hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe String)
 hBody d def = 
-  do let h = http :: State (HTTP d) a -> m a
+  do let h = http :: State (Http d) a -> m a
      c <- body d
      e <- h (getM contentType)
      return (decodeWith def <$> (e >>= snd) <*> c)

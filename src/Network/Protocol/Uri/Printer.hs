@@ -25,8 +25,8 @@ instance Show Authority where
         p' = maybe id (\s -> sc ':' . shows s) p
     in u' . shows h . p'
 
-instance Show URI where
-  showsPrec _ (URI _ s a p q f) =
+instance Show Uri where
+  showsPrec _ (Uri _ s a p q f) =
     let s' = if null s then id else ss s . sc ':'
         a' = show a
         p' = shows p

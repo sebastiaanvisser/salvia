@@ -40,7 +40,7 @@ data Authority = Authority
 data Path = Path { __segments :: [PathSegment] }
   deriving (Eq, Ord)
 
-data URI = URI
+data Uri = Uri
   { _relative  :: Bool
   , _scheme    :: Scheme
   , _authority :: Authority
@@ -50,7 +50,7 @@ data URI = URI
   }
   deriving (Eq, Ord)
 
-$(mkLabels [''Domain, ''Path, ''Host, ''Authority, ''URI])
+$(mkLabels [''Domain, ''Path, ''Host, ''Authority, ''Uri])
 
 _domain   :: Host :-> Domain
 _ipv4     :: Host :-> IPv4
@@ -59,20 +59,20 @@ _host     :: Authority :-> Host
 _port     :: Authority :-> Maybe Port
 _userinfo :: Authority :-> UserInfo
 _segments :: Path :-> [PathSegment]
-_path     :: URI :-> Path
-_query    :: URI :-> Query
+_path     :: Uri :-> Path
+_query    :: Uri :-> Query
 
-authority :: URI :-> Authority
-domain    :: URI :-> Domain
-fragment  :: URI :-> Fragment
-ipv4      :: URI :-> IPv4
-port      :: URI :-> Maybe Port
-query     :: URI :-> Query
-regname   :: URI :-> String
-relative  :: URI :-> Bool
-scheme    :: URI :-> Scheme
-segments  :: URI :-> [PathSegment]
-userinfo  :: URI :-> UserInfo
+authority :: Uri :-> Authority
+domain    :: Uri :-> Domain
+fragment  :: Uri :-> Fragment
+ipv4      :: Uri :-> IPv4
+port      :: Uri :-> Maybe Port
+query     :: Uri :-> Query
+regname   :: Uri :-> String
+relative  :: Uri :-> Bool
+scheme    :: Uri :-> Scheme
+segments  :: Uri :-> [PathSegment]
+userinfo  :: Uri :-> UserInfo
 
 -- Public label based on private labels.
 
@@ -88,8 +88,8 @@ query     = (decode, encode) `lmap` _query
 
 {- | Constructors for making empty URI. -}
 
-mkURI :: URI
-mkURI = URI False mkScheme mkAuthority mkPath mkQuery mkFragment
+mkUri :: Uri
+mkUri = Uri False mkScheme mkAuthority mkPath mkQuery mkFragment
 
 {- | Constructors for making empty `Scheme`. -}
 

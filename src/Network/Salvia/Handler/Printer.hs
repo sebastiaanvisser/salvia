@@ -33,9 +33,9 @@ hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 
 -- | Send all the message headers directly over the socket.
 
-hFlushHeaders :: forall m d. (Show (HTTP d), SocketM m, SendM m, MonadIO m, HttpM d m) => d -> m ()
+hFlushHeaders :: forall m d. (Show (Http d), SocketM m, SendM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeaders _ =
-  do r <- http get :: m (HTTP d)
+  do r <- http get :: m (Http d)
      h <- sock 
      catchIO (hPutStr h (show r) >> hFlush h) ()
 

@@ -13,7 +13,7 @@ import Network.Salvia.Core.Aspects
 {- | Request dispatcher based on the request path file extenstion. -}
 
 hExtension :: HttpM Request m => Maybe String -> m a -> m a -> m a
-hExtension = hRequestDispatch (extension % path % asURI) (==)
+hExtension = hRequestDispatch (extension % path % asUri) (==)
 
 {- | List dispatcher version of `hExtension`. -}
 

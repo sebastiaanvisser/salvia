@@ -19,7 +19,7 @@ import Control.Monad ()
 import Data.Char (toLower)
 import Data.List (intercalate)
 import Misc.Text
-import Network.Protocol.Uri (URI)
+import Network.Protocol.Uri (Uri)
 import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import qualified Data.Map as M
 
@@ -34,7 +34,7 @@ data Cookie =
     name       :: String
   , value      :: String
   , comment    :: Maybe String
-  , commentURL :: Maybe URI
+  , commentURL :: Maybe Uri
   , discard    :: Bool
   , domain     :: Maybe String
   , maxAge     :: Maybe Int

@@ -24,34 +24,34 @@ Run a handler in a local environment in which the `HTTP' `Request' has
 been modified.
 -}
 
-hLocalRequest :: HttpM Request m => (HTTP Request :-> b) -> (b -> b) -> m a -> m a
+hLocalRequest :: HttpM Request m => (Http Request :-> b) -> (b -> b) -> m a -> m a
 hLocalRequest p f m =
   do u <- request (getM p) <* request (modM p f)
      m <* request (p =: u)
 
 {- |
-Run an handler in a modified context in which the request `URI` has been
-changed by the specified modifier function. After the handler completes the `URI`
+Run an handler in a modified context in which the request `Uri` has been
+changed by the specified modifier function. After the handler completes the `Uri`
 remains untouched.
 -}
 
-hRewrite :: HttpM Request m => (URI -> URI) -> m a -> m a
-hRewrite = hLocalRequest asURI
+hRewrite :: HttpM Request m => (Uri -> Uri) -> m a -> m a
+hRewrite = hLocalRequest asUri
 
 {- | Run handler in a context with a modified host. -}
 
 hRewriteHost :: HttpM Request m => (String -> String) -> m a -> m a
-hRewriteHost = hLocalRequest (host % asURI)
+hRewriteHost = hLocalRequest (host % asUri)
 
 {- | Run handler in a context with a modified path. -}
 
 hRewritePath :: HttpM Request m => (FilePath -> FilePath) -> m a -> m a
-hRewritePath = hLocalRequest (path % asURI)
+hRewritePath = hLocalRequest (path % asUri)
 
 {- | Run handler in a context with a modified file extension. -}
 
 hRewriteExt :: HttpM Request m => (Maybe String -> Maybe String) -> m a -> m a
-hRewriteExt = hLocalRequest (extension % path % asURI)
+hRewriteExt = hLocalRequest (extension % path % asUri)
 
 {- |
 Run handler in a context with a modified path. The specified prefix will be

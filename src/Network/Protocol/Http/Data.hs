@@ -49,7 +49,7 @@ data Response = Response { __status :: Status }
 
 {- | An HTTP message. The message body is *not* included. -}
 
-data HTTP a = HTTP
+data Http a = Http
   { _headline :: a
   , _version  :: Version
   , _headers  :: Headers
@@ -77,15 +77,15 @@ emptyHeaders = Headers empty
 
 {- | Create an empty HTTP request message. -}
 
-emptyRequest :: HTTP Request
-emptyRequest = HTTP (Request GET "") http11 emptyHeaders
+emptyRequest :: Http Request
+emptyRequest = Http (Request GET "") http11 emptyHeaders
 
 {- | Create an empty HTTP response message. -}
 
-emptyResponse :: HTTP Response
-emptyResponse = HTTP (Response OK) http11 emptyHeaders
+emptyResponse :: Http Response
+emptyResponse = Http (Response OK) http11 emptyHeaders
 
-$(mkLabels [''Version, ''Request, ''Response, ''HTTP])
+$(mkLabels [''Version, ''Request, ''Response, ''Http])
 
 {- | Label to access the major part of the version. -}
 
@@ -103,24 +103,24 @@ _status :: Response :-> Status
 
 {- | Label to access the header of an HTTP message. -}
 
-headers :: HTTP a :-> Headers
+headers :: Http a :-> Headers
 
 {- | Label to access the version part of an HTTP message. -}
 
-version :: HTTP a :-> Version
+version :: Http a :-> Version
 
 {- | Label to access the header line part of an HTTP message. -}
 
-headline :: HTTP a :-> a
+headline :: Http a :-> a
 
 {- | Label to access the method part of an HTTP request message. -}
 
-method :: HTTP Request :-> Method
+method :: Http Request :-> Method
 method = _method % headline
 
 {- | Label to access the URI part of an HTTP request message. -}
 
-uri :: HTTP Request :-> String
+uri :: Http Request :-> String
 uri = _uri % headline
 
 {- |
@@ -128,12 +128,12 @@ Label to access the URI part of an HTTP request message and access it as a true
 URI data type.
 -}
 
-asURI :: HTTP Request :-> URI
-asURI = (toURI, show) `lmap` uri
+asUri :: Http Request :-> Uri
+asUri = (toUri, show) `lmap` uri
 
 {- | Label to access the status part of an HTTP response message. -}
 
-status :: HTTP Response :-> Status
+status :: Http Response :-> Status
 status = _status % headline
 
 {- | Normalize the capitalization of an HTTP header key. -}
@@ -143,7 +143,7 @@ normalizeHeader = intercalate "-" . map normalCase . splitOn "-"
 
 {- | Generic label to access an HTTP header field by key. -}
 
-header :: Key -> HTTP a :-> Maybe Value
+header :: Key -> Http a :-> Maybe Value
 header key = mkLabel
   (lookup (normalizeHeader key) . unHeaders . lget headers)
   (\x -> lmod headers (Headers . alter (const x) (normalizeHeader key) . unHeaders))

@@ -9,7 +9,7 @@ module Network.Protocol.Http {- doc ok -}
   , Headers (..)
   , Request (..)
   , Response (..)
-  , HTTP (..)
+  , Http (..)
 
   -- * Creating (parts of) messages.
 
@@ -29,7 +29,7 @@ module Network.Protocol.Http {- doc ok -}
   , headline
   , method
   , uri
-  , asURI
+  , asUri
   , status
   , normalizeHeader
   , header

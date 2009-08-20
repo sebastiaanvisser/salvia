@@ -18,12 +18,12 @@ class (Applicative m, Monad m) => ConfigM m where
   config :: m Config
 
 class (Applicative m, Monad m) => HttpM d m where
-  http :: State (HTTP d) a -> m a
+  http :: State (Http d) a -> m a
 
-request :: HttpM Request m => State (HTTP Request) a -> m a
+request :: HttpM Request m => State (Http Request) a -> m a
 request = http
 
-response :: HttpM Response m => State (HTTP Response) a -> m a
+response :: HttpM Response m => State (Http Response) a -> m a
 response = http
 
 class (Applicative m, Monad m) => SocketM m where

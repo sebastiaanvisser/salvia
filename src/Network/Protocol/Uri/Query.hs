@@ -28,7 +28,7 @@ parseQueryParams = parse pQueryParams  ""
 
 {- | Fetch the query parameters form a URI. -}
 
-queryParams :: URI -> Parameters
+queryParams :: Uri -> Parameters
 queryParams = either (const []) id . parseQueryParams . lget query
 
 -- Translate special characters in a parameter.

@@ -18,14 +18,14 @@ module Network.Protocol.Uri (
   , Path (..)
   , Host (..)
   , Authority (..)
-  , URI (..)
+  , Uri (..)
 
   -- * Creating (parts of) URIs.
 
   , encode
   , decode
 
-  , mkURI
+  , mkUri
   , mkScheme
   , mkPath
   , mkAuthority
@@ -58,15 +58,15 @@ module Network.Protocol.Uri (
 
   -- * Parsing URIs.
 
-  , toURI
-  , parseURI
-  , parseAbsoluteURI
+  , toUri
+  , parseUri
+  , parseAbsoluteUri
   , parseAuthority
   , parsePath
   , parseHost
 
   , pUriReference
-  , pAbsoluteURI
+  , pAbsoluteUri
   , pAuthority
   , pPath
   , pHost

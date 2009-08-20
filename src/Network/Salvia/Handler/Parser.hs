@@ -49,8 +49,8 @@ specified with the first argument the function silently returns.
 
 hParser
   :: (SocketM m, MonadIO m)
-  => (HTTP d -> m b)                        -- ^ What to do with message.
-  -> (String -> Either ParseError (HTTP d)) -- ^ Custom message parser.
+  => (Http d -> m b)                        -- ^ What to do with message.
+  -> (String -> Either ParseError (Http d)) -- ^ Custom message parser.
   -> Int                                    -- ^ Timeout in milliseconds.
   -> (String -> m a)                        -- ^ The fail handler.
   -> m a                                    -- ^ The success handler.

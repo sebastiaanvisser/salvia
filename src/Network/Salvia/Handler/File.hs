@@ -42,7 +42,7 @@ hFileResource file =
 fileMime :: FilePath -> Mime
 fileMime file =
     maybe defaultMime id
-  $ (either (const Nothing) Just (parseURI file)
+  $ (either (const Nothing) Just (parseUri file)
   >>= mimetype . lget path)
 
 {- |
@@ -67,15 +67,15 @@ that utilizes the path part of the request URI as the resource identifier.
 -}
 
 hResource :: HttpM Request m => (FilePath -> m a) -> m a
-hResource rh = request (getM (path % asURI)) >>= rh
+hResource rh = request (getM (path % asUri)) >>= rh
 
 {- |
 Turn a handler that is parametrized by a URI into a regular handler that
 utilizes the request URI as the resource identifier.
 -}
 
-hUri :: HttpM Request m => (URI -> m a) -> m a
-hUri rh = request (getM asURI) >>= rh
+hUri :: HttpM Request m => (Uri -> m a) -> m a
+hUri rh = request (getM asUri) >>= rh
 
 -- | Like `hFileResource` but uses the path of the current request URI.
 

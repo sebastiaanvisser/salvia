@@ -5,14 +5,14 @@ import Data.Map
 import Network.Protocol.Http.Data
 import Network.Protocol.Http.Status
 
-instance Show (HTTP Request) where
-  showsPrec _ (HTTP (Request m u) v hs) =
+instance Show (Http Request) where
+  showsPrec _ (Http (Request m u) v hs) =
       shows m . ss " " . ss u . ss " "
     . shows v . eol
     . shows hs . eol . eol
 
-instance Show (HTTP Response) where
-  showsPrec _ (HTTP (Response s) v hs) =
+instance Show (Http Response) where
+  showsPrec _ (Http (Response s) v hs) =
       shows v . ss " "
     . maybe (ss "Unknown status") shows (lookupR s statusCodes)
     . ss " " . shows s . eol

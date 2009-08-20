@@ -25,19 +25,19 @@ import Text.Parsec.Prim (Stream, ParsecT)
 
 -- | Parse a string as an HTTP request message. This parser is very forgiving.
 
-parseRequest :: String -> Either ParseError (HTTP Request)
+parseRequest :: String -> Either ParseError (Http Request)
 parseRequest = parse pRequest ""
 
 -- | Parse a string as an HTTP request message. This parser is very forgiving.
 
-parseResponse :: String -> Either ParseError (HTTP Response)
+parseResponse :: String -> Either ParseError (Http Response)
 parseResponse = parse pResponse ""
 
 -- | Parsec parser to parse the header part of an HTTP request.
 
-pRequest :: Stream s m Char => ParsecT s u m (HTTP Request)
+pRequest :: Stream s m Char => ParsecT s u m (Http Request)
 pRequest =
-      (\m u v h -> HTTP (Request m u) v h)
+      (\m u v h -> Http (Request m u) v h)
   <$> (pMethod <* many1 (oneOf ls))
   <*> (many1 (noneOf ws) <* many1 (oneOf ls))
   <*> (pVersion <* eol)
@@ -45,9 +45,9 @@ pRequest =
 
 -- | Parsec parser to parse the header part of an HTTP response.
 
-pResponse :: Stream s m Char => ParsecT s u m (HTTP Response)
+pResponse :: Stream s m Char => ParsecT s u m (Http Response)
 pResponse =
-      (\v s h -> HTTP (Response (statusFromCode $ read s)) v h)
+      (\v s h -> Http (Response (statusFromCode $ read s)) v h)
   <$> (pVersion <* many1 (oneOf ls))
   <*> (many1 digit <* many1 (oneOf ls) <* many1 (noneOf lf) <* eol)
   <*> (pHeaders <* eol)
@@ -67,7 +67,7 @@ pHeaders = Headers <$> p
 pVersion :: Stream s m Char => ParsecT s u m Version
 pVersion = 
       (\h l -> Version (ord h - ord '0') (ord l  - ord '0'))
-  <$> (string "HTTP/" *> digit)
+  <$> (istring "HTTP/" *> digit)
   <*> (char '.'       *> digit)
 
 -- | Parsec parser to parse an HTTP method. Parses arbitrary method but

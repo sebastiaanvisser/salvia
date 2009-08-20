@@ -1,13 +1,15 @@
-Http iso HTTP, Uri is URI ??
-proxy?
-cgi?
-security: drop request for different hosts:ports
-streaming big files?
-standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
-cleanup Environment mess: after/before/wrapper/etc...
-server running on multiple TCP ports
-remove -----------
 comet?
 IPv6?
+proxy?
+cgi?
+
+server running on multiple TCP ports
+standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
+security: drop request for different hosts:ports
+
+streaming big files?
 get a good notion of all true IO actions (SocketM) and create debug error catcher.
+cleanup Environment mess: after/before/wrapper/etc...
+
+remove -----------
 

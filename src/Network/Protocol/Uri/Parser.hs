@@ -14,10 +14,10 @@ import Safe
 import Text.Parsec hiding (many, (<|>))
 import Text.Parsec.Prim (Stream, ParsecT)
 
-host :: URI :-> String
+host :: Uri :-> String
 host = (show, either (const mkHost) id . parseHost) `lmap` (_host % authority)
 
-path :: URI :-> FilePath
+path :: Uri :-> FilePath
 path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _path
 
 -- deriving instance Show Domain
@@ -25,20 +25,20 @@ path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _pa
 -- deriving instance Show IPv4
 -- deriving instance Show Path
 -- deriving instance Show Host
--- deriving instance Show URI
+-- deriving instance Show Uri
 
-toURI :: String -> URI
-toURI = either (const mkURI) id . parseURI
+toUri :: String -> Uri
+toUri = either (const mkUri) id . parseUri
 
-{- | Parse string into a `URI`. -}
+{- | Parse string into a `Uri`. -}
 
-parseURI :: String -> Either ParseError URI
-parseURI = parse pUriReference ""
+parseUri :: String -> Either ParseError Uri
+parseUri = parse pUriReference ""
 
-{- | Parse string into a `URI` and only accept absolute URIs. -}
+{- | Parse string into a `Uri` and only accept absolute Uri. -}
 
-parseAbsoluteURI :: String -> Either ParseError URI
-parseAbsoluteURI = parse pAbsoluteURI ""
+parseAbsoluteUri :: String -> Either ParseError Uri
+parseAbsoluteUri = parse pAbsoluteUri ""
 
 {- | Parse string into a `Authority` object. -}
 
@@ -88,8 +88,8 @@ pHex = (\a b -> a:b:[])
 -- 3.  Syntax Components
 
 -- With the hier-part integrated.
-pUri :: Stream s m Char => ParsecT s u m URI
-pUri = (\a (b,c) d e -> URI False a b c d e)
+pUri :: Stream s m Char => ParsecT s u m Uri
+pUri = (\a (b,c) d e -> Uri False a b c d e)
   <$> (pScheme <* string ":")
   <*> (ap <|> p)
   <*> option "" (string "?" *> pQuery)
@@ -231,25 +231,25 @@ pPchar = choice [
 
 -- 4.1.  URI Reference
 
-pUriReference :: Stream s m Char => ParsecT s u m URI
-pUriReference = try pAbsoluteURI <|> pRelativeRef
+pUriReference :: Stream s m Char => ParsecT s u m Uri
+pUriReference = try pAbsoluteUri <|> pRelativeRef
 
 -- 4.2.  Relative Reference
 
 -- With the relative-part integrated.
-pRelativeRef :: Stream s m Char => ParsecT s u m URI
+pRelativeRef :: Stream s m Char => ParsecT s u m Uri
 pRelativeRef = ($)
   <$> (try pRelativePart
-  <|> ((URI True mkScheme mkAuthority)
+  <|> ((Uri True mkScheme mkAuthority)
   <$> (pPathAbsolute <|> pPathRootless <|> pPathEmpty)))
   <*> option "" (string "?" *> pQuery)
   <*> option "" (string "#" *> pFragment)
 
-pRelativePart :: Stream s m Char => ParsecT s u m (Query -> Fragment -> URI)
-pRelativePart = (URI True mkScheme) <$> (string "//" *> pAuthority) <*> pPathAbempty
+pRelativePart :: Stream s m Char => ParsecT s u m (Query -> Fragment -> Uri)
+pRelativePart = (Uri True mkScheme) <$> (string "//" *> pAuthority) <*> pPathAbempty
 
 -- 4.3.  Absolute URI
 
-pAbsoluteURI :: Stream s m Char => ParsecT s u m URI
-pAbsoluteURI = pUri
+pAbsoluteUri :: Stream s m Char => ParsecT s u m Uri
+pAbsoluteUri = pUri
 

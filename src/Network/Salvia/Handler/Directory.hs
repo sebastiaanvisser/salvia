@@ -22,7 +22,7 @@ filesystem.
 
 hDirectoryResource :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 hDirectoryResource dirName =
-  do u <- request (getM asURI)
+  do u <- request (getM asUri)
      let p = lget path u
      if (null p) || last p /= '/'
        then hRedirect (show $ lmod path (++"/") u)
@@ -37,7 +37,7 @@ hDirectory = hResource hDirectoryResource
 
 dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 dirHandler dirName =
-  do p <- request (getM (path % asURI))
+  do p <- request (getM (path % asUri))
      filenames <- liftIO $ getDirectoryContents dirName
      processed <- liftIO $ mapM (processFilename dirName) (sort filenames)
      let b = listing p processed

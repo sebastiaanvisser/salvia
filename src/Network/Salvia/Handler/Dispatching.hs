@@ -37,10 +37,10 @@ handler will be invoked, otherwise the second handler will be used.
 -}
 
 hDispatch
-  :: (MonadState s m, Monad n)
-  => (m b -> n b) -> (s :-> b) -> (t -> b -> Bool) -> t -> n c -> n c -> n c
-hDispatch d f match a handler _default =
-  do ctx <- d (getM f)
+  :: forall a b c d m. HttpM d m => d -> (Http d :-> b) -> (c -> b -> Bool) -> c -> m a -> m a -> m a
+hDispatch _ f match a handler _default =
+  do let h = http :: State (Http d) b -> m b
+     ctx <- h (getM f)
      if a `match` ctx
        then handler
        else _default
@@ -59,14 +59,14 @@ Like the `hDispatch` but always dispatches on a (part of) the `HTTP
 Request' part of the context.
 -}
 
-hRequestDispatch :: HttpM Request m => (HTTP Request :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
-hRequestDispatch = hDispatch request
+hRequestDispatch :: HttpM Request m => (Http Request :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
+hRequestDispatch = hDispatch forRequest
 
 {- |
 Like the `hDispatch` but always dispatches on a (part of) the `HTTP
 Response' part of the context.
 -}
 
-hResponseDispatch :: HttpM Response m => (HTTP Response :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
-hResponseDispatch = hDispatch response
+hResponseDispatch :: HttpM Response m => (Http Response :-> b) -> (t -> b -> Bool) -> Dispatcher t m c
+hResponseDispatch = hDispatch forResponse
 

@@ -47,8 +47,8 @@ data Context c p = Context
   { _config   :: c             -- ^ The client or server configuration.
   , _payload  :: p             -- ^ Connection wide payload.
                                
-  , _request  :: HTTP Request  -- ^ The HTTP request header.
-  , _response :: HTTP Response -- ^ The HTTP response header.
+  , _request  :: Http Request  -- ^ The HTTP request header.
+  , _response :: Http Response -- ^ The HTTP response header.
                                
   , _rawSock  :: Socket        -- ^ The raw socket for the connection with the other endpoint. 
   , _sock     :: Handle        -- ^ The socket handle for the connection with the other endpoint.
@@ -65,8 +65,8 @@ queue    :: Context c p :-> SendQueue
 peer     :: Context c p :-> SockAddr
 rawSock  :: Context c p :-> Socket
 sock     :: Context c p :-> Handle
-request  :: Context c p :-> HTTP Request
-response :: Context c p :-> HTTP Response
+request  :: Context c p :-> Http Request
+response :: Context c p :-> Http Response
 
 {- |
 Create and default server context with the specified server configuration,
