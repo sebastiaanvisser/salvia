@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.ExtensionDispatcher {- doc ok -}
+module Network.Salvia.Handler.Extension {- doc ok -}
   ( hExtension
   , hExtensionRouter
   )

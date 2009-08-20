@@ -14,7 +14,7 @@ import Network.Salvia.Handler.Directory
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
-import Network.Salvia.Handler.MethodRouter
+import Network.Salvia.Handler.Method
 import System.IO
 import qualified Data.ByteString.Lazy as B
 

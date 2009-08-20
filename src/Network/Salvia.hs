@@ -1,4 +1,4 @@
-module Network.Salvia 
+module Network.Salvia              {- doc ok -}
   ( module Network.Salvia.Httpd
   , module Network.Salvia.Handlers
   )

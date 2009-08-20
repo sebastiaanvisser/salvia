@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.PathRouter {- doc ok -}
+module Network.Salvia.Handler.Path {- doc ok -}
   ( hPath
   , hPathRouter
   , hPrefix

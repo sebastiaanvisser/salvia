@@ -1,4 +1,4 @@
-module Network.Protocol.Http.Status where {- doc ko -}
+module Network.Protocol.Http.Status where {- doc ok -}
 
 import Data.Bimap
 import Data.Maybe

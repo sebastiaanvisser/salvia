@@ -72,24 +72,24 @@ Library
                     Network.Salvia.Core.Handler
                     Network.Salvia.Core.Server
                     Network.Salvia.Handler.Banner
+                    Network.Salvia.Handler.Body
                     Network.Salvia.Handler.CGI
                     Network.Salvia.Handler.Close
-                    Network.Salvia.Handler.Body
                     Network.Salvia.Handler.Cookie
                     Network.Salvia.Handler.Counter
                     Network.Salvia.Handler.Directory
                     Network.Salvia.Handler.Dispatching
                     Network.Salvia.Handler.Environment
                     Network.Salvia.Handler.Error
-                    Network.Salvia.Handler.ExtensionDispatcher
+                    Network.Salvia.Handler.Extension
                     Network.Salvia.Handler.File
                     Network.Salvia.Handler.FileSystem
                     Network.Salvia.Handler.Head
                     Network.Salvia.Handler.Log
                     Network.Salvia.Handler.Login
-                    Network.Salvia.Handler.MethodRouter
+                    Network.Salvia.Handler.Method
                     Network.Salvia.Handler.Parser
-                    Network.Salvia.Handler.PathRouter
+                    Network.Salvia.Handler.Path
                     Network.Salvia.Handler.Printer
                     Network.Salvia.Handler.Put
                     Network.Salvia.Handler.Redirect
