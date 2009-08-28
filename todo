@@ -15,5 +15,3 @@ get a good notion of all true IO actions (SocketM) and create debug error catche
 cleanup Environment mess: after/before/wrapper/etc...
 what is up with relative URIs?
 
-remove -----------
-

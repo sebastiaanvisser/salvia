@@ -68,7 +68,7 @@ import Control.Applicative
 import Data.List (intercalate)
 import System.Environment (getEnvironment)
 
---------[ ansi escape sequence generation ]------------------------------------
+-- Ansi escape sequence generation.
 
 -- Generic function for producing ANSI escape sequences.
 esc :: String -> [String] -> String -> String
@@ -123,7 +123,7 @@ blink     = ("5":)
 inverse   = ("7":)
 invisible = ("8":)
 
---------[ ansi color listing ]-------------------------------------------------
+-- Ansi color listing.
 
 data Color =
     Black
@@ -149,7 +149,7 @@ num Cyan    = 6
 num White   = 7
 num Reset   = 9
 
---------[ shortcut functions for common actions ]------------------------------
+-- Shortcut functions for common actions.
 
 -- Reset all color and style information.
 reset :: String
@@ -195,7 +195,7 @@ cyanBg    = clr $ bg Cyan
 whiteBg   = clr $ bg White
 resetBg   = clr $ bg Reset
 
---------[ terminal geometry ]--------------------------------------------------
+-- Terminal geometry.
 
 -- Try to read terminal width from environment variable.
 width :: IO Int

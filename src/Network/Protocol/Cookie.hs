@@ -1,6 +1,4 @@
-{- |
-For more information: http://www.ietf.org/rfc/rfc2109.txt
--}
+-- | For more information: http://www.ietf.org/rfc/rfc2109.txt
 
 module Network.Protocol.Cookie (
     Cookie (..)
@@ -24,10 +22,8 @@ import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
 import qualified Data.Map as M
 
 
-{- |
-The `Cookie` data type containg one key/value pair with all the (potentially
-optional) meta-data.
--}
+-- | The `Cookie` data type containg one key/value pair with all the
+-- (potentially optional) meta-data.
 
 data Cookie =
   Cookie {
@@ -45,7 +41,7 @@ data Cookie =
   , version    :: Int
   }
 
-{- | Create an empty cookie. -}
+-- | Create an empty cookie.
 
 empty :: Cookie
 empty = Cookie {
@@ -63,33 +59,30 @@ empty = Cookie {
   , version    = 0
   }
 
-{- |
-A collection of multiple cookies. These can all be set in one single HTTP
-/Set-Cookie/ header field.
--}
+-- | A collection of multiple cookies. These can all be set in one single HTTP
+-- /Set-Cookie/ header field.
 
 type Cookies = M.Map String Cookie
 
-{- |
-Convert a list of cookies into a cookie mapping. The name will be used as the
-key, the cookie itself as the value.
--}
+-- | Convert a list of cookies into a cookie mapping. The name will be used as
+-- the key, the cookie itself as the value.
 
 cookies :: [Cookie] -> Cookies
 cookies = M.fromList . map (\a -> (name a, a))
 
-{- | Case-insensitive way of getting a cookie out of a collection by name. -}
+-- | Case-insensitive way of getting a cookie out of a collection by name.
 
 cookie :: String -> Cookies -> Maybe Cookie
 cookie n = M.lookup (map toLower n)
 
--------[ cookie show instance ]------------------------------------------------
+-- Cookie show instance.
 
 instance Show Cookie where
   show = flip showsCookie ""
 
 -- Show a semicolon separated list of attribute/value pairs. Only meta pairs
 -- with significant values will be pretty printed.
+
 showsCookie :: Cookie -> ShowS
 showsCookie c =
     pair     (name c)     (value c)
@@ -117,7 +110,7 @@ showsCookie c =
     optval 0     = Nothing
     optval i     = Just (show i)
 
-{- | Show multiple cookies, pretty printed using a comma separator. -}
+-- | Show multiple cookies, pretty printed using a comma separator.
 
 showCookies :: Cookies -> String
 showCookies = ($"")
@@ -125,7 +118,7 @@ showCookies = ($"")
   . map (shows . snd)
   . M.toList
 
--------[ cookie parser ]-------------------------------------------------------
+-- Cookie parser.
 
 {- |
 Parse a set of cookie values and turn this into a collection of real cookies.
