@@ -4,6 +4,7 @@ module Network.Protocol.Uri.Data where
 import Prelude hiding ((.), id)
 import Control.Category
 import Data.Record.Label
+import Data.Maybe
 import Network.Protocol.Uri.Encode
 
 type Scheme      = String
@@ -67,19 +68,36 @@ _query :: Uri :-> Query
 
 authority :: Uri :-> Authority
 
--- | Access domain part of the URI.
+-- | Access domain part of the URI, returns `Nothing' when the host is a
+-- regname or IP-address.
 
-domain :: Uri :-> Domain
-domain = _domain  . _host . authority
+domain :: Uri :-> Maybe Domain
+domain = (f, Hostname . fromJust) `lmap` (_host . authority)
+  where
+    f (Hostname d) = Just d
+    f _            = Nothing
+
+-- | Access regname part of the URI, returns `Nothing' when the host is a
+-- domain or IP-address.
+
+regname :: Uri :-> Maybe RegName
+regname = (f, RegName . fromJust) `lmap` (_host . authority)
+  where
+    f (RegName r) = Just r
+    f _           = Nothing
+
+-- | Access IPv4-address part of the URI, returns `Nothing' when the host is a
+-- domain or regname.
+
+ipv4 :: Uri :-> Maybe IPv4
+ipv4 = (f, IP . fromJust) `lmap` (_host . authority)
+  where
+    f (IP i) = Just i
+    f _      = Nothing
 
 -- | Access raw (URI-encoded) fragment.
 
 _fragment :: Uri :-> Fragment
-
--- | Access IPv4-address part of the URI, fails for non-IPv4 hosts.
-
-ipv4 :: Uri :-> IPv4
-ipv4 = _ipv4 . _host . authority
 
 -- | Access the port number part of the URI when available.
 
@@ -97,11 +115,6 @@ query = encoded . _query
 
 fragment :: Uri :-> Fragment
 fragment = encoded . _fragment
-
--- | Access regname part of the URI, fails for non-regname hosts.
-
-regname :: Uri :-> RegName
-regname = _regname . _host . authority
 
 -- | Is a URI relative?
 
@@ -121,7 +134,7 @@ segments = _segments . _path
 -- | Access the userinfo part of the URI. The userinfo contains an optional
 -- username and password or some other credentials.
 
-userinfo :: Uri :-> UserInfo
+userinfo :: Uri :-> String
 userinfo = _userinfo . authority
 
 -- | Constructors for making empty URI.

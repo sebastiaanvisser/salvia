@@ -15,14 +15,7 @@ main =
        (hDefaultEnv myHandler)
        ()
 
-myHandler
-  :: (HttpM Response m,
-      MonadIO m,
-      HttpM Request m,
-      SendM m,
-      BodyM Request m,
-      ConfigM m) =>
-     m ()
+myHandler :: (HttpM Response m, MonadIO m, HttpM Request m, SendM m, BodyM Request m, ConfigM m) => m ()
 myHandler = 
   hPortRouter
     [ ( 8080

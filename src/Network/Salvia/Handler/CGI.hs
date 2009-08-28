@@ -21,7 +21,7 @@ import System.Process
 import Text.Parsec hiding (many, (<|>))
 import qualified Data.ByteString.Lazy as L
 
--- | Handler to run CGI scripts.
+-- | Handler to run CGI scripts. Not entirely finished.
 
 hCGI :: (MonadIO m, HttpM Request m, BodyM Request m, HttpM Response m, SendM m, ConfigM m) => FilePath -> m ()
 hCGI fn =
@@ -56,6 +56,7 @@ hCGI fn =
            : headerDecls hdrs
 
      -- Start up the CGI script with the appropriate environment variables.
+     -- todo: what to do with stderr? log?
      (inp, out, _, pid) <- liftIO (runInteractiveProcess fn [] Nothing $ Just envs)
 
      -- Read the request body and fork a thread to spool the body to the CGI
