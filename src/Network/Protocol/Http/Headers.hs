@@ -1,10 +1,11 @@
 module Network.Protocol.Http.Headers where {- doc ok -}
 
+import Control.Category
 import Control.Monad
 import Data.Record.Label
-import Network.Protocol.Http.Parser
 import Network.Protocol.Http.Data
-import Prelude hiding (lookup)
+import Network.Protocol.Uri.Query
+import Prelude hiding ((.), id)
 import Safe
 
 {- | Access the /Content-Length/ header field. -}

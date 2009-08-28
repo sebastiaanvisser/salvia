@@ -52,12 +52,6 @@ normalize p  = norm_rev (reverse p)
     rest_dir  0 q (h:t   ) = rest_dir   0   (  h:q)  t
     rest_dir  n q (_:t   ) = rest_dir   n        q   t
 
-
-{- | Make a path relative by removing the first slash when there is one. -}
-
-mkPathRelative :: FilePath -> FilePath
-mkPathRelative = dropWhile (=='/')
-
 {- | Jail a filepath within a jail directory. -}
 
 jail

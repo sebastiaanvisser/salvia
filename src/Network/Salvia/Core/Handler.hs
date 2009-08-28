@@ -1,6 +1,7 @@
 module Network.Salvia.Core.Handler where
 
 import Control.Applicative
+import Control.Category
 import Control.Monad.State
 import Data.Monoid
 import Data.Record.Label
@@ -9,6 +10,7 @@ import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Printer
+import Prelude hiding ((.), id)
 import Safe
 import System.IO
 import qualified Data.ByteString.Lazy as B
@@ -30,11 +32,11 @@ instance Alternative (Handler c p) where
 
 instance MonadPlus (Handler c p) where
   mzero = Handler $
-    do status % response =: BadRequest
+    do status . response =: BadRequest
        return (error "mzero/empty")
   a `mplus` b =
     do r <- a
-       s <- getM (status % response)
+       s <- getM (status . response)
        if statusFailure s
          then A.http (put emptyResponse) >> empty >> b
          else return r

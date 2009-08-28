@@ -13,11 +13,13 @@ module Network.Salvia.Handler.Rewrite {- doc ok -}
 where
 
 import Control.Applicative
+import Control.Category
 import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
+import Prelude hiding ((.), id)
 
 {- |
 Run a handler in a local environment in which the `HTTP' `Request' has
@@ -41,17 +43,17 @@ hRewrite = hLocalRequest asUri
 {- | Run handler in a context with a modified host. -}
 
 hRewriteHost :: HttpM Request m => (String -> String) -> m a -> m a
-hRewriteHost = hLocalRequest (host % asUri)
+hRewriteHost = hLocalRequest (host . asUri)
 
 {- | Run handler in a context with a modified path. -}
 
 hRewritePath :: HttpM Request m => (FilePath -> FilePath) -> m a -> m a
-hRewritePath = hLocalRequest (path % asUri)
+hRewritePath = hLocalRequest (path . asUri)
 
 {- | Run handler in a context with a modified file extension. -}
 
 hRewriteExt :: HttpM Request m => (Maybe String -> Maybe String) -> m a -> m a
-hRewriteExt = hLocalRequest (extension % path % asUri)
+hRewriteExt = hLocalRequest (extension . path . asUri)
 
 {- |
 Run handler in a context with a modified path. The specified prefix will be

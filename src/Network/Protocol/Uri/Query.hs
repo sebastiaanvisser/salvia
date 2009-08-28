@@ -1,39 +1,48 @@
 module Network.Protocol.Uri.Query where
 
+import Prelude hiding ((.), id)
+import Control.Category
+import Data.Char
+import Data.List
+import Data.List.Split 
 import Data.Record.Label
-import Control.Applicative hiding (empty)
+import Misc.Text
 import Network.Protocol.Uri.Data
-import Text.Parsec hiding (many, (<|>))
-import Text.Parsec.Prim (Stream, ParsecT)
+import Network.Protocol.Uri.Encode
 
 type Parameters = [(String, Maybe String)]
 
-pQueryParams :: Stream s m Char => ParsecT s u m Parameters
-pQueryParams = 
-      filter (not . null . fst)
-  <$> sepBy pParam (char '&')
+-- | Fetch the query parameters form a URI.
 
-pParam :: Stream s m Char => ParsecT s u m (String, Maybe String)
-pParam = (,)
-  <$> many (noneOf "=&")
-  <*> pMaybe (char '=' *> (translateParam <$> many (noneOf "&")))
-      
-pMaybe :: Stream s m t => ParsecT s u m a -> ParsecT s u m (Maybe a)
-pMaybe a = option Nothing (Just <$> a)
+queryParams :: Uri :-> Parameters
+queryParams = params . _query
 
-{- | Parse a pre-decoded query string into key value pairs parameters. -}
+-- | Generic label to parse a string as query parameters.
 
-parseQueryParams :: String -> Either ParseError Parameters
-parseQueryParams = parse pQueryParams  ""
+params :: String :-> Parameters
+params = keyValues "&" "=" . ((from, to) `lmap` encoded)
+  where from = intercalate " " . splitOn "+"
+        to   = intercalate "+" . splitOn " "
 
-{- | Fetch the query parameters form a URI. -}
+-- | Generic label for accessing key value pairs encoded in a string.
 
-queryParams :: Uri -> Parameters
-queryParams = either (const []) id . parseQueryParams . lget query
+keyValues :: String -> String -> String :-> Parameters
+keyValues sep eqs = mkLabel parser (\a _ -> printer a)
+  where parser =
+            filter (\(a, b) -> not (null a) || b /= Nothing && b /= Just "")
+          . map (f . splitOn eqs)
+          . concat
+          . map (splitOn sep)
+          . lines
+          where f []     = ("", Nothing)
+                f [x]    = (trim x, Nothing)
+                f (x:xs) = (trim x, Just . trim $ intercalate eqs xs)
+        printer = intercalate sep . map (\(a, b) -> a ++ maybe "" (eqs ++) b)
 
--- Translate special characters in a parameter.
-translateParam :: String -> String
-translateParam []       = []
-translateParam ('+':xs) = ' ' : translateParam xs
-translateParam (x:xs)   = x   : translateParam xs
+-- | Generic label for accessing lists of values encoded in a string.
+
+values :: String -> String :-> [String]
+values sep = mkLabel parser (\a _ -> printer a)
+  where parser = filter (not . null) . concat . map (splitOn sep) . lines
+        printer = intercalate sep
 

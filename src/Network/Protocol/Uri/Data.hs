@@ -1,12 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Network.Protocol.Uri.Data where
 
+import Prelude hiding ((.), id)
+import Control.Category
 import Data.Record.Label
 import Network.Protocol.Uri.Encode
-
-{- | See rfc2396 for more info. -}
-
---- URI data type definition. 
 
 type Scheme      = String
 type RegName     = String
@@ -46,7 +44,7 @@ data Uri = Uri
   , _authority :: Authority
   , __path     :: Path
   , __query    :: Query
-  , _fragment  :: Fragment
+  , __fragment :: Fragment
   }
   deriving (Eq, Ord)
 
@@ -60,73 +58,113 @@ _port     :: Authority :-> Maybe Port
 _userinfo :: Authority :-> UserInfo
 _segments :: Path :-> [PathSegment]
 _path     :: Uri :-> Path
-_query    :: Uri :-> Query
+
+-- | Access raw (URI-encoded) query.
+
+_query :: Uri :-> Query
+
+-- | Access authority part of the URI.
 
 authority :: Uri :-> Authority
-domain    :: Uri :-> Domain
-fragment  :: Uri :-> Fragment
-ipv4      :: Uri :-> IPv4
-port      :: Uri :-> Maybe Port
-query     :: Uri :-> Query
-regname   :: Uri :-> String
-relative  :: Uri :-> Bool
-scheme    :: Uri :-> Scheme
-segments  :: Uri :-> [PathSegment]
-userinfo  :: Uri :-> UserInfo
 
--- Public label based on private labels.
+-- | Access domain part of the URI.
 
-domain    = _domain   % _host % authority
-regname   = _regname  % _host % authority
-ipv4      = _ipv4     % _host % authority
-userinfo  = _userinfo % authority
-port      = _port     % authority
-segments  = _segments % _path
-query     = (decode, encode) `lmap` _query
+domain :: Uri :-> Domain
+domain = _domain  . _host . authority
 
--- Creating, selection and modifying URIs.
+-- | Access raw (URI-encoded) fragment.
 
-{- | Constructors for making empty URI. -}
+_fragment :: Uri :-> Fragment
+
+-- | Access IPv4-address part of the URI, fails for non-IPv4 hosts.
+
+ipv4 :: Uri :-> IPv4
+ipv4 = _ipv4 . _host . authority
+
+-- | Access the port number part of the URI when available.
+
+port :: Uri :-> Maybe Port
+port = _port . authority
+
+-- | Access the query part of the URI, the part that follows the ?. The query
+-- will be properly decoded when reading and encoded when writing.
+
+query :: Uri :-> Query
+query = encoded . _query
+
+-- | Access the fragment part of the URI, the part that follows the #. The
+-- fragment will be properly decoded when reading and encoded when writing.
+
+fragment :: Uri :-> Fragment
+fragment = encoded . _fragment
+
+-- | Access regname part of the URI, fails for non-regname hosts.
+
+regname :: Uri :-> RegName
+regname = _regname . _host . authority
+
+-- | Is a URI relative?
+
+relative :: Uri :-> Bool
+
+-- | Access the scheme part of the URI. A scheme is probably the protocol
+-- indicator like /http/, /ftp/, etc.
+
+scheme :: Uri :-> Scheme
+
+-- | Access the path part of the URI as a list of path segments. The segments
+-- will still be URI-encoded.
+
+segments :: Uri :-> [PathSegment]
+segments = _segments . _path
+
+-- | Access the userinfo part of the URI. The userinfo contains an optional
+-- username and password or some other credentials.
+
+userinfo :: Uri :-> UserInfo
+userinfo = _userinfo . authority
+
+-- | Constructors for making empty URI.
 
 mkUri :: Uri
 mkUri = Uri False mkScheme mkAuthority mkPath mkQuery mkFragment
 
-{- | Constructors for making empty `Scheme`. -}
+-- | Constructors for making empty `Scheme`.
 
 mkScheme :: Scheme
 mkScheme = ""
 
-{- | Constructors for making empty `Path`. -}
+-- | Constructors for making empty `Path`.
 
 mkPath :: Path
 mkPath = Path []
 
-{- | Constructors for making empty `Authority`. -}
+-- | Constructors for making empty `Authority`.
 
 mkAuthority :: Authority
 mkAuthority = Authority "" mkHost mkPort
 
-{- | Constructors for making empty `Query`. -}
+-- | Constructors for making empty `Query`.
 
 mkQuery :: Query
 mkQuery = ""
 
-{- | Constructors for making empty `Fragment`. -}
+-- | Constructors for making empty `Fragment`.
 
 mkFragment :: Fragment
 mkFragment = ""
 
-{- | Constructors for making empty `UserInfo`. -}
+-- | Constructors for making empty `UserInfo`.
 
 mkUserinfo :: UserInfo
 mkUserinfo = ""
 
-{- | Constructors for making empty `Host`. -}
+-- | Constructors for making empty `Host`.
 
 mkHost :: Host
 mkHost = Hostname (Domain [])
 
-{- | Constructors for making empty `Port`. -}
+-- | Constructors for making empty `Port`.
 
 mkPort :: Maybe Port
 mkPort = Nothing

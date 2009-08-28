@@ -14,21 +14,13 @@ module Network.Protocol.Http.Parser {- doc ok -}
   , pVersion
   , pMethod
 
-  -- * Helper labels for accessing lists and maps encoded in strings.
-
-  , keyValues
-  , values
-
   ) where
 
 import Control.Applicative hiding (empty)
 import Control.Monad
 import Data.Char
-import Data.List (intercalate)
-import Data.List.Split hiding (oneOf)
+import Data.List hiding (insert)
 import Data.Map (insert, empty)
-import Data.Record.Label
-import Misc.Text
 import Network.Protocol.Http.Data
 import Network.Protocol.Http.Status
 import Text.Parsec hiding (many, (<|>))
@@ -111,26 +103,4 @@ eol = () <$ ((char '\r' <* pMaybe (char '\n')) <|> char '\n')
 
 istring :: Stream s m Char => String -> ParsecT s u m String
 istring s = sequence (map (\c -> satisfy (\d -> toUpper c == toUpper d)) s)
-
--- | Label for accessing key value pairs encoded in a string.
-
-keyValues :: String -> String -> String :-> [(String, Maybe String)]
-keyValues sep eqs = mkLabel parser (\a _ -> printer a)
-  where parser =
-            filter (\(a, b) -> not (null a) || b /= Nothing && b /= Just "")
-          . map (f . splitOn eqs)
-          . concat
-          . map (splitOn sep)
-          . lines
-          where f []     = ("", Nothing)
-                f [x]    = (trim x, Nothing)
-                f (x:xs) = (trim x, Just . trim $ intercalate eqs xs)
-        printer = intercalate sep . map (\(a, b) -> a ++ maybe "" (eqs ++) b)
-
--- | Label for accessing lists of values encoded in a string.
-
-values :: String -> String :-> [String]
-values sep = mkLabel parser (\a _ -> printer a)
-  where parser = filter (not . null) . concat . map (splitOn sep) . lines
-        printer = intercalate sep
 

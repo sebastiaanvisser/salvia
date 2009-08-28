@@ -17,14 +17,14 @@ to the response headers.
 
 hBanner
   :: (MonadIO m, HttpM Response m)
-  => String -- ^ The HTTP server name.
+  => String -- ^ The name to include as the /Server/ header line.
   -> m ()
-hBanner sv = do
-  dt <- liftIO $
-    do zone <- getCurrentTimeZone
-       time <- utcToLocalTime zone <$> getCurrentTime
-       return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" time
-  response $
-    do date   =: Just dt
-       server =: Just sv
+hBanner sv =
+  do dt <- liftIO $
+       do zone <- getCurrentTimeZone
+          time <- utcToLocalTime zone <$> getCurrentTime
+          return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" time
+     response $
+       do date   =: Just dt
+          server =: Just sv
 

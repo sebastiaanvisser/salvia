@@ -14,7 +14,7 @@ module Network.Salvia.Handler.Body {- doc ok -}
 where
 
 import Data.Maybe
-import Data.Encoding hiding (decode)
+import Data.Encoding
 import Control.Applicative
 import Control.Monad.State
 import Data.Record.Label
@@ -89,8 +89,7 @@ parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
 hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
-hParameters d def =
-  (>>= either (const Nothing) Just . parseQueryParams . decode) <$> hBody d def
+hParameters d def = fmap (lget params) <$> hBody d def
 
 -- | Like `hParameters' but specifically for `HTTP' `Request's.
 

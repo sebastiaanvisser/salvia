@@ -1,3 +1,4 @@
+{- | Serving parts of the local file system. -}
 module Network.Salvia.Handler.FileSystem {- doc ok -}
   ( hFileSystem
   , hFileSystemNoIndexes
@@ -5,15 +6,17 @@ module Network.Salvia.Handler.FileSystem {- doc ok -}
   )
 where
 
+import Control.Category
 import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Protocol.Uri (jail, path)
+import Network.Protocol.Uri
+import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Directory
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.File
-import Network.Salvia.Core.Aspects
-import System.Directory (doesDirectoryExist)
+import Prelude hiding ((.), id)
+import System.Directory
 
 {- |
 Dispatch based on file type; regular files or directories. The first handler
@@ -27,17 +30,23 @@ parts of the file system.
 
 hFileTypeDispatcher
   :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
-  => (FilePath -> m ()) -> (FilePath -> m ()) -> FilePath -> m ()
+  => (FilePath -> m ())  -- ^ Handler to invoke in case of directory.
+  -> (FilePath -> m ())  -- ^ Handler to invoke in case of regular files.
+  -> FilePath            -- ^ Directory to serve.
+  -> m ()
 hFileTypeDispatcher hdir hfile dir =
-  request (getM (path % asUri)) >>=
-    hJailedDispatch dir hdir hfile . (dir ++)
+  do p <- request $ getM (path . asUri) 
+     hJailedDispatch dir hdir hfile (dir /+ p)
 
 {- |
 Serve single directory by combining the `hDirectoryResource` and
 `hFileResource` handlers in the `hFileTypeDispatcher`.
 -}
 
-hFileSystem :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
+hFileSystem
+  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  => FilePath  -- ^ Directory to serve.
+  -> m ()
 hFileSystem = hFileTypeDispatcher hDirectoryResource hFileResource
 
 {- |
@@ -45,8 +54,14 @@ Serve single directory like `hFileSystem` but do not show directory indices.
 Instead of an directory index an `Forbidden` response will be created.
 -}
 
-hFileSystemNoIndexes :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
+hFileSystemNoIndexes
+  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  => FilePath  -- ^ Directory to serve.
+  -> m ()
 hFileSystemNoIndexes = hFileTypeDispatcher (const $ hError Forbidden) hFileResource
+
+-- Helper distpatcher that takes care of jailing the request in the specified
+-- file system directory.
 
 hJailedDispatch
   :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)

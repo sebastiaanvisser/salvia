@@ -11,13 +11,15 @@ module Network.Salvia.Handler.File  {- doc ok -}
   )
 where
 
+import Control.Category
 import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Mime
 import Network.Protocol.Uri
-import Network.Salvia.Handler.Error
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Error
+import Prelude hiding ((.), id)
 import System.IO
 
 {- |
@@ -67,7 +69,7 @@ that utilizes the path part of the request URI as the resource identifier.
 -}
 
 hResource :: HttpM Request m => (FilePath -> m a) -> m a
-hResource rh = request (getM (path % asUri)) >>= rh
+hResource rh = request (getM (path . asUri)) >>= rh
 
 {- |
 Turn a handler that is parametrized by a URI into a regular handler that

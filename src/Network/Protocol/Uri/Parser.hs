@@ -2,6 +2,7 @@
 module Network.Protocol.Uri.Parser where
 
 import Control.Applicative hiding (empty)
+import Control.Category
 import Data.Char
 import Data.List (intercalate)
 import Data.Maybe
@@ -10,52 +11,56 @@ import Network.Protocol.Uri.Data
 import Network.Protocol.Uri.Data
 import Network.Protocol.Uri.Encode
 import Network.Protocol.Uri.Printer ()
+import Prelude hiding ((.), id)
 import Safe
 import Text.Parsec hiding (many, (<|>))
 import Text.Parsec.Prim (Stream, ParsecT)
 
+-- | Access the host part of the URI.
+
 host :: Uri :-> String
-host = (show, either (const mkHost) id . parseHost) `lmap` (_host % authority)
+host = (show, either (const mkHost) id . parseHost) `lmap` (_host . authority)
+
+-- | Access the path part of the URI. The query will be properly decoded when
+-- reading and encoded when writing.
 
 path :: Uri :-> FilePath
 path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _path
 
--- deriving instance Show Domain
--- deriving instance Show Authority
--- deriving instance Show IPv4
--- deriving instance Show Path
--- deriving instance Show Host
--- deriving instance Show Uri
+-- | Parse string into a URI and ignore all failures by returning an empty URI
+-- when parsing fails. Can be quite useful in situations that parse errors are
+-- unlikely.
 
 toUri :: String -> Uri
 toUri = either (const mkUri) id . parseUri
 
-{- | Parse string into a `Uri`. -}
+-- | Parse string into a URI.
 
 parseUri :: String -> Either ParseError Uri
 parseUri = parse pUriReference ""
 
-{- | Parse string into a `Uri` and only accept absolute Uri. -}
+-- | Parse string into a URI and only accept absolute URIs.
 
 parseAbsoluteUri :: String -> Either ParseError Uri
 parseAbsoluteUri = parse pAbsoluteUri ""
 
-{- | Parse string into a `Authority` object. -}
+-- | Parse string into an authority.
 
 parseAuthority :: String -> Either ParseError Authority
 parseAuthority = parse pAuthority ""
 
-{- | Parse string into a `Path`. -}
+-- | Parse string into a path.
 
 parsePath :: String -> Either ParseError Path
 parsePath = parse pPath ""
 
-{- | Parse string into a `Host`. -}
+-- | Parse string into a host.
 
 parseHost :: String -> Either ParseError Host
 parseHost = parse pHost ""
 
 -- D.2.  Modifications
+
 pAlpha, pDigit, pAlphanum :: Stream s m Char => ParsecT s u m Char
 pAlpha    = letter
 pDigit    = digit
@@ -77,6 +82,7 @@ pSubDelims :: Stream s m Char => ParsecT s u m Char
 pSubDelims = oneOf "!$&'()*+,;="
 
 -- 2.1.  Percent-Encoding
+
 pPctEncoded :: Stream s m Char => ParsecT s u m String
 pPctEncoded = (:) <$> char '%' <*> pHex
 
@@ -88,6 +94,7 @@ pHex = (\a b -> a:b:[])
 -- 3.  Syntax Components
 
 -- With the hier-part integrated.
+
 pUri :: Stream s m Char => ParsecT s u m Uri
 pUri = (\a (b,c) d e -> Uri False a b c d e)
   <$> (pScheme <* string ":")
@@ -99,10 +106,12 @@ pUri = (\a (b,c) d e -> Uri False a b c d e)
     p  = ((,) mkAuthority) <$> (pPathAbsolute <|> pPathRootless {-<|> pPathEmpty-})
 
 -- 3.1.  Scheme
+
 pScheme :: Stream s m Char => ParsecT s u m Scheme
 pScheme = (:) <$> pAlpha <*> many (pAlphanum <|> oneOf "+_.")
 
 -- 3.2.  Authority
+
 pAuthority :: Stream s m Char => ParsecT s u m Authority
 pAuthority = Authority
   <$> option mkUserinfo (try (pUserinfo <* string "@"))
@@ -110,6 +119,7 @@ pAuthority = Authority
   <*> option Nothing (string ":" *> pPort)
 
 -- 3.2.1.  User Information
+
 pUserinfo :: Stream s m Char => ParsecT s u m String
 pUserinfo = concat <$> many (
       (pure <$> pUnreserved)
@@ -119,6 +129,7 @@ pUserinfo = concat <$> many (
   )
 
 -- 3.2.2.  Host
+
 pHost :: Stream s m Char => ParsecT s u m Host
 pHost = diff <$> pRegName -- <|> RegName <$> pRegName
   where
@@ -174,6 +185,7 @@ pRegName = concat <$> many1 (
 
 -- Not actually part of the rfc3986, but comptability with the rfc2396.
 -- This information can be useful, so why throw away.
+
 pHostname :: Stream s m Char => ParsecT s u m [String]
 pHostname = sepBy (option "" pDomainlabel) (string ".")
 
@@ -181,14 +193,17 @@ pDomainlabel :: Stream s m Char => ParsecT s u m String
 pDomainlabel = intercalate "-" <$> sepBy1 (some pAlphanum) (string "-")
 
 -- 3.2.3.  Port
+
 pPort :: Stream s m Char => ParsecT s u m (Maybe Port)
 pPort = readMay <$> some pDigit
 
 -- 3.4.  Query
+
 pQuery :: Stream s m Char => ParsecT s u m String
 pQuery = concat <$> many (pPchar <|> pure <$> oneOf "/?")
 
 -- 3.5.  Fragment
+
 pFragment :: Stream s m Char => ParsecT s u m String
 pFragment = concat <$> many (pPchar <|> pure <$> oneOf "/?" )
 
@@ -237,6 +252,7 @@ pUriReference = try pAbsoluteUri <|> pRelativeRef
 -- 4.2.  Relative Reference
 
 -- With the relative-part integrated.
+
 pRelativeRef :: Stream s m Char => ParsecT s u m Uri
 pRelativeRef = ($)
   <$> (try pRelativePart

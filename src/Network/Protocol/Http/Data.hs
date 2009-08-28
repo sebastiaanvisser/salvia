@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Network.Protocol.Http.Data where {- doc ok -}
 
+import Control.Category
 import Data.List hiding (lookup)
 import Data.List.Split
 import Data.Map hiding (map)
@@ -8,7 +9,7 @@ import Data.Record.Label
 import Misc.Text
 import Network.Protocol.Http.Status
 import Network.Protocol.Uri
-import Prelude hiding (lookup)
+import Prelude hiding ((.), id, lookup)
 
 {- | List of HTTP request methods. -}
 
@@ -116,12 +117,12 @@ headline :: Http a :-> a
 {- | Label to access the method part of an HTTP request message. -}
 
 method :: Http Request :-> Method
-method = _method % headline
+method = _method . headline
 
 {- | Label to access the URI part of an HTTP request message. -}
 
 uri :: Http Request :-> String
-uri = _uri % headline
+uri = _uri . headline
 
 {- |
 Label to access the URI part of an HTTP request message and access it as a true
@@ -134,7 +135,7 @@ asUri = (toUri, show) `lmap` uri
 {- | Label to access the status part of an HTTP response message. -}
 
 status :: Http Response :-> Status
-status = _status % headline
+status = _status . headline
 
 {- | Normalize the capitalization of an HTTP header key. -}
 

@@ -3,6 +3,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Network.Protocol.Uri (
 
+  -- * URI datatype.
+
     Scheme
   , RegName
   , Port
@@ -13,17 +15,42 @@ module Network.Protocol.Uri (
   , PathSegment
   , Parameters
 
-  , Domain (..)
-  , IPv4 (..)
-  , Path (..)
-  , Host (..)
-  , Authority (..)
-  , Uri (..)
+  , Domain (Domain)
+  , IPv4 (IPv4)
+  , Path (Path)
+  , Host (Hostname, RegName, IP)
+  , Authority (Authority)
+  , Uri (Uri)
 
-  -- * Creating (parts of) URIs.
+  -- * Accessing parts of URIs.
+
+  , relative
+  , scheme
+  , userinfo
+  , authority
+  , host
+  , domain
+  , ipv4
+  , regname
+  , port
+  , path
+  , segments
+  , query
+  , fragment
+
+  -- * More advanced labels.
+
+  , queryParams
+  , params
+  , extension
+
+  -- * Encoding/decoding URI encoded strings.
 
   , encode
   , decode
+  , encoded
+
+  -- * Creating empty URIs.
 
   , mkUri
   , mkScheme
@@ -35,27 +62,6 @@ module Network.Protocol.Uri (
   , mkHost
   , mkPort
 
-  -- * Accessing parts of URIs.
-
-  , domain
-  , regname
-  , ipv4
-  , userinfo
-  , host
-  , port
-  , relative
-  , scheme
-  , authority
-  , path
-  , query
-  , fragment
-
-  -- * Helper labels.
-
-  , segments
-  , _host
-  , _port
-
   -- * Parsing URIs.
 
   , toUri
@@ -65,22 +71,8 @@ module Network.Protocol.Uri (
   , parsePath
   , parseHost
 
-  , pUriReference
-  , pAbsoluteUri
-  , pAuthority
-  , pPath
-  , pHost
-
-  -- * Handling query parameters.
-
-  , parseQueryParams
-  , queryParams
-
   -- * Filename related utilities.
 
-  , extension
-
-  , mkPathRelative
   , mimetype
   , normalize
   , jail

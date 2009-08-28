@@ -1,3 +1,4 @@
+{- | Rendering of HTML directory listings. -}
 module Network.Salvia.Handler.Directory {- doc ok -}
   ( hDirectory
   , hDirectoryResource
@@ -5,6 +6,7 @@ module Network.Salvia.Handler.Directory {- doc ok -}
 where
 
 import Control.Applicative
+import Control.Category
 import Control.Monad.State
 import Data.List (sort)
 import Data.Record.Label
@@ -13,6 +15,7 @@ import Network.Protocol.Uri (path)
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Core.Aspects
+import Prelude hiding ((.), id)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 
 {- |
@@ -20,7 +23,10 @@ Serve a simple HTML directory listing for the specified directory on the
 filesystem.
 -}
 
-hDirectoryResource :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
+hDirectoryResource
+  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  => FilePath  -- ^ Directory to produce a listing for.
+  -> m ()
 hDirectoryResource dirName =
   do u <- request (getM asUri)
      let p = lget path u
@@ -29,15 +35,17 @@ hDirectoryResource dirName =
        else dirHandler dirName
 
 {- |
-Like `hDirectoryResource` but uses the path of the current request URI.
+Like `hDirectoryResource` but uses the path from the current request URI.
 -}
 
 hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
 hDirectory = hResource hDirectoryResource
 
+-- Helper function that does all the work.
+
 dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 dirHandler dirName =
-  do p <- request (getM (path % asUri))
+  do p <- request (getM (path . asUri))
      filenames <- liftIO $ getDirectoryContents dirName
      processed <- liftIO $ mapM (processFilename dirName) (sort filenames)
      let b = listing p processed

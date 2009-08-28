@@ -1,24 +1,25 @@
 module Network.Salvia.Handler.CGI (hCGI) where {- doc ok -}
 
 import Control.Applicative
+import Control.Category
+import Control.Concurrent
+import Control.Monad.State
 import Data.Char
 import Data.List
 import Data.List.Split
-import Data.Maybe
-import Control.Concurrent
-import Control.Monad.State
+import Data.Map (toList)
 import Data.Record.Label
 import Network.Protocol.Http hiding (hostname)
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
-import Network.Salvia.Handler.Parser
-import Network.Salvia.Handler.Error
 import Network.Salvia.Core.Config
+import Network.Salvia.Handler.Error
+import Network.Salvia.Handler.Parser
+import Prelude hiding ((.), id)
 import System.IO
 import System.Process
 import Text.Parsec hiding (many, (<|>))
 import qualified Data.ByteString.Lazy as L
-import Data.Map (toList)
 
 -- | Handler to run CGI scripts.
 
@@ -26,8 +27,8 @@ hCGI :: (MonadIO m, HttpM Request m, BodyM Request m, HttpM Response m, SendM m,
 hCGI fn =
   do cfg     <- config
      hdrs    <- request (getM headers)
-     _query  <- request (getM (query % asUri))
-     _path   <- request (getM (path % asUri))
+     _query  <- request (getM (query . asUri))
+     _path   <- request (getM (path . asUri))
      _method <- request (getM method)
 
      -- Helper function to convert all headers to environment variables.

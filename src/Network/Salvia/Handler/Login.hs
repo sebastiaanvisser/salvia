@@ -139,8 +139,8 @@ hSignup
   => TUserDatabase FilePath -> Actions -> m ()
 hSignup tdb acts =
   do db <- liftIO . atomically $ readTVar tdb
-     params <- hRequestParameters "utf-8"
-     case freshUserInfo params (dbUsers db) acts of
+     ps <- hRequestParameters "utf-8"
+     case freshUserInfo ps (dbUsers db) acts of
        Nothing -> hCustomError Unauthorized "signup failed"
        Just u  -> liftIO $
          do atomically
@@ -149,8 +149,8 @@ hSignup tdb acts =
             appendFile (dbSource db) (printUserLine u)
 
 freshUserInfo :: Maybe Parameters -> Users -> Actions -> Maybe User
-freshUserInfo params us acts =
-  do p <- params
+freshUserInfo ps us acts =
+  do p <- ps
      user <- "username" `lookup` p >>= id
      pass <- "password" `lookup` p >>= id
      mail <- "email"    `lookup` p >>= id
@@ -169,15 +169,15 @@ hLogin
   :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
   => UserDatabase b -> TUserSession a -> m ()
 hLogin db session =
-  do params <- hRequestParameters "utf-8"
+  do ps <- hRequestParameters "utf-8"
      maybe
        (hCustomError Unauthorized "login failed")
        (loginSuccessful session)
-       (authenticate params db)
+       (authenticate ps db)
 
 authenticate :: Maybe Parameters -> UserDatabase a -> Maybe User
-authenticate params db =
-  do p <- params
+authenticate ps db =
+  do p <- ps
      user <- "username" `lookup` p >>= id
      pass <- "password" `lookup` p >>= id
      case headMay $ filter ((==user).username) (dbUsers db) of
