@@ -69,10 +69,10 @@ hParser action parse t onfail onsuccess =
 -- Read all lines until the first empty line.
 readNonEmptyLines :: Handle -> IO String
 readNonEmptyLines h = ($"") <$> f
-  where f =
-          do l <- hGetLine h
-             let lf = showChar '\n'
-             if null l || l == "\r"
-               then return lf
-               else ((showString l . lf) .) <$> f
+  where
+    f = do l <- hGetLine h
+           let lf = showChar '\n'
+           if null l || l == "\r"
+             then return lf
+             else ((showString l . lf) .) <$> f
 

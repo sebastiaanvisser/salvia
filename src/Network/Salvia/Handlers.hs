@@ -1,10 +1,11 @@
 module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
+  (
 
   -- * Fundamental protocol handlers.
 
   -- ** Default handler environments.
 
-  ( hDefaultEnv
+    hDefaultEnv
   , hSessionEnv
 
   -- ** Parse client requests.
@@ -192,6 +193,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
   , hAuthorizedUser
 
   , readUserDatabase
+
   )
 where
 

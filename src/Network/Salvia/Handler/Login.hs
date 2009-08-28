@@ -1,7 +1,9 @@
 module Network.Salvia.Handler.Login {- doc ok -}
+  (
 
   -- * Basic types.
-  ( Username
+
+    Username
   , Password
   , Action
   , Actions
@@ -11,11 +13,13 @@ module Network.Salvia.Handler.Login {- doc ok -}
   , TUserDatabase
 
   -- * User Sessions.
+
   , UserPayload (..)
   , UserSession
   , TUserSession
 
   -- * Handlers.
+
   , hSignup
   , hLogin
   , hLogout
@@ -25,6 +29,7 @@ module Network.Salvia.Handler.Login {- doc ok -}
   , hAuthorizedUser
 
   -- * Helper functions.
+
   , readUserDatabase
 
   )

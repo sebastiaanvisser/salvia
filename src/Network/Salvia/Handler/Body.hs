@@ -38,14 +38,15 @@ message, client request or server response.
 hRawBody :: forall m d. (MonadIO m, SocketM m, HttpM d m) => d -> m (Maybe B.ByteString)
 hRawBody _ =
   do let h = http :: State (Http d) a -> m a
-     len <- h (getM contentLength)
+     con <- h (getM connection)
      kpa <- h (getM keepAlive)
+     len <- h (getM contentLength)
      s   <- sock
      liftIO $
-       case (kpa :: Maybe Integer, len :: Maybe Integer) of
-         (_,       Just n)  -> Just <$> B.hGet s (fromIntegral n)
-         (Nothing, Nothing) -> Just <$> B.hGetContents s
-         _                  -> return Nothing
+       case (con, kpa :: Maybe Integer, len :: Maybe Integer) of
+         (_, _,       Just n)                           -> Just <$> B.hGet s (fromIntegral n)
+         (k, Nothing, Nothing) | k /= Just "keep-alive" -> Just <$> B.hGetContents s
+         _                                              -> return Nothing
 
 -- | Like `hRawBody' but specifically for `Http' `Request's.
 

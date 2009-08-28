@@ -15,7 +15,14 @@ main =
        (hDefaultEnv myHandler)
        ()
 
-myHandler :: (MonadIO m, HttpM Request m, HttpM Response m, BodyM Request m, SendM m) => m ()
+myHandler
+  :: (HttpM Response m,
+      MonadIO m,
+      HttpM Request m,
+      SendM m,
+      BodyM Request m,
+      ConfigM m) =>
+     m ()
 myHandler = 
   hPortRouter
     [ ( 8080
@@ -26,7 +33,11 @@ myHandler =
               (hFileSystem ".")
             )
           , (".host", hString "Jajaj!!!")
-          , ("phony", hCustomError NotFound "phony!")
+          , ("phony", 
+               hPrefix "/favicon.ico"
+                 (hError NotFound)
+                 (hCGI "./myscript.sh")
+            )
           ] (hError Forbidden)
       )
     ] (hCustomError Forbidden "Public service running on port 8080.")

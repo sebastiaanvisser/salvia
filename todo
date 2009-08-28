@@ -1,7 +1,6 @@
 comet?
 IPv6?
 proxy?
-cgi?
 
 server running on multiple TCP ports
 standard file logger, with terminal logger in salvia-extras with separate terminal package dep.

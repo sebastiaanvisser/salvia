@@ -1,8 +1,9 @@
 module Network.Protocol.Http {- doc ok -}
+  (
 
   -- * HTTP message data types.
 
-  ( Method (..)
+    Method (..)
   , Version (..)
   , Key
   , Value
@@ -38,6 +39,10 @@ module Network.Protocol.Http {- doc ok -}
 
   , contentLength
   , connection
+  , accept
+  , acceptEncoding
+  , acceptLanguage
+  , cacheControl
   , keepAlive
   , cookie
   , setCookie
