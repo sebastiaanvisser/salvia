@@ -1,101 +1,146 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- | For more information: http://www.ietf.org/rfc/rfc2109.txt
-
-module Network.Protocol.Cookie (
-    Cookie (..)
+module Network.Protocol.Cookie {- todo: test please -}
+  (
+  
+  -- * Cookie datatype.
+    Cookie (Cookie)
+  , cookie
   , empty
 
-  , Cookies
+  -- * Accessing cookies.
+  , name
+  , value
+  , comment
+  , commentURL
+  , discard
+  , domain
+  , maxAge
+  , expires
+  , path
+  , port
+  , secure
+  , version
+
+  -- * Collection of cookies.
+
+  , Cookies (..)
   , cookies
-  , cookie
-  , showCookies
+  , getCookie
 
-  , parseCookies
-  ) where
+  , fromList
+  , toList
 
-import Control.Applicative hiding (empty)
-import Control.Monad ()
-import Data.Char (toLower)
-import Data.List (intercalate)
+  )
+where
+
+import Prelude hiding ((.), id)
+import Control.Category
+import Control.Monad (join)
+import Data.Record.Label
+import Data.Maybe
+import Data.Char
+import Safe
+import Data.List
 import Misc.Text
-import Network.Protocol.Uri (Uri)
-import Text.ParserCombinators.Parsec hiding (many, optional, (<|>))
+import Network.Protocol.Uri.Query
 import qualified Data.Map as M
-
 
 -- | The `Cookie` data type containg one key/value pair with all the
 -- (potentially optional) meta-data.
 
 data Cookie =
-  Cookie {
-    name       :: String
-  , value      :: String
-  , comment    :: Maybe String
-  , commentURL :: Maybe Uri
-  , discard    :: Bool
-  , domain     :: Maybe String
-  , maxAge     :: Maybe Int
-  , expires    :: Maybe String
-  , path       :: Maybe String
-  , port       :: [Int]
-  , secure     :: Bool
-  , version    :: Int
-  }
+  Cookie
+    { _name       :: String
+    , _value      :: String
+    , _comment    :: Maybe String
+    , _commentURL :: Maybe String
+    , _discard    :: Bool
+    , _domain     :: Maybe String
+    , _maxAge     :: Maybe Int
+    , _expires    :: Maybe String
+    , _path       :: Maybe String
+    , _port       :: [Int]
+    , _secure     :: Bool
+    , _version    :: Int
+    } deriving Eq
+
+$(mkLabels [''Cookie])
+
+-- | Access name/key of a cookie.
+
+name :: Cookie :-> String
+
+-- | Access value of a cookie.
+
+value :: Cookie :-> String
+
+-- | Access comment of a cookie.
+
+comment :: Cookie :-> Maybe String
+
+-- | Access comment-URL of a cookie.
+
+commentURL :: Cookie :-> Maybe String
+
+-- | Access discard flag of a cookie.
+
+discard :: Cookie :-> Bool
+
+-- | Access domain of a cookie.
+
+domain :: Cookie :-> Maybe String
+
+-- | Access max-age of a cookie.
+
+maxAge :: Cookie :-> Maybe Int
+
+-- | Access expiration of a cookie.
+
+expires :: Cookie :-> Maybe String
+
+-- | Access path of a cookie.
+
+path :: Cookie :-> Maybe String
+
+-- | Access port of a cookie.
+
+port :: Cookie :-> [Int]
+
+-- | Access secure flag of a cookie.
+
+secure :: Cookie :-> Bool
+
+-- | Access version of a cookie.
+
+version :: Cookie :-> Int
 
 -- | Create an empty cookie.
 
 empty :: Cookie
-empty = Cookie {
-    name       = ""
-  , value      = ""
-  , comment    = Nothing
-  , commentURL = Nothing
-  , discard    = False
-  , domain     = Nothing
-  , maxAge     = Nothing
-  , expires    = Nothing
-  , path       = Nothing
-  , port       = []
-  , secure     = False
-  , version    = 0
-  }
-
--- | A collection of multiple cookies. These can all be set in one single HTTP
--- /Set-Cookie/ header field.
-
-type Cookies = M.Map String Cookie
-
--- | Convert a list of cookies into a cookie mapping. The name will be used as
--- the key, the cookie itself as the value.
-
-cookies :: [Cookie] -> Cookies
-cookies = M.fromList . map (\a -> (name a, a))
-
--- | Case-insensitive way of getting a cookie out of a collection by name.
-
-cookie :: String -> Cookies -> Maybe Cookie
-cookie n = M.lookup (map toLower n)
+empty = Cookie "" "" Nothing Nothing False Nothing Nothing Nothing Nothing [] False 0
 
 -- Cookie show instance.
 
 instance Show Cookie where
-  show = flip showsCookie ""
+  showsPrec _ = showsCookie
 
 -- Show a semicolon separated list of attribute/value pairs. Only meta pairs
 -- with significant values will be pretty printed.
 
 showsCookie :: Cookie -> ShowS
 showsCookie c =
-    pair     (name c)     (value c)
-  . opt      "comment"    (comment c)
-  . opt      "commentURL" (fmap show $ commentURL c)
-  . bool     "discard"    (discard c)
-  . opt      "domain"     (domain c)
-  . opt      "maxAge"     (fmap show $ maxAge c)
-  . opt      "expires"    (expires c)
-  . opt      "path"       (path c)
-  . list     "port"       (map show $ port c)
-  . bool     "secure"     (secure c)
-  . opt      "version"    (optval $ version c)
+    pair (get name c) (get value c)
+  . opt  "comment"    (get comment c)
+  . opt  "commentURL" (get commentURL c)
+  . bool "discard"    (get discard c)
+  . opt  "domain"     (get domain c)
+  . opt  "maxAge"     (fmap show $ get maxAge c)
+  . opt  "expires"    (get expires c)
+  . opt  "path"       (get path c)
+  . lst  "port"       (map show $ get port c)
+  . bool "secure"     (get secure c)
+  . opt  "version"    (optval $ get version c)
   where
     attr a       = showString a
     val v        = showString ("=" ++ v)
@@ -103,67 +148,66 @@ showsCookie c =
     single a     = attr a . end
     pair a v     = attr a . val v . end
     opt a        = maybe id (pair a)
-    list _ []    = id
-    list a xs    = pair a $ intercalate "," xs
+    lst _ []     = id
+    lst a xs     = pair a $ intercalate "," xs
     bool _ False = id
     bool a True  = single a
     optval 0     = Nothing
     optval i     = Just (show i)
 
--- | Show multiple cookies, pretty printed using a comma separator.
+parseCookie :: String -> Cookie
+parseCookie s = 
+  let p = forth (keyValues ";" "=") s
+  in Cookie
+    { _name       = (fromMaybe "" .        fmap fst . headMay)              p
+    , _value      = (fromMaybe "" . join . fmap snd . headMay)              p
+    , _comment    = (                           join . lookup "comment")    p
+    , _commentURL = (                           join . lookup "commentURL") p
+    , _discard    = (maybe False (const True) . join . lookup "discard")    p
+    , _domain     = (                           join . lookup "commentURL") p
+    , _maxAge     = (join . fmap readMay .      join . lookup "commentURL") p
+    , _expires    = (                           join . lookup "expires")    p
+    , _path       = (                           join . lookup "path")       p
+    , _port       = (maybe [] (readDef [-1]) .  join . lookup "port")       p
+    , _secure     = (maybe False (const True) . join . lookup "secure")     p
+    , _version    = (maybe 1 (readDef 1) .      join . lookup "version")    p
+    }
 
-showCookies :: Cookies -> String
-showCookies = ($"")
-  . intersperseS (showString ", ")
-  . map (shows . snd)
-  . M.toList
+-- | Cookie parser and pretty printer as a lens.
 
--- Cookie parser.
+cookie :: Lens Cookie String
+cookie = show <-> parseCookie
 
-{- |
-Parse a set of cookie values and turn this into a collection of real cookies.
-As the specification states, only the name, value, domain, path and port will
-be recognized.
--}
+-- | A collection of multiple cookies. These can all be set in one single HTTP
+-- /Set-Cookie/ header field.
 
-parseCookies :: String -> Maybe Cookies
-parseCookies = either (const Nothing) (Just . cookies) . parse pCookie ""
+newtype Cookies = Cookies { unCookies :: M.Map String Cookie }
+  deriving Eq
 
-pCookie :: GenParser Char st [Cookie]
-pCookie = map ck <$> pCookieValues
-  where
-    ck ((n, v), m) =
-      empty {
-        name   = n
-      , value  = v
-      , domain = "$domain" `M.lookup` m
-      , path   = "$path"   `M.lookup` m
-      , port   = maybe [] pPorts $
-                 "$port"   `M.lookup` m
-      }
+instance Show Cookies where
+  showsPrec _ =
+      intersperseS (showString ", ")
+    . map (shows . snd)
+    . M.toList
+    . unCookies
 
--- Parse a list of comma separated portnumbers. Returns a list of integers or
--- an empty list on failure.
-pPorts :: String -> [Int]
-pPorts = either (const []) id . parse p ""
-   where
-    p = char '"'
-     *> sepBy1 (read <$> many1 digit) (char ',')
-     <* char '"'
+-- | Cookies parser and pretty printer as a lens.
 
--- Parse a collection of cookie name/value pairs.
-pCookieValues :: GenParser Char st [((String, String), M.Map String String)]
-pCookieValues =
-      flip sepBy1 sep ((,)
-  <$> pair key
-  <*> (M.fromList
-  <$> filter (not . null . fst)
-  <$> many (try (sep *> pair skey))))
-  where
-    f      = trim . map toLower
-    key    = f <$> many1 (noneOf "=;")
-    skey   = f <$> ((:) <$> char '$' <*> many (noneOf "=;"))
-    val    = trim <$> many (noneOf ";")
-    pair k = (,) <$> k <*> (char '=' *> val)
-    sep    = char ';' *> many (oneOf " \t\r\n")
+cookies :: Lens String Cookies
+cookies = (fromList . map parseCookie <-> map show . toList) . values ","
+
+-- | Case-insensitive way of getting a cookie out of a collection by name.
+
+getCookie :: String -> Cookies -> Maybe Cookie
+getCookie n = M.lookup (map toLower n) . unCookies
+
+-- | Convert a list to a cookies collection.
+
+fromList :: [Cookie] -> Cookies
+fromList = Cookies . M.fromList . map (\a -> (get name a, a))
+
+-- | Get the cookies as a list.
+
+toList :: Cookies -> [Cookie]
+toList = map snd . M.toList . unCookies
 

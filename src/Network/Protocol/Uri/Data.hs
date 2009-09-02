@@ -72,7 +72,7 @@ authority :: Uri :-> Authority
 -- regname or IP-address.
 
 domain :: Uri :-> Maybe Domain
-domain = (f, Hostname . fromJust) `lmap` (_host . authority)
+domain = (f <-> Hostname . fromJust) `iso` (_host . authority)
   where
     f (Hostname d) = Just d
     f _            = Nothing
@@ -81,7 +81,7 @@ domain = (f, Hostname . fromJust) `lmap` (_host . authority)
 -- domain or IP-address.
 
 regname :: Uri :-> Maybe RegName
-regname = (f, RegName . fromJust) `lmap` (_host . authority)
+regname = (f <-> RegName . fromJust) `iso` (_host . authority)
   where
     f (RegName r) = Just r
     f _           = Nothing
@@ -90,7 +90,7 @@ regname = (f, RegName . fromJust) `lmap` (_host . authority)
 -- domain or regname.
 
 ipv4 :: Uri :-> Maybe IPv4
-ipv4 = (f, IP . fromJust) `lmap` (_host . authority)
+ipv4 = (f <-> IP . fromJust) `iso` (_host . authority)
   where
     f (IP i) = Just i
     f _      = Nothing
@@ -108,13 +108,13 @@ port = _port . authority
 -- will be properly decoded when reading and encoded when writing.
 
 query :: Uri :-> Query
-query = encoded . _query
+query = encoded `iso` _query
 
 -- | Access the fragment part of the URI, the part that follows the #. The
 -- fragment will be properly decoded when reading and encoded when writing.
 
 fragment :: Uri :-> Fragment
-fragment = encoded . _fragment
+fragment = encoded `iso` _fragment
 
 -- | Is a URI relative?
 

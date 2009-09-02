@@ -15,7 +15,8 @@ where
 
 import Control.Applicative hiding (empty)
 import Control.Concurrent.STM
-import Control.Monad.State
+import Control.Monad.State hiding (get)
+import Data.Record.Label
 import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
@@ -105,9 +106,9 @@ identifier.
 hSessionID :: HttpM Request m => m (Maybe SessionID)
 hSessionID =
   let f prev =
-        do ck  <- prev
-           sid <- cookie "sid" ck
-           sid' <- readMay (value sid)
+        do cks <- prev
+           ck <- getCookie "sid" cks
+           sid' <- readMay (get value ck)
            return (SID sid')
   in f <$> hGetCookies
 
@@ -123,7 +124,7 @@ hSetSessionCookie
 hSetSessionCookie tsession ex =
   do ck <- newCookie ex
      sid <- liftIO (sID <$> atomically (readTVar tsession))
-     hSetCookies $ cookies [ck {name = "sid", value = show sid}]
+     hSetCookies $ fromList [(name  `set` "sid") $ (value `set` show sid) ck]
 
 {- |
 Create a new session with a specified expiration date. The session will be

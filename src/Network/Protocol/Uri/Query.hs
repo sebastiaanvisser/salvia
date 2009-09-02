@@ -15,19 +15,19 @@ type Parameters = [(String, Maybe String)]
 -- | Fetch the query parameters form a URI.
 
 queryParams :: Uri :-> Parameters
-queryParams = params . _query
+queryParams = params `iso` _query
 
 -- | Generic label to parse a string as query parameters.
 
-params :: String :-> Parameters
-params = keyValues "&" "=" . ((from, to) `lmap` encoded)
+params :: Lens String Parameters
+params = keyValues "&" "=" . (from <-> to) . encoded
   where from = intercalate " " . splitOn "+"
         to   = intercalate "+" . splitOn " "
 
 -- | Generic label for accessing key value pairs encoded in a string.
 
-keyValues :: String -> String -> String :-> Parameters
-keyValues sep eqs = mkLabel parser (\a _ -> printer a)
+keyValues :: String -> String -> Lens String Parameters
+keyValues sep eqs = parser <-> printer
   where parser =
             filter (\(a, b) -> not (null a) || b /= Nothing && b /= Just "")
           . map (f . splitOn eqs)
@@ -41,8 +41,8 @@ keyValues sep eqs = mkLabel parser (\a _ -> printer a)
 
 -- | Generic label for accessing lists of values encoded in a string.
 
-values :: String -> String :-> [String]
-values sep = mkLabel parser (\a _ -> printer a)
+values :: String -> Lens String [String]
+values sep = parser <-> printer
   where parser = filter (not . null) . concat . map (splitOn sep) . lines
         printer = intercalate sep
 

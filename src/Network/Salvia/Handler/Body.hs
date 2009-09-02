@@ -16,7 +16,7 @@ where
 import Data.Maybe
 import Data.Encoding
 import Control.Applicative
-import Control.Monad.State
+import Control.Monad.State hiding (get)
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
@@ -89,7 +89,7 @@ parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
 hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
-hParameters d def = fmap (lget params) <$> hBody d def
+hParameters d def = fmap (forth params) <$> hBody d def
 
 -- | Like `hParameters' but specifically for `HTTP' `Request's.
 

@@ -19,13 +19,13 @@ import Text.Parsec.Prim (Stream, ParsecT)
 -- | Access the host part of the URI.
 
 host :: Uri :-> String
-host = (show, either (const mkHost) id . parseHost) `lmap` (_host . authority)
+host = (show <-> either (const mkHost) id . parseHost) `iso` (_host . authority)
 
 -- | Access the path part of the URI. The query will be properly decoded when
 -- reading and encoded when writing.
 
 path :: Uri :-> FilePath
-path = (decode . show, either (const mkPath) id . parsePath . encode) `lmap` _path
+path = (decode . show <-> either (const mkPath) id . parsePath . encode) `iso` _path
 
 -- | Parse string into a URI and ignore all failures by returning an empty URI
 -- when parsing fails. Can be quite useful in situations that parse errors are

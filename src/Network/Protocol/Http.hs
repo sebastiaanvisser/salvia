@@ -4,13 +4,13 @@ module Network.Protocol.Http {- doc ok -}
   -- * HTTP message data types.
 
     Method (..)
-  , Version (..)
+  , Version
   , Key
   , Value
   , Headers (..)
-  , Request (..)
-  , Response (..)
-  , Http (..)
+  , Request
+  , Response
+  , Http
 
   -- * Creating (parts of) messages.
 
@@ -68,7 +68,6 @@ module Network.Protocol.Http {- doc ok -}
   -- * Handling HTTP status codes.
 
   , Status (..)
-  , statusCodes
   , statusFailure
   , statusFromCode
   , codeFromStatus

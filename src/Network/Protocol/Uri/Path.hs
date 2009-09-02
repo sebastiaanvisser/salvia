@@ -7,7 +7,7 @@ import Data.Record.Label
 {- | Label to access the extension of a filename. -}
 
 extension :: FilePath :-> Maybe String
-extension = mkLabel getExt setExt
+extension = label getExt setExt
   where
     splt     p = (\(a,b) -> (reverse a, reverse b)) $ break (=='.') $ reverse p
     isExt e  p = '/' `elem` e || not ('.' `elem` p)
@@ -22,7 +22,7 @@ extension.
 -}
 
 mimetype :: FilePath -> Maybe String
-mimetype p = lget extension p >>= mime
+mimetype p = get extension p >>= mime
 
 {- |
 Normalize a path by removing or merging all dot or dot-dot segments and double

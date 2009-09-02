@@ -10,21 +10,21 @@ import Control.Applicative hiding (empty)
 import Control.Monad.State
 import Data.Record.Label
 import Data.Time.Format
-import Network.Protocol.Cookie hiding (cookie)
-import Network.Protocol.Http
-import Network.Salvia.Core.Config
+import Network.Protocol.Cookie
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Core.Config
 import System.Locale
+import qualified Network.Protocol.Http as H
 
 {- | Set the `cookie` HTTP response header (Set-Cookie) with the specified `Cookies`. -}
 
-hSetCookies :: HttpM Response m => Cookies -> m ()
-hSetCookies = response . (setCookie =:) . Just . showCookies
+hSetCookies :: HttpM H.Response m => Cookies -> m ()
+hSetCookies = response . (H.setCookie =:) . Just . show
 
 {- | Try to get the cookies from the HTTP `cookie` request header. -}
 
-hGetCookies :: HttpM Request m => m (Maybe Cookies)
-hGetCookies = join . fmap parseCookies <$> request (getM cookie)
+hGetCookies :: (HttpM H.Request f) => f (Maybe Cookies)
+hGetCookies = fmap (forth cookies) <$> request (getM H.cookie)
 
 {- |
 Convenient method for creating cookies that expire in the near future and are
@@ -35,10 +35,10 @@ root.
 newCookie :: (ConfigM m, FormatTime t) => t -> m Cookie
 newCookie expire = do
   httpd <- config
-  return $ empty {
-      path    = Just "/"
---  , domain  = Just $ '.' : hostname httpd
-    , port    = [fromEnum $ listenPort httpd]
-    , expires = Just $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire
-    }
+  return 
+    . (path    `set` Just "/")
+    . (domain  `set` Just ('.' : hostname httpd))
+    . (port    `set` [fromEnum (listenPort httpd)])
+    . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
+    $ empty
 

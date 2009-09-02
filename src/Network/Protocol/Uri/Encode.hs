@@ -1,6 +1,5 @@
 module Network.Protocol.Uri.Encode where
 
-import Control.Category
 import Data.Bits
 import Data.Char
 import Data.Maybe
@@ -29,6 +28,6 @@ decode (d:ds) = d : decode ds
 
 -- | Decoding and encoding as a label.
 
-encoded :: String :-> String
-encoded = (decode, encode) `lmap` id
+encoded :: Lens String String
+encoded = decode <-> encode
 

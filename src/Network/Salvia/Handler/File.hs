@@ -12,7 +12,7 @@ module Network.Salvia.Handler.File  {- doc ok -}
 where
 
 import Control.Category
-import Control.Monad.State
+import Control.Monad.State hiding (get)
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Mime
@@ -45,7 +45,7 @@ fileMime :: FilePath -> Mime
 fileMime file =
     maybe defaultMime id
   $ (either (const Nothing) Just (parseUri file)
-  >>= mimetype . lget path)
+  >>= mimetype . get path)
 
 {- |
 Like the `hFileResource` handler, but with a custom filter over the content.

@@ -29,7 +29,7 @@ Library
                     containers ==0.2.*,
                     directory ==1.0.*,
                     encoding ==0.5.*,
-                    fclabels ==0.3.*,
+                    fclabels ==0.4.*,
                     filepath == 1.1.*,
                     monads-fd ==0.0.*,
                     network ==2.*,

@@ -2,8 +2,9 @@ comet?
 IPv6?
 proxy?
 
+cookie protocol should be label based and probably use keyValues
 
-doc fix!!
+doc fix!! http/cookie/all
 fix timeout issues
 
 server running on multiple TCP ports
