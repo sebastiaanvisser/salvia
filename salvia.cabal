@@ -43,29 +43,14 @@ Library
                     time ==1.1.*,
                     transformers ==0.1.*,
                     utf8-string ==0.3.*,
+                    salvia-protocol ==0.1.*,
                     split ==0.1.*
 
   Other-modules:    Misc.Text
                     Misc.Util
                     Misc.Terminal
 
-  Exposed-modules:  Network.Protocol.Cookie
-                    Network.Protocol.Http
-                    Network.Protocol.Http.Data
-                    Network.Protocol.Http.Headers
-                    Network.Protocol.Http.Parser
-                    Network.Protocol.Http.Printer
-                    Network.Protocol.Http.Status
-                    Network.Protocol.Mime
-                    Network.Protocol.Uri
-                    Network.Protocol.Uri.Chars
-                    Network.Protocol.Uri.Data
-                    Network.Protocol.Uri.Encode
-                    Network.Protocol.Uri.Parser
-                    Network.Protocol.Uri.Path
-                    Network.Protocol.Uri.Printer
-                    Network.Protocol.Uri.Query
-                    Network.Salvia
+  Exposed-modules:  Network.Salvia
                     Network.Salvia.Core.Aspects
                     Network.Salvia.Core.Config
                     Network.Salvia.Core.Context
