@@ -18,6 +18,7 @@ import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
 import Network.Salvia.Core.Aspects
 import System.IO
+import Prelude hiding (log)
 
 {- |
 This is the default stateless handler evnironment. It takes care of request
@@ -28,13 +29,10 @@ requests (`hHead`) and printing the `salvia-httpd` server banner (`hBanner`).
 
 hDefaultEnv
   :: (MonadIO m, FlushM Response m, PeerM m, HttpM Request m, HttpM Response m, ServerM m, QueueM m)
-  => m a     -- ^ Handler to run in the default environment.
+  => Handle  -- ^ File handle to log to.
+  -> m a     -- ^ Handler to run in the default environment.
   -> m ()
-hDefaultEnv handler =
-  hKeepAlive $ 
-    hRequestParser (1000 * 15)
-      (wrapper Nothing . parseError)
-      (wrapper Nothing $ hHead handler)
+hDefaultEnv log handler = wrapper log Nothing (hHead handler)
 
 {- |
 This function is a more advanced version of the `hDefaultEnv` handler
@@ -46,41 +44,27 @@ environment should be parametrized with a session.
 
 hSessionEnv
   :: (MonadIO m, FlushM Response m, QueueM m, PeerM m, HttpM Request m, HttpM Response m, ServerM m)
-  => TVar Int               -- ^ Request count variable.
+  => Handle                 -- ^ File handle to log to.
+  -> TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
   -> m ()
-hSessionEnv count sessions handler =
-  hKeepAlive $ 
-    hRequestParser (1000 * 15)
-     (wrapper (Just count) . parseError)
-     (wrapper (Just count) $
-       do session <- hSession sessions 300
-          hHead (handler session))
+hSessionEnv log count sessions handler =
+  wrapper log (Just count) $
+    do session <- hSession sessions 300
+       hHead (handler session)
 
--- Helper functions.
--- todo: cleanup.
-
-before :: (MonadIO m, HttpM Response m) => m ()
-before = hBanner "salvia-httpd"
-
-after
-  :: (QueueM m, PeerM m, FlushM Response m, HttpM Request m, ServerM m, MonadIO m, HttpM Response m)
-  => Maybe (TVar Int) -> m ()
-after mc = 
-  do hResponsePrinter
-     maybe
-       (hLog stdout)
-       (\c -> hCounter c >> hLogWithCounter c stdout)
-       mc
+-- Helper with common functionality.
 
 wrapper
-  :: (MonadIO m, HttpM Response m, ServerM m, QueueM m, PeerM m, FlushM Response m, HttpM Request m)
-  => Maybe (TVar Int) -> m a -> m ()
-wrapper c h = before >> h >> after c
-
-parseError :: (HttpM Response m, QueueM m) => String -> m ()
-parseError err = 
-  do hError BadRequest
-     sendStr ("\n" ++ err ++ "\n")
+  :: (MonadIO m, HttpM Response m, HttpM Request m, FlushM Response m, PeerM m, QueueM m)
+  => Handle -> Maybe (TVar Int) -> m a -> m ()
+wrapper log count handler = 
+  let logger = maybe (hLog log) (\c -> hCounter c >> hLogWithCounter c stdout) count
+      f h = h >> hResponsePrinter >> logger
+  in hKeepAlive $ 
+    do hBanner "salvia-httpd"
+       hRequestParser (1000 * 15)
+         (f . hCustomError BadRequest)
+         (f handler)
 

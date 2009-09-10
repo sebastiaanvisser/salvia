@@ -23,7 +23,7 @@ hBanner sv =
   do dt <- liftIO $
        do zone <- getCurrentTimeZone
           time <- utcToLocalTime zone <$> getCurrentTime
-          return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" time
+          return $ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %z" time
      response $
        do date   =: Just dt
           server =: Just sv
