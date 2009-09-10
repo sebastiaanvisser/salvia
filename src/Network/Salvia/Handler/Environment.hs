@@ -60,7 +60,7 @@ wrapper
   :: (MonadIO m, HttpM Response m, HttpM Request m, FlushM Response m, PeerM m, QueueM m)
   => Handle -> Maybe (TVar Int) -> m a -> m ()
 wrapper log count handler = 
-  let logger = maybe (hLog log) (\c -> hCounter c >> hLogWithCounter c stdout) count
+  let logger = maybe (hLog log) (\c -> hCounter c >> hLogWithCounter c log) count
       f h = h >> hResponsePrinter >> logger
   in hKeepAlive $ 
     do hBanner "salvia-httpd"

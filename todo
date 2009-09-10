@@ -5,7 +5,7 @@ proxy?
 fix timeout issues
 
 server running on multiple TCP ports
-standard file logger, with terminal logger in salvia-extras with separate terminal package dep.
+can logger and color logger share things
 
 streaming big files?
 get a good notion of all true IO actions (SocketM) and create debug error catcher.

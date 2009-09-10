@@ -47,7 +47,6 @@ Library
 
   Other-modules:    Misc.Text
                     Misc.Util
-                    Misc.Terminal
 
   Exposed-modules:  Network.Salvia
                     Network.Salvia.Core.Aspects
