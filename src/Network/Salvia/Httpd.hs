@@ -8,20 +8,20 @@ module Network.Salvia.Httpd
   , forRequest
   , forResponse
 
-  , ConfigM
-  , config
+  , ServerM
+  , server
 
   , HttpM
   , http
   , request
   , response
 
-  , SocketM
+  , PeerM
   , rawSock
   , sock
   , peer
 
-  , SendM
+  , QueueM
   , enqueue
   , dequeue
   , sendStr
@@ -35,14 +35,6 @@ module Network.Salvia.Httpd
 
   , BodyM 
   , body
-
-  -- Httpd.Core.Server
-  , server
-
-  -- Httpd.Core.Client
---   , client
---   , getRequest
-
   )
 where
 
@@ -51,6 +43,6 @@ import Network.Salvia.Core.Config
 import Network.Salvia.Core.Aspects
 
 -- Concrete implementation.
-import Network.Salvia.Core.Server
+-- import Network.Salvia.Core.Server
 -- import Network.Salvia.Core.Client
 

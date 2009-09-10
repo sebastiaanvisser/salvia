@@ -24,7 +24,7 @@ hSetCookies = response . (H.setCookie =:) . Just . show
 {- | Try to get the cookies from the HTTP `cookie` request header. -}
 
 hGetCookies :: (HttpM H.Request f) => f (Maybe Cookies)
-hGetCookies = fmap (forth cookies) <$> request (getM H.cookie)
+hGetCookies = fmap (fw cookies) <$> request (getM H.cookie)
 
 {- |
 Convenient method for creating cookies that expire in the near future and are
@@ -32,9 +32,9 @@ bound to the domain and port this server runs on. The path will be locked to
 root.
 -}
 
-newCookie :: (ConfigM m, FormatTime t) => t -> m Cookie
+newCookie :: (ServerM m, FormatTime t) => t -> m Cookie
 newCookie expire = do
-  httpd <- config
+  httpd <- server
   return 
     . (path    `set` Just "/")
     . (domain  `set` Just ('.' : hostname httpd))

@@ -29,7 +29,7 @@ parts of the file system.
 -}
 
 hFileTypeDispatcher
-  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
   => (FilePath -> m ())  -- ^ Handler to invoke in case of directory.
   -> (FilePath -> m ())  -- ^ Handler to invoke in case of regular files.
   -> FilePath            -- ^ Directory to serve.
@@ -44,7 +44,7 @@ Serve single directory by combining the `hDirectoryResource` and
 -}
 
 hFileSystem
-  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
   => FilePath  -- ^ Directory to serve.
   -> m ()
 hFileSystem = hFileTypeDispatcher hDirectoryResource hFileResource
@@ -55,7 +55,7 @@ Instead of an directory index an `Forbidden` response will be created.
 -}
 
 hFileSystemNoIndexes
-  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
   => FilePath  -- ^ Directory to serve.
   -> m ()
 hFileSystemNoIndexes = hFileTypeDispatcher (const $ hError Forbidden) hFileResource
@@ -64,7 +64,7 @@ hFileSystemNoIndexes = hFileTypeDispatcher (const $ hError Forbidden) hFileResou
 -- file system directory.
 
 hJailedDispatch
-  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
   => FilePath -> (FilePath -> m ()) -> (FilePath -> m ()) -> FilePath -> m () 
 hJailedDispatch dir hdir hfile file =
   do case jail dir file of

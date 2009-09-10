@@ -15,7 +15,7 @@ import System.IO
 
 -- | Run a handler once and close the connection afterwards.
 
-hCloseConn :: (SocketM m, MonadIO m) => m a -> m ()
+hCloseConn :: (PeerM m, MonadIO m) => m a -> m ()
 hCloseConn h = h >> sock >>= flip catchIO () . hClose
 
 {- |
@@ -34,7 +34,7 @@ the following criteria are met:
 -}
 
 hKeepAlive
-  :: (SendM m, SocketM m, HttpM Request m, HttpM Response m, MonadIO m)
+  :: (QueueM m, PeerM m, HttpM Request m, HttpM Response m, MonadIO m)
   => m a -> m ()
 hKeepAlive handler =
   do handler
@@ -51,12 +51,12 @@ hKeepAlive handler =
        then catchIO (hClose h) ()
        else resetContext >> hKeepAlive handler
 
-resetContext :: (HttpM Request m, HttpM Response m, SendM m) => m ()
+resetContext :: (HttpM Request m, HttpM Response m, QueueM m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)
      empty
 
-empty :: SendM m => m ()
+empty :: QueueM m => m ()
 empty = dequeue >>= maybe (return ()) (const empty)
 

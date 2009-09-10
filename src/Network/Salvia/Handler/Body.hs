@@ -35,7 +35,7 @@ the socket. The function is parametrized with a the direction of the HTTP
 message, client request or server response.
 -}
 
-hRawBody :: forall m d. (MonadIO m, SocketM m, HttpM d m) => d -> m (Maybe B.ByteString)
+hRawBody :: forall m d. (MonadIO m, PeerM m, HttpM d m) => d -> m (Maybe B.ByteString)
 hRawBody _ =
   do let h = http :: State (Http d) a -> m a
      con <- h (getM connection)
@@ -89,7 +89,7 @@ parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
 hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
-hParameters d def = fmap (forth params) <$> hBody d def
+hParameters d def = fmap (fw params) <$> hBody d def
 
 -- | Like `hParameters' but specifically for `HTTP' `Request's.
 

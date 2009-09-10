@@ -76,7 +76,7 @@ A cookie will be set that informs the client of the current session.
 -}
 
 hSession
-  :: (MonadIO m, HttpM Request m, ConfigM m, HttpM Response m)
+  :: (MonadIO m, HttpM Request m, ServerM m, HttpM Response m)
   => Sessions a            -- ^ Map of shared session variables.
   -> Integer               -- ^ Number of seconds to be added to the session expiritation time.
   -> m (TSession a)
@@ -119,7 +119,7 @@ as value. The session expiration date will be used as the cookie expire field.
 -}
 
 hSetSessionCookie
-  :: (ConfigM m, FormatTime t, HttpM Response m, MonadIO m)
+  :: (ServerM m, FormatTime t, HttpM Response m, MonadIO m)
   => TSession a -> t -> m ()
 hSetSessionCookie tsession ex =
   do ck <- newCookie ex

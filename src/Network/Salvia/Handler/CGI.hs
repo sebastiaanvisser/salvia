@@ -9,7 +9,7 @@ import Data.List
 import Data.List.Split
 import Data.Map (toList)
 import Data.Record.Label
-import Network.Protocol.Http hiding (hostname)
+import Network.Protocol.Http hiding (hostname, server)
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
@@ -23,9 +23,9 @@ import qualified Data.ByteString.Lazy as L
 
 -- | Handler to run CGI scripts. Not entirely finished.
 
-hCGI :: (MonadIO m, HttpM Request m, BodyM Request m, HttpM Response m, SendM m, ConfigM m) => FilePath -> m ()
+hCGI :: (MonadIO m, HttpM Request m, BodyM Request m, HttpM Response m, QueueM m, ServerM m) => FilePath -> m ()
 hCGI fn =
-  do cfg     <- config
+  do cfg     <- server
      hdrs    <- request (getM headers)
      _query  <- request (getM (query . asUri))
      _path   <- request (getM (path . asUri))

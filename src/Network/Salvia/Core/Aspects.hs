@@ -14,9 +14,6 @@ forRequest = undefined
 forResponse :: Response
 forResponse = undefined
 
-class (Applicative m, Monad m) => ConfigM m where
-  config :: m Config
-
 class (Applicative m, Monad m) => HttpM d m where
   http :: State (Http d) a -> m a
 
@@ -26,7 +23,7 @@ request = http
 response :: HttpM Response m => State (Http Response) a -> m a
 response = http
 
-class (Applicative m, Monad m) => SocketM m where
+class (Applicative m, Monad m) => PeerM m where
   rawSock :: m Socket
   sock    :: m Handle
   peer    :: m SockAddr
@@ -34,7 +31,7 @@ class (Applicative m, Monad m) => SocketM m where
 -- TODO:  queue and dequeue are probably enough.
 type SendAction = (Socket, Handle) -> IO ()
 
-class (Applicative m, Monad m) => SendM m where
+class (Applicative m, Monad m) => QueueM m where
   enqueue  :: SendAction -> m ()
   dequeue  :: m (Maybe SendAction)
 
@@ -49,4 +46,13 @@ class (Applicative m, Monad m) => FlushM d m where
 
 class (Applicative m, Monad m) => BodyM d m where
   body :: d -> m (Maybe B.ByteString)
+
+class (Applicative m, Monad m) => ServerM m where
+  server :: m Config
+
+class (Applicative m, Monad m) => PayloadM m p where
+  payload :: State p a -> m a
+
+class (Applicative m, Monad m) => ClientM m where
+  client :: m ()
 

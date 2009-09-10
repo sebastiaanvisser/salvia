@@ -20,7 +20,7 @@ import Prelude hiding (sequence)
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (SocketM m, HttpM Request m, MonadIO m)
+  :: (PeerM m, HttpM Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -30,7 +30,7 @@ hRequestParser = hParser (request . put) parseRequest
 -- | Like the `hParser' but always parses `HTTP` `Response`s.
 
 hResponseParser
-  :: (SocketM m, HttpM Response m, MonadIO m)
+  :: (PeerM m, HttpM Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -48,7 +48,7 @@ specified with the first argument the function silently returns.
 -}
 
 hParser
-  :: (SocketM m, MonadIO m)
+  :: (PeerM m, MonadIO m)
   => (Http d -> m b)                        -- ^ What to do with message.
   -> (String -> Either ParseError (Http d)) -- ^ Custom message parser.
   -> Int                                    -- ^ Timeout in milliseconds.

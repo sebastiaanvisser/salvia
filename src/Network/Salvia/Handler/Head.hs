@@ -15,7 +15,7 @@ specified sub handler will be executed under the assumption that the request
 was a 'GET' request, otherwise this handler will act as the identify function.
 -}
 
-hHead :: (MonadIO m, SendM m, HttpM Request m) => m a -> m a
+hHead :: (MonadIO m, QueueM m, HttpM Request m) => m a -> m a
 hHead handler =
   do m <- request (getM method)
      case m of

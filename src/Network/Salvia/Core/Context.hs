@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Network.Salvia.Core.Context
-  ( SendAction
+{-  ( SendAction
   , SendQueue
 
   , Context (..)
@@ -15,12 +15,14 @@ module Network.Salvia.Core.Context
   , queue
 
   , mkContext
-  )
+  )-}
 where
 
+import Control.Category
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Socket (SockAddr, Socket)
+import Prelude hiding ((.), id)
 import System.IO
 
 -- | A send action is some thing that works on a socket or handle.
@@ -37,23 +39,31 @@ sent at the end of a request handler.
 
 type SendQueue  = [SendAction]
 
+data PeerInfo = PeerInfo
+  { __rawSock :: Socket
+  , __sock    :: Handle
+  , __peer    :: SockAddr
+  }
+
+$(mkLabels [''PeerInfo])
+
+_rawSock :: PeerInfo :-> Socket
+_sock    :: PeerInfo :-> Handle
+_peer    :: PeerInfo :-> SockAddr
+
 {- |
 A handler context contains all the information needed by the request handlers
 to perform their task and to set up a proper response. All the fields in the
 context are accessible using the read/write labels defined below.
 -}
 
+
 data Context c p = Context
   { _config   :: c             -- ^ The client or server configuration.
   , _payload  :: p             -- ^ Connection wide payload.
-                               
   , _request  :: Http Request  -- ^ The HTTP request header.
   , _response :: Http Response -- ^ The HTTP response header.
-                               
-  , _rawSock  :: Socket        -- ^ The raw socket for the connection with the other endpoint. 
-  , _sock     :: Handle        -- ^ The socket handle for the connection with the other endpoint.
-  , _peer     :: SockAddr      -- ^ The address of the other endpoint.
-                               
+  , _peerInfo :: PeerInfo      -- ^ The raw socket for the connection with the other endpoint. 
   , _queue    :: SendQueue     -- ^ The queue of send actions.
   }
 
@@ -62,11 +72,18 @@ $(mkLabels [''Context])
 config   :: Context c p :-> c
 payload  :: Context c p :-> p
 queue    :: Context c p :-> SendQueue
-peer     :: Context c p :-> SockAddr
-rawSock  :: Context c p :-> Socket
-sock     :: Context c p :-> Handle
+peerInfo :: Context c p :-> PeerInfo
 request  :: Context c p :-> Http Request
 response :: Context c p :-> Http Response
+
+rawSock :: Context c p :-> Socket
+rawSock = _rawSock . peerInfo
+
+sock :: Context c p :-> Handle
+sock = _sock . peerInfo
+
+peer :: Context c p :-> SockAddr
+peer = _peer . peerInfo
 
 {- |
 Create and default server context with the specified server configuration,
@@ -80,9 +97,7 @@ mkContext c p a r s =
     , _payload  = p
     , _request  = emptyRequest
     , _response = emptyResponse  -- 200 OK, by default.
-    , _rawSock  = r
-    , _sock     = s
-    , _peer     = a
+    , _peerInfo = PeerInfo r s a
     , _queue    = []
     }
 

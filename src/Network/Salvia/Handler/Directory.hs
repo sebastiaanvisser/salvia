@@ -24,7 +24,7 @@ filesystem.
 -}
 
 hDirectoryResource
-  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
   => FilePath  -- ^ Directory to produce a listing for.
   -> m ()
 hDirectoryResource dirName =
@@ -38,12 +38,12 @@ hDirectoryResource dirName =
 Like `hDirectoryResource` but uses the path from the current request URI.
 -}
 
-hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
+hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m) => m ()
 hDirectory = hResource hDirectoryResource
 
 -- Helper function that does all the work.
 
-dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
+dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m) => FilePath -> m ()
 dirHandler dirName =
   do p <- request (getM (path . asUri))
      filenames <- liftIO $ getDirectoryContents dirName

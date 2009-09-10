@@ -27,7 +27,7 @@ requests (`hHead`) and printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, FlushM Response m, SocketM m, HttpM Request m, HttpM Response m, ConfigM m, SendM m)
+  :: (MonadIO m, FlushM Response m, PeerM m, HttpM Request m, HttpM Response m, ServerM m, QueueM m)
   => m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
@@ -45,7 +45,7 @@ environment should be parametrized with a session.
 -}
 
 hSessionEnv
-  :: (MonadIO m, FlushM Response m, SendM m, SocketM m, HttpM Request m, HttpM Response m, ConfigM m)
+  :: (MonadIO m, FlushM Response m, QueueM m, PeerM m, HttpM Request m, HttpM Response m, ServerM m)
   => TVar Int               -- ^ Request count variable.
   -> Sessions b             -- ^ Session collection variable.
   -> (TSession b -> m a)    -- ^ m parametrized with current session.
@@ -65,7 +65,7 @@ before :: (MonadIO m, HttpM Response m) => m ()
 before = hBanner "salvia-httpd"
 
 after
-  :: (SendM m, SocketM m, FlushM Response m, HttpM Request m, ConfigM m, MonadIO m, HttpM Response m)
+  :: (QueueM m, PeerM m, FlushM Response m, HttpM Request m, ServerM m, MonadIO m, HttpM Response m)
   => Maybe (TVar Int) -> m ()
 after mc = 
   do hResponsePrinter
@@ -75,11 +75,11 @@ after mc =
        mc
 
 wrapper
-  :: (MonadIO m, HttpM Response m, ConfigM m, SendM m, SocketM m, FlushM Response m, HttpM Request m)
+  :: (MonadIO m, HttpM Response m, ServerM m, QueueM m, PeerM m, FlushM Response m, HttpM Request m)
   => Maybe (TVar Int) -> m a -> m ()
 wrapper c h = before >> h >> after c
 
-parseError :: (HttpM Response m, SendM m) => String -> m ()
+parseError :: (HttpM Response m, QueueM m) => String -> m ()
 parseError err = 
   do hError BadRequest
      sendStr ("\n" ++ err ++ "\n")

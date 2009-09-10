@@ -135,7 +135,7 @@ produced.
 -}
 
 hSignup
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, QueueM m)
   => TUserDatabase FilePath -> Actions -> m ()
 hSignup tdb acts =
   do db <- liftIO . atomically $ readTVar tdb
@@ -166,7 +166,7 @@ the user is logged in and stored in the session payload. Otherwise a
 -}
 
 hLogin
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, QueueM m)
   => UserDatabase b -> TUserSession a -> m ()
 hLogin db session =
   do ps <- hRequestParameters "utf-8"
@@ -188,7 +188,7 @@ authenticate ps db =
          else Nothing
 
 -- Login user and create `Ok' response on successful user.
-loginSuccessful :: (MonadIO m, HttpM Response m, SendM m) => TUserSession a -> User -> m ()
+loginSuccessful :: (MonadIO m, HttpM Response m, QueueM m) => TUserSession a -> User -> m ()
 loginSuccessful session user =
   do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
      liftIO $ atomically (readTVar session >>= writeTVar session . f)
@@ -210,7 +210,7 @@ identifier, session start and expiration date and the possible user payload
 that is included.
 -}
 
-hLoginfo :: (MonadIO m, SendM m) => TUserSession a -> m ()
+hLoginfo :: (MonadIO m, QueueM m) => TUserSession a -> m ()
 hLoginfo session =
   do s' <- liftIO $ atomically $ readTVar session
 
@@ -234,7 +234,7 @@ the guest account from the user database is used for authorization.
 -}
 
 hAuthorized
-  :: (MonadIO m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Response m, QueueM m)
   => UserDatabase b        -- ^ The user database to read guest account from.
   -> Action                -- ^ The actions that should be authorized.
   -> (Maybe User -> m ())  -- ^ The handler to perform when authorized.
@@ -258,7 +258,7 @@ guest user will not be used in any case.
 -}
 
 hAuthorizedUser
-  :: (MonadIO m, HttpM Response m, SendM m)
+  :: (MonadIO m, HttpM Response m, QueueM m)
   => Action          -- ^ The actions that should be authorized.
   -> (User -> m ())  -- ^ The handler to perform when authorized.
   -> TUserSession a  -- ^ This handler requires a user session

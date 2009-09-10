@@ -7,7 +7,7 @@ import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Core.Aspects hiding (server)
 import System.Locale
 
 {- |
