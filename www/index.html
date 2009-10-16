@@ -1,9 +1,30 @@
-<html>
-<head>
-<title>test</title>
+<!DOCTYPE html>
+<!-- html5 -->
+<title>Saliva demo.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta charset="utf-8">
+
+<header>
+  <h1>Salvia demo.</h1>
+</header>
+
+<form id="put">
+<fieldset>
+  <legend>Put example</legend>
+  <p><label>Contents: <textarea name="contents" placeholder="document contents"></textarea></label></p>
+  <p><label>Filename: <input type="text" name="address" placeholder="data.txt"></label></p>
+  <input type="submit" onclick="put()">
+</fieldset>
+</form>
+
+<footer>haskell</footer>
+
+
+
+
 <script type="text/javascript">
 var r;
-function doit() {
+function put () {
   r = new XMLHttpRequest();
   doc = document.getElementById("doc").value;
   text = document.getElementById("text").value;
@@ -23,14 +44,4 @@ function resp() {
   }
 }
 </script>
-</head>
-<body>
-<form>
-doc: <input id="doc">
-text: <textarea id="text"></textarea>
-</form>
-<button onclick="doit()">do</button>
-<div id="status"></div>
-<div id="output"></div>
-</body>
-</html>
+

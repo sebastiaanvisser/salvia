@@ -13,15 +13,14 @@ module Network.Salvia.Handler.Body {- doc ok -}
   )
 where
 
-import Data.Maybe
-import Data.Encoding
 import Control.Applicative
 import Control.Monad.State hiding (get)
+import Data.Encoding
+import Data.Maybe
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
-import qualified Data.Encoding as E
 import qualified Data.ByteString.Lazy as B
 
 {- |

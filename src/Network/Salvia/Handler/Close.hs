@@ -33,11 +33,9 @@ the following criteria are met:
 * The HTTP version is HTTP/1.0.
 -}
 
-hKeepAlive
-  :: (QueueM m, PeerM m, HttpM Request m, HttpM Response m, MonadIO m)
-  => m a -> m ()
+hKeepAlive :: (QueueM m, PeerM m, HttpM' m, MonadIO m) => m a -> m ()
 hKeepAlive handler =
-  do handler
+  do _ <- handler
      h      <- sock
      conn   <- request (getM connection)
      ver    <- request (getM version)
@@ -49,9 +47,9 @@ hKeepAlive handler =
            , ver == http10
            ]
        then catchIO (hClose h) ()
-       else resetContext >> hKeepAlive handler
+       else resetContext >> hKeepAlive handler 
 
-resetContext :: (HttpM Request m, HttpM Response m, QueueM m) => m ()
+resetContext :: (HttpM' m, QueueM m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)

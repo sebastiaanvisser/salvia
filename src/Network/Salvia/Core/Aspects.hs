@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Network.Salvia.Core.Aspects where
 
 import Control.Applicative
@@ -16,6 +17,9 @@ forResponse = undefined
 
 class (Applicative m, Monad m) => HttpM d m where
   http :: State (Http d) a -> m a
+
+class (HttpM Request m, HttpM Response m) => HttpM' m
+instance (HttpM Request m, HttpM Response m) => HttpM' m
 
 request :: HttpM Request m => State (Http Request) a -> m a
 request = http

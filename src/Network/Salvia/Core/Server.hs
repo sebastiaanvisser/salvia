@@ -35,5 +35,4 @@ server c h p = do
          do d <- socketToHandle k ReadWriteMode
             let ctx = mkContext c p a k d
             evalStateT (unHandler h) ctx
-  putStrLn "quiting"
 

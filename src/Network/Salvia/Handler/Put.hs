@@ -6,7 +6,6 @@ module Network.Salvia.Handler.Put {- doc ok -}
 where
 
 import Control.Monad.State
-import Data.Maybe
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Body

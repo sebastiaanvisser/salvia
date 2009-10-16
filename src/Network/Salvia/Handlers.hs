@@ -6,7 +6,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
   -- ** Default handler environments.
 
     hDefaultEnv
-  , hSessionEnv
+--   , hSessionEnv
 
   -- ** Parse client requests.
 
@@ -149,50 +149,63 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
   -- * Session and user management.
 
+  -- ** HTTP client.
+
+  -- * Client requests.
+
+  , hGetRequest
+  , hClientEnvironment
+
+  -- * Proxy.
+
+--   , hProxy
+
   -- ** Cookie handling.
 
   , hSetCookies
   , hGetCookies
-  , newCookie
+  , hDelCookie
+  , hNewCookie
 
   -- ** Session management.
+  , module Network.Salvia.Handler.Session
 
-  , hSession
+--   , hSession
 
-  , SessionID
-  , Session (..)
-  , TSession
-  , Sessions
+--   , SessionID
+--   , Session (..)
+--   , TSession
+--   , Sessions
 
-  , hSessionID
-  , hSetSessionCookie
+--   , hSessionID
+--   , hSetSessionCookie
 
-  , mkSessions
+--   , mkSessions
 
   -- ** User management.
 
-  , Username
-  , Password
-  , Action
-  , Actions
-  , User (..)
-  , Users
-  , UserDatabase
-  , TUserDatabase
+--   , Username
+--   , Password
+--   , Action
+--   , Actions
+--   , User (..)
+--   , Users
+--   , UserDatabase
+--   , TUserDatabase
 
-  , UserPayload (..)
-  , UserSession
-  , TUserSession
+--   , UserPayload (..)
+--   , UserSession
+--   , TUserSession
 
-  , hSignup
-  , hLogin
-  , hLogout
-  , hLoginfo
+--   , hSignup
+--   , hLogin
+--   , hLogout
+--   , hLoginfo
 
-  , hAuthorized
-  , hAuthorizedUser
+--   , hAuthorized
+--   , hAuthorizedUser
 
-  , readUserDatabase
+--   , readUserDatabase
 
   )
 where
@@ -200,6 +213,7 @@ where
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.CGI
+import Network.Salvia.Handler.Client
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Cookie
 import Network.Salvia.Handler.Counter
@@ -212,11 +226,12 @@ import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Head
 import Network.Salvia.Handler.Log
-import Network.Salvia.Handler.Login
+-- import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Method
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path
 import Network.Salvia.Handler.Printer
+-- import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Put
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Handler.Rewrite

@@ -1,6 +1,6 @@
 module Network.Salvia.Handler.Environment {- doc ok -}
   ( hDefaultEnv
-  , hSessionEnv
+--   , hSessionEnv
   )
 where
 
@@ -15,7 +15,7 @@ import Network.Salvia.Handler.Head
 import Network.Salvia.Handler.Log
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Printer
-import Network.Salvia.Handler.Session
+-- import Network.Salvia.Handler.Session
 import Network.Salvia.Core.Aspects
 import System.IO
 import Prelude hiding (log)
@@ -42,7 +42,7 @@ all session information (used by `hSession`). Handlers that run in this
 environment should be parametrized with a session.
 -}
 
-hSessionEnv
+{-hSessionEnv
   :: (MonadIO m, FlushM Response m, QueueM m, PeerM m, HttpM Request m, HttpM Response m, ServerM m)
   => Handle                 -- ^ File handle to log to.
   -> TVar Int               -- ^ Request count variable.
@@ -52,7 +52,7 @@ hSessionEnv
 hSessionEnv log count sessions handler =
   wrapper log (Just count) $
     do session <- hSession sessions 300
-       hHead (handler session)
+       hHead (handler session)-}
 
 -- Helper with common functionality.
 
@@ -64,7 +64,7 @@ wrapper log count handler =
       f h = h >> hResponsePrinter >> logger
   in hKeepAlive $ 
     do hBanner "salvia-httpd"
-       hRequestParser (1000 * 15)
+       hRequestParser (1000 * 4)
          (f . hCustomError BadRequest)
          (f handler)
 

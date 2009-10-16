@@ -53,11 +53,13 @@ Library
                     Network.Salvia.Core.Config
                     Network.Salvia.Core.Context
                     Network.Salvia.Core.Handler
+                    Network.Salvia.Core.Client
                     Network.Salvia.Core.Server
                     Network.Salvia.Handler.Banner
                     Network.Salvia.Handler.Body
                     Network.Salvia.Handler.CGI
                     Network.Salvia.Handler.Close
+                    Network.Salvia.Handler.Client
                     Network.Salvia.Handler.Cookie
                     Network.Salvia.Handler.Counter
                     Network.Salvia.Handler.Directory
@@ -74,6 +76,7 @@ Library
                     Network.Salvia.Handler.Parser
                     Network.Salvia.Handler.Path
                     Network.Salvia.Handler.Printer
+                    Network.Salvia.Handler.Proxy
                     Network.Salvia.Handler.Put
                     Network.Salvia.Handler.Redirect
                     Network.Salvia.Handler.Rewrite
@@ -90,7 +93,7 @@ Library
                     MultiParamTypeClasses
                     GeneralizedNewtypeDeriving
 
-Executable        salvia-demo
+Executable          salvia-demo
   Executable:       salvia-demo
   Main-is:          Demo.hs
   GHC-Options:      -threaded -Wall -fno-warn-orphans

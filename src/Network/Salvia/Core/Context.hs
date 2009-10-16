@@ -101,3 +101,10 @@ mkContext c p a r s =
     , _queue    = []
     }
 
+-- todo: make peerInfo a Maybe.
+emptyContext :: Context () ()
+emptyContext = mkContext () ()
+  (error "emptyContext: no peer info available")
+  (error "emptyContext: no peer info available")
+  (error "emptyContext: no peer info available")
+

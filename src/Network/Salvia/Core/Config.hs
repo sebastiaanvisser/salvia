@@ -23,7 +23,7 @@ data Config =
 {- |
 The default server configuration sets some safe default values. The server will
 by default bind to 0.0.0.0 at port 80. The default value for the TCP backlog is
-4, the default socket buffer size is 64KB. This function has to be in IO
+64, the default socket buffer size is 64KB. This function has to be in IO
 because of the translation from a `String` to a `HostAddress` using
 `inet_addr`.
 -}
@@ -35,6 +35,6 @@ defaultConfig =
     , admin      = "admin@localhost"
     , listenAddr = 0
     , listenPort = 80
-    , backlog    = 16
+    , backlog    = 64
     }
 

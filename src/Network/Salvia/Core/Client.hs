@@ -6,47 +6,52 @@ import Data.Maybe
 import Data.Record.Label
 import Network.BSD
 import Network.Protocol.Uri
+import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Handler
-import Network.Salvia.Handler.Body
-import Network.Salvia.Handler.Client
+-- import Network.Salvia.Handler.Body
+-- import Network.Salvia.Handler.Client
 import Network.Socket
 import System.IO
+import System.IO.Error
 import qualified Network.Salvia.Core.Context as C
 
-client
-  :: Handler c () a -- ^ Handler to setup request.
-  -> Handler d () b -- ^ Handler to react to response.
-  -> String         -- ^ jaja
-  -> IO (Maybe b)  -- ^ jaja
+runClient
+  :: ClientHandler a -- ^ Handler to setup request.
+  -> ClientHandler b -- ^ Handler to react to response.
+  -> IO b
 
-client hReq hRes uri = 
-  case parseUri uri of
-    Left _ -> return Nothing
-    Right u ->
-      do let p = fromMaybe 80 (get port u)
+runClient hReq hRes = 
+  do -- Run the handler to setup the request.
+     req <- get C.request . snd <$> runHandler hReq C.emptyContext
+     let u = get asUri req
+         p = fromMaybe 80 (get port u)
+         h = get host u
 
-         -- Open up connection to client
-         entry <- getHostByName (get host u)
-         sck <- socket (hostFamily entry) Stream 0
-         let addr = head (hostAddresses entry)
-         connect sck (SockAddrInet (fromIntegral p) addr)
-         h <- socketToHandle sck ReadWriteMode
-         name <- getSocketName sck
+     -- Get the host address first by trying a hostname lookup and when this
+     -- fails trying to parse as an IP address.
+     hbn <- try (getHostByName h)
+     (fam, addr) <- case hbn of
+       Left _  -> inet_addr h >>= return . (,) AF_INET
+       Right e -> return (hostFamily e, head (hostAddresses e))
 
-         -- Create context and run setup request.
-         ss <- execStateT (unHandler hReq) (C.mkContext undefined () name sck h)
+     -- Open up connection to client
+     sck <- socket fam Stream 0
+     connect sck (SockAddrInet (fromIntegral p) addr)
+     fd <- socketToHandle sck ReadWriteMode
+     name <- getSocketName sck
 
-         -- Update context and handle response.
-         let k = request (put (get C.request ss)) >> hRes
-         Just <$> evalStateT (unHandler k) (C.mkContext undefined () name sck h)
+     -- Put the request in the context and run the response handler.
+     fst <$> runHandler 
+       (request (put req) >> hRes)
+       (C.mkContext () () name sck fd)
 
-getRequest :: String -> IO (Maybe String)
-getRequest u = join . join <$>
-  client 
-    (hGetRequest u)
-    (hClientEnvironment
-      (const (return Nothing))
-      (hResponseBody "utf-8")
-    ) u
+-- getRequest :: String -> IO (Maybe String)
+-- getRequest u = join . join <$>
+--   runClient 
+--     (hGetRequest u)
+--     (hClientEnvironment
+--       (const (return Nothing))
+--       (hResponseBody "utf-8")
+--     ) u
 
