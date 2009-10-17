@@ -7,8 +7,8 @@ where
 import Network.Socket
 
 {- |
-The HTTP server configuration specifies some important network settings the
-server must know before being able to run. Most fields speak for themselves.
+The HTTP server configuration contains some network settings the server needs
+know before being able to run. Most fields speak for themselves.
 -}
 
 data Config =
@@ -23,9 +23,7 @@ data Config =
 {- |
 The default server configuration sets some safe default values. The server will
 by default bind to 0.0.0.0 at port 80. The default value for the TCP backlog is
-64, the default socket buffer size is 64KB. This function has to be in IO
-because of the translation from a `String` to a `HostAddress` using
-`inet_addr`.
+64, the default socket buffer size is 64KB.
 -}
 
 defaultConfig :: Config

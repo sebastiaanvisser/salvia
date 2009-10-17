@@ -2,8 +2,6 @@ comet?
 IPv6?
 proxy?
 
-fix timeout issues
-
 jailIO
 session typeclass
 send using decoding

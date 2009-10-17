@@ -9,13 +9,13 @@ where
 import Control.Applicative
 import Control.Monad.State hiding (sequence)
 import Data.Traversable
-import Misc.Util
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Error
+import Prelude hiding (sequence)
 import System.IO
 import System.Timeout
 import Text.Parsec.Error (ParseError)
-import Prelude hiding (sequence)
 
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 

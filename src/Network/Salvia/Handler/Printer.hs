@@ -1,16 +1,16 @@
 module Network.Salvia.Handler.Printer {- doc ok -}
-  ( hRequestPrinter
-  , hResponsePrinter
-  , hFlushHeaders
-  , hFlushQueue
-  )
+( hRequestPrinter
+, hResponsePrinter
+, hFlushHeaders
+, hFlushQueue
+)
 where
 
 import Control.Applicative
 import Control.Monad.State
-import Misc.Util
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Error
 import System.IO
 
 {- |

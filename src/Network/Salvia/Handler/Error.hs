@@ -1,9 +1,10 @@
 module Network.Salvia.Handler.Error {- doc ok -}
-  ( hError
-  , hCustomError
-  , hIOError
-  , hSafeIO
-  )
+( hError
+, hCustomError
+, hIOError
+, hSafeIO
+, catchIO
+)
 where
 
 import Control.Monad.Trans
@@ -12,16 +13,14 @@ import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
 import System.IO.Error
 
-{- |
-The 'hError' handler enables the creation of a default style of error responses
-for the specified HTTP `Status` code.
--}
+-- | The 'hError' handler enables the creation of a default style of error
+-- responses for the specified HTTP `Status` code.
 
 hError :: (HttpM Response m, QueueM m) => Status -> m ()
 hError e = hCustomError e
   (concat ["[", show (codeFromStatus e), "] ", show e, "\n"])
 
-{- | Like `hError` but with a custom error message. -}
+-- | Like `hError` but with a custom error message.
 
 hCustomError :: (HttpM Response m, QueueM m) => Status -> String -> m ()
 hCustomError e m =
@@ -49,13 +48,16 @@ hIOError e
   | isPermissionError   e = hError Forbidden
   | otherwise             = hError InternalServerError
 
-{- |
-Execute an handler with the result of an IO action. When the IO actions fails a
-default error handler will be executed.
--}
+-- | Execute an handler with the result of an IO action. When the IO actions
+-- fails a default error handler will be executed.
 
 hSafeIO
   :: (MonadIO m, HttpM Response m, QueueM m)
   => IO a -> (a -> m ()) -> m ()
 hSafeIO io h = liftIO (try io) >>= either hIOError h
+
+-- | Utility function to easily catch IO errors.
+
+catchIO :: MonadIO m => IO a -> a -> m a
+catchIO a b = liftIO (a `catch` (const (return b)))
 

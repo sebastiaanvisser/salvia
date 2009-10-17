@@ -1,16 +1,16 @@
 module Network.Salvia.Handler.Close {- doc ok -}
   ( hCloseConn
   , hKeepAlive
-  , empty
+  , emptyQueue
   )
 where
 
-import Misc.Util
 import Control.Monad.State
 import Data.Maybe
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Error
 import System.IO
 
 -- | Run a handler once and close the connection afterwards.
@@ -53,8 +53,10 @@ resetContext :: (HttpM' m, QueueM m) => m ()
 resetContext =
   do request  (put emptyRequest)
      response (put emptyResponse)
-     empty
+     emptyQueue
 
-empty :: QueueM m => m ()
-empty = dequeue >>= maybe (return ()) (const empty)
+-- | Empty the send queue.
+
+emptyQueue :: QueueM m => m ()
+emptyQueue = dequeue >>= return () `maybe` const emptyQueue
 

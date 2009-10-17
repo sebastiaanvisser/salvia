@@ -20,6 +20,6 @@ hHead handler =
   do m <- request (getM method)
      case m of
        HEAD -> hLocalRequest method (const GET) $
-                 handler <* empty
+                 handler <* emptyQueue
        _    -> handler
 

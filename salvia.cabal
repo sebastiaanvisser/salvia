@@ -45,9 +45,6 @@ Library
                     salvia-protocol,
                     split
 
-  Other-modules:    Misc.Text
-                    Misc.Util
-
   Exposed-modules:  Network.Salvia
                     Network.Salvia.Core.Aspects
                     Network.Salvia.Core.Config
