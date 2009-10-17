@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Redirect (hRedirect) where {- doc ok -}
+module Network.Salvia.Handler.Redirect (hRedirect) where
 
 import Data.Record.Label
 import Network.Protocol.Http

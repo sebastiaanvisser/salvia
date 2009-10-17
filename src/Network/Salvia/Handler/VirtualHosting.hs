@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.VirtualHosting {- doc ok -}
+module Network.Salvia.Handler.VirtualHosting
   ( hVirtualHosting
   , hPortRouter
   )

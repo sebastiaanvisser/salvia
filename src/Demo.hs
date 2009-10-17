@@ -55,5 +55,5 @@ hString s =
   do response $
        do contentType   =: Just ("text/plain", Just "utf-8")
           contentLength =: Just (length s)
-     sendStr s
+     hSend s
 

@@ -2,7 +2,6 @@
 module Network.Salvia.Impl.Handler where
 
 import Control.Applicative
-import Control.Category
 import Control.Monad.State
 import Data.Monoid
 import Data.Record.Label hiding (get)
@@ -12,11 +11,8 @@ import Network.Salvia.Core.Context
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
-import Prelude hiding ((.), id)
 import Safe
-import qualified Data.ByteString.Lazy as B
 import qualified Network.Salvia.Core.Aspects as A
-import qualified System.IO.UTF8 as U
 
 newtype Handler c p a = Handler { unHandler :: StateT (Context c p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context c p))
@@ -40,10 +36,6 @@ instance A.HttpM Response (Handler c p) where
 instance A.QueueM (Handler c p) where
   enqueue f     = modM queue (++[f])
   dequeue       = headMay <$> getM queue <* modM queue (tailDef [])
-  sendStr s     = A.enqueue (flip U.hPutStr s . snd)
-  sendBs bs     = A.enqueue (flip B.hPutStr bs . snd)
-  spoolStr f fd = A.enqueue (\(_, h) -> U.hGetContents fd >>= U.hPutStr h . f)
-  spoolBs  f fd = A.enqueue (\(_, h) -> B.hGetContents fd >>= B.hPut    h . f)
 
 instance A.PeerM (Handler c p) where
   rawSock = getM rawSock

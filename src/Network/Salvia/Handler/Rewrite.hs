@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Rewrite {- doc ok -}
+module Network.Salvia.Handler.Rewrite
   ( hLocalRequest
 
   , hRewrite

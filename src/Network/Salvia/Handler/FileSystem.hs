@@ -1,5 +1,5 @@
 {- | Serving parts of the local file system. -}
-module Network.Salvia.Handler.FileSystem {- doc ok -}
+module Network.Salvia.Handler.FileSystem
   ( hFileSystem
   , hFileSystemNoIndexes
   , hFileTypeDispatcher

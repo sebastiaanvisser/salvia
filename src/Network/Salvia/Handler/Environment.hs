@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Environment {- doc ok -}
+module Network.Salvia.Handler.Environment
   ( hDefaultEnv
 --   , hSessionEnv
   )

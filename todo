@@ -2,10 +2,8 @@ comet?
 IPv6?
 proxy?
 
+
 jailIO
-session typeclass
-send using decoding
-text
 
 server running on multiple TCP ports
 can logger and color logger share things

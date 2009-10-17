@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.File  {- doc ok -}
+module Network.Salvia.Handler.File
   ( hFile
   , hFileResource
   , fileMime
@@ -19,6 +19,7 @@ import Network.Protocol.Mime
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Error
+import Network.Salvia.Handler.Queue
 import Prelude hiding ((.), id)
 import System.IO
 
@@ -39,7 +40,7 @@ hFileResource file =
          do contentType   =: Just (fileMime file, Just "utf-8")
             contentLength =: Just fs
             status        =: OK
-       spoolBs id fd
+       hSpool fd
 
 fileMime :: FilePath -> Mime
 fileMime file =
@@ -61,7 +62,7 @@ hFileResourceFilter fFilter file =
     do response $
          do contentType =: Just (fileMime file, Just "utf-8")
             status      =: OK
-       spoolStr fFilter fd
+       hSpoolWith fFilter fd
 
 {- |
 Turn a handler that is parametrized by a file resources into a regular handler

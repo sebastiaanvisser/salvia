@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Counter (hCounter) where {- doc ok -}
+module Network.Salvia.Handler.Counter (hCounter) where
 
 import Control.Concurrent.STM
 import Control.Monad.State

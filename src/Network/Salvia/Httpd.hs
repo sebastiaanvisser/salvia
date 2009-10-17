@@ -24,10 +24,6 @@ module Network.Salvia.Httpd
   , QueueM
   , enqueue
   , dequeue
-  , sendStr
-  , sendBs
-  , spoolStr
-  , spoolBs
 
   , FlushM
   , flushHeaders
@@ -41,8 +37,5 @@ where
 -- Abstract implementation.
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Aspects
-
--- Concrete implementation.
--- import Network.Salvia.Core.Server
--- import Network.Salvia.Core.Client
+-- import Network.Salvia.Core.Context
 

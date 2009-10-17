@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Printer {- doc ok -}
+module Network.Salvia.Handler.Printer
 ( hRequestPrinter
 , hResponsePrinter
 , hFlushHeaders
@@ -49,4 +49,5 @@ hFlushQueue =
      flip catchIO () $
        sequence_ (map ($ (s, h)) q) >> hFlush h
   where queue = dequeue >>= maybe (return []) ((<$> queue) . (:))
+
 

@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Cookie {- doc ok -}
+module Network.Salvia.Handler.Cookie
   ( hSetCookies
   , hGetCookies
   , hDelCookie

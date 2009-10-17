@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Login {- doc ok -}
+module Network.Salvia.Handler.Login
   (
 
   -- * Basic types.
@@ -48,6 +48,7 @@ import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Error
+import Network.Salvia.Handler.Queue
 import Network.Salvia.Handler.Session
 import Safe
 
@@ -193,7 +194,7 @@ loginSuccessful session user =
   do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
      liftIO $ atomically (readTVar session >>= writeTVar session . f)
      response (status =: OK)
-     sendStr "login successful\n"
+     hSend "login successful\n"
 
 {- | Logout the current user by emptying the session payload. -}
 
@@ -214,16 +215,16 @@ hLoginfo :: (MonadIO m, QueueM m) => TUserSession a -> m ()
 hLoginfo session =
   do s' <- liftIO $ atomically $ readTVar session
 
-     sendStr ("sID="    ++ show (sID     s') ++ "\n")
-     sendStr ("start="  ++ show (sStart  s') ++ "\n")
-     sendStr ("expire=" ++ show (sExpire s') ++ "\n")
+     hSend ("sID="    ++ show (sID     s') ++ "\n")
+     hSend ("start="  ++ show (sStart  s') ++ "\n")
+     hSend ("expire=" ++ show (sExpire s') ++ "\n")
 
      case sPayload s' of
        Nothing -> return ()
        Just (UserPayload (User uname _ mail acts) _ _) ->
-         do sendStr ("username=" ++ uname                ++ "\n")
-            sendStr ("email="    ++ mail                 ++ "\n")
-            sendStr ("actions="  ++ intercalate " " acts ++ "\n")
+         do hSend ("username=" ++ uname                ++ "\n")
+            hSend ("email="    ++ mail                 ++ "\n")
+            hSend ("actions="  ++ intercalate " " acts ++ "\n")
 
 {- |
 Execute a handler only when the user for the current session is authorized to

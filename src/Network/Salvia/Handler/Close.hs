@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Close {- doc ok -}
+module Network.Salvia.Handler.Close
   ( hCloseConn
   , hKeepAlive
   , emptyQueue

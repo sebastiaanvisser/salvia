@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.CGI (hCGI) where {- doc ok -}
+module Network.Salvia.Handler.CGI (hCGI) where
 
 import Control.Applicative
 import Control.Category
@@ -15,6 +15,7 @@ import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Parser
+import Network.Salvia.Handler.Queue
 import Prelude hiding ((.), id)
 import System.IO
 import System.Process
@@ -77,6 +78,6 @@ hCGI fn =
 
      -- Spool all data from the CGI script's output to the client. When
      -- finished, close the handle and wait for the script to terminate.
-     spoolBs id out
+     hSpool out
      enqueue (const (hClose out <* waitForProcess pid))
 

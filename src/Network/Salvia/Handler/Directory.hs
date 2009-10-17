@@ -1,5 +1,5 @@
 {- | Rendering of HTML directory listings. -}
-module Network.Salvia.Handler.Directory {- doc ok -}
+module Network.Salvia.Handler.Directory
   ( hDirectory
   , hDirectoryResource
   )
@@ -15,6 +15,7 @@ import Network.Protocol.Uri (path)
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
+import Network.Salvia.Handler.Queue
 import Prelude hiding ((.), id, mod)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 
@@ -53,7 +54,7 @@ dirHandler dirName =
        do contentType   =: Just ("text/html", Nothing)
           contentLength =: Just (length b)
           status        =: OK
-     sendStr b
+     hSend b
 
 -- Add trailing slash to a directory name.
 processFilename :: FilePath -> FilePath -> IO FilePath

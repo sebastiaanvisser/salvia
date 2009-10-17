@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Put {- doc ok -}
+module Network.Salvia.Handler.Put
   ( hPutFileSystem
   , hPutResource
   , hStore

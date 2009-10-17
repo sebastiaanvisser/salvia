@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Dispatching {- doc ok -}
+module Network.Salvia.Handler.Dispatching
   ( Dispatcher
   , ListDispatcher
   , hDispatch

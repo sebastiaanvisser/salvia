@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Head (hHead) where {- doc ok -}
+module Network.Salvia.Handler.Head (hHead) where
 
 import Control.Monad.Trans
 import Control.Applicative hiding (empty)

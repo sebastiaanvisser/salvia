@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Body {- doc ok -}
+module Network.Salvia.Handler.Body
   ( hRawRequestBody
   , hRawResponseBody
   , hRawBody

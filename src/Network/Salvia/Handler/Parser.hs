@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Parser {- doc ok -}
+module Network.Salvia.Handler.Parser
   ( hRequestParser
   , hResponseParser
   , hParser

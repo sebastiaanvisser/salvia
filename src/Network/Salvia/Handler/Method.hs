@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Method {- doc ok -}
+module Network.Salvia.Handler.Method
   ( hMethod
   , hMethodRouter
   )

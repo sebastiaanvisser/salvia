@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Error {- doc ok -}
+module Network.Salvia.Handler.Error
 ( hError
 , hCustomError
 , hIOError
@@ -11,6 +11,7 @@ import Control.Monad.Trans
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Handler.Queue
 import System.IO.Error
 
 -- | The 'hError' handler enables the creation of a default style of error
@@ -28,7 +29,7 @@ hCustomError e m =
        do status        =: e
           contentLength =: Just (length m)
           contentType   =: Just ("text/plain", Nothing)
-     sendStr m
+     hSend m
 
 {- |
 Map an `IOError` to a default style error response.

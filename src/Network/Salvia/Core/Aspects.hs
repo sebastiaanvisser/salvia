@@ -61,10 +61,10 @@ class (Applicative m, Monad m) => QueueM m where
   dequeue  :: m (Maybe SendAction)
 
   -- TODO:  queue and dequeue are probably enough.
-  sendStr  :: String                                   -> m ()
-  sendBs   :: B.ByteString                             -> m ()
-  spoolStr :: (String       -> String)       -> Handle -> m ()
-  spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
+--   sendStr  :: String                                   -> m ()
+--   sendBs   :: B.ByteString                             -> m ()
+--   spoolStr :: (String       -> String)       -> Handle -> m ()
+--   spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
 
 -- | The `FlushM' type class can be used to flush the message headers and the
 -- message body directly over the wire to the other endpoint.

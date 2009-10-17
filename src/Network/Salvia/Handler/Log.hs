@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Log {- doc ok -}
+module Network.Salvia.Handler.Log
   ( hLog
   , hLogWithCounter
   )

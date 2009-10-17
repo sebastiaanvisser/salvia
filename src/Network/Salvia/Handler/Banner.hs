@@ -1,4 +1,4 @@
-module Network.Salvia.Handler.Banner (hBanner) where {- doc ok -}
+module Network.Salvia.Handler.Banner (hBanner) where
 
 import Control.Applicative
 import Control.Monad.State
