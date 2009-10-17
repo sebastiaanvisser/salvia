@@ -1,4 +1,4 @@
-module Network.Salvia.Core.Client where
+module Network.Salvia.Impl.Client where
 
 import Control.Applicative
 import Control.Monad.State hiding (get)
@@ -8,7 +8,7 @@ import Network.BSD
 import Network.Protocol.Uri
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
-import Network.Salvia.Core.Handler
+import Network.Salvia.Impl.Handler
 -- import Network.Salvia.Handler.Body
 -- import Network.Salvia.Handler.Client
 import Network.Socket

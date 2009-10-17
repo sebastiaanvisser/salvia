@@ -1,9 +1,9 @@
-module Network.Salvia.Core.Server (server) where
+module Network.Salvia.Impl.Server (server) where
 
 import Control.Concurrent
 import Control.Monad.State
 import Network.Salvia.Core.Context 
-import Network.Salvia.Core.Handler
+import Network.Salvia.Impl.Handler
 import Network.Salvia.Core.Config
 import Network.Socket
 import System.IO

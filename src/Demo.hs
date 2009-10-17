@@ -1,14 +1,12 @@
 module Main where
 
+import Control.Monad.Trans
 import Data.Record.Label
-import Network.Socket
 import Network.Protocol.Http hiding (server, hostname)
 import Network.Salvia hiding (server)
-import Network.Salvia.Core.Server
--- import Network.Salvia.Core.Client
-import qualified Control.Monad.State as S
+import Network.Salvia.Impl.Server
+import Network.Socket
 import System.IO
-import Control.Monad.Trans
 
 main :: IO ()
 main =

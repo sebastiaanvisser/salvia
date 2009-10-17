@@ -1,5 +1,5 @@
 {-# LANGUAGE StandaloneDeriving, TypeSynonymInstances #-}
-module Network.Salvia.Core.Handler where
+module Network.Salvia.Impl.Handler where
 
 import Control.Applicative
 import Control.Category

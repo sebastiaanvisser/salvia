@@ -52,9 +52,9 @@ Library
                     Network.Salvia.Core.Aspects
                     Network.Salvia.Core.Config
                     Network.Salvia.Core.Context
-                    Network.Salvia.Core.Handler
-                    Network.Salvia.Core.Client
-                    Network.Salvia.Core.Server
+                    Network.Salvia.Impl.Handler
+                    Network.Salvia.Impl.Client
+                    Network.Salvia.Impl.Server
                     Network.Salvia.Handler.Banner
                     Network.Salvia.Handler.Body
                     Network.Salvia.Handler.CGI
