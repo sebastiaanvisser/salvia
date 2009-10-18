@@ -22,14 +22,6 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
   , hFlushHeaders
   , hFlushQueue
 
-  -- ** Sending data.
-
-  , hSend
-  , hSendBs
-  , hSpool
-  , hSpoolWith
-  , hSpoolWithBs
-
   -- ** Accessing request and response bodies.
 
   , hRawRequestBody
@@ -241,7 +233,6 @@ import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Put
-import Network.Salvia.Handler.Queue
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Handler.Rewrite
 import Network.Salvia.Handler.Session

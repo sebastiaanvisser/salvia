@@ -5,7 +5,7 @@ import Data.Record.Label
 import Network.Protocol.Http hiding (server, hostname)
 import Network.Salvia hiding (server)
 import Network.Salvia.Impl.Server
-import Network.Socket
+import Network.Socket hiding (send)
 import System.IO
 
 main :: IO ()
@@ -19,7 +19,7 @@ main =
        (hDefaultEnv l myHandler)
        store
 
-myHandler :: (HttpM Response m, MonadIO m, SessionM m Int, HttpM Request m, QueueM m, BodyM Request m, ServerM m) => m ()
+myHandler :: (HttpM Response m, MonadIO m, SessionM m Int, HttpM Request m, SendM m, QueueM m, BodyM Request m, ServerM m) => m ()
 myHandler = 
   hPortRouter
     [ ( 8080
@@ -50,10 +50,10 @@ hPrintSession =
 --      putSession (s { sPayload = Just (20 :: Int)} )
      liftIO (print (s :: Session Int))
 
-hString :: (HttpM Response m, QueueM m) => String -> m ()
+hString :: (HttpM Response m, SendM m) => String -> m ()
 hString s =
   do response $
        do contentType   =: Just ("text/plain", Just "utf-8")
           contentLength =: Just (length s)
-     hSend s
+     send s
 

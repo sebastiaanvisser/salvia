@@ -12,7 +12,9 @@ import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
 import Safe
+import System.IO
 import qualified Network.Salvia.Core.Aspects as A
+import qualified Data.ByteString.Lazy as ByteString
 
 newtype Handler c p a = Handler { unHandler :: StateT (Context c p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context c p))
@@ -36,6 +38,12 @@ instance A.HttpM Response (Handler c p) where
 instance A.QueueM (Handler c p) where
   enqueue f     = modM queue (++[f])
   dequeue       = headMay <$> getM queue <* modM queue (tailDef [])
+
+instance A.SendM (Handler c p) where
+  send        s    = A.enqueue (flip hPutStr s . snd)
+  sendBs      bs   = A.enqueue (flip ByteString.hPutStr bs . snd)
+  spoolWith   f fd = A.enqueue (\(_, h) -> hGetContents fd >>= hPutStr h . f)
+  spoolWithBs f fd = A.enqueue (\(_, h) -> ByteString.hGetContents fd >>= ByteString.hPut h . f)
 
 instance A.PeerM (Handler c p) where
   rawSock = getM rawSock

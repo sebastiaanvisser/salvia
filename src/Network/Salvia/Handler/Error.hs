@@ -11,25 +11,24 @@ import Control.Monad.Trans
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Aspects
-import Network.Salvia.Handler.Queue
 import System.IO.Error
 
 -- | The 'hError' handler enables the creation of a default style of error
 -- responses for the specified HTTP `Status` code.
 
-hError :: (HttpM Response m, QueueM m) => Status -> m ()
+hError :: (HttpM Response m, SendM m) => Status -> m ()
 hError e = hCustomError e
   (concat ["[", show (codeFromStatus e), "] ", show e, "\n"])
 
 -- | Like `hError` but with a custom error message.
 
-hCustomError :: (HttpM Response m, QueueM m) => Status -> String -> m ()
+hCustomError :: (HttpM Response m, SendM m) => Status -> String -> m ()
 hCustomError e m =
   do response $
        do status        =: e
           contentLength =: Just (length m)
           contentType   =: Just ("text/plain", Nothing)
-     hSend m
+     send m
 
 {- |
 Map an `IOError` to a default style error response.
@@ -42,7 +41,7 @@ The mapping from an IO error to an error response is rather straightforward:
 >  | True                  = hError InternalServerError
 -}
 
-hIOError :: (HttpM Response m, QueueM m) => IOError -> m ()
+hIOError :: (HttpM Response m, SendM m) => IOError -> m ()
 hIOError e
   | isDoesNotExistError e = hError NotFound
   | isAlreadyInUseError e = hError ServiceUnavailable
@@ -53,7 +52,7 @@ hIOError e
 -- fails a default error handler will be executed.
 
 hSafeIO
-  :: (MonadIO m, HttpM Response m, QueueM m)
+  :: (MonadIO m, HttpM Response m, SendM m)
   => IO a -> (a -> m ()) -> m ()
 hSafeIO io h = liftIO (try io) >>= either hIOError h
 

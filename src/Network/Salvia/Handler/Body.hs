@@ -1,16 +1,14 @@
 module Network.Salvia.Handler.Body
-  ( hRawRequestBody
-  , hRawResponseBody
-  , hRawBody
-  
-  , hRequestBody
-  , hResponseBody
-  , hBody
-
-  , hRequestParameters
-  , hResponseParameters
-  , hParameters
-  )
+( hRawRequestBody
+, hRawResponseBody
+, hRawBody
+, hRequestBody
+, hResponseBody
+, hBody
+, hRequestParameters
+, hResponseParameters
+, hParameters
+)
 where
 
 import Control.Applicative
@@ -69,8 +67,8 @@ hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Mayb
 hBody d def = 
   do let h = http :: State (Http d) a -> m a
      c <- body d
-     e <- h (getM contentType)
-     return (decodeWith def <$> (e >>= snd) <*> c)
+     e <- (>>= snd) <$> h (getM contentType)
+     return (decodeWith def <$> e <*> c)
 
 -- | Like `hBody' but specifically for `HTTP' `Request's.
 
@@ -99,6 +97,8 @@ hRequestParameters = hParameters forRequest
 
 hResponseParameters :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Parameters)
 hResponseParameters = hParameters forResponse
+
+-- Decoding helper.
 
 decodeWith :: String -> String -> B.ByteString -> String
 decodeWith def enc = decodeLazyByteString (fromMaybe (encodingFromString def) (encodingFromStringExplicit enc))

@@ -15,7 +15,6 @@ import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Parser
-import Network.Salvia.Handler.Queue
 import Prelude hiding ((.), id)
 import System.IO
 import System.Process
@@ -24,7 +23,7 @@ import qualified Data.ByteString.Lazy as L
 
 -- | Handler to run CGI scripts. Not entirely finished.
 
-hCGI :: (MonadIO m, HttpM Request m, BodyM Request m, HttpM Response m, QueueM m, ServerM m) => FilePath -> m ()
+hCGI :: (MonadIO m, BodyM Request m, HttpM' m, SendM m, QueueM m, ServerM m) => FilePath -> m ()
 hCGI fn =
   do cfg     <- server
      hdrs    <- request (getM headers)
@@ -78,6 +77,6 @@ hCGI fn =
 
      -- Spool all data from the CGI script's output to the client. When
      -- finished, close the handle and wait for the script to terminate.
-     hSpool out
+     spool out
      enqueue (const (hClose out <* waitForProcess pid))
 

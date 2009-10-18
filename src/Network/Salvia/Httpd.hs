@@ -25,6 +25,12 @@ module Network.Salvia.Httpd
   , enqueue
   , dequeue
 
+  , SendM
+  , send
+  , sendBs
+  , spoolWith
+  , spoolWithBs
+
   , FlushM
   , flushHeaders
   , flushQueue

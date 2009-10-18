@@ -48,7 +48,6 @@ import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Error
-import Network.Salvia.Handler.Queue
 import Network.Salvia.Handler.Session
 import Safe
 
@@ -136,7 +135,7 @@ produced.
 -}
 
 hSignup
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, QueueM m)
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
   => TUserDatabase FilePath -> Actions -> m ()
 hSignup tdb acts =
   do db <- liftIO . atomically $ readTVar tdb
@@ -167,7 +166,7 @@ the user is logged in and stored in the session payload. Otherwise a
 -}
 
 hLogin
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, QueueM m)
+  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
   => UserDatabase b -> TUserSession a -> m ()
 hLogin db session =
   do ps <- hRequestParameters "utf-8"
@@ -189,12 +188,12 @@ authenticate ps db =
          else Nothing
 
 -- Login user and create `Ok' response on successful user.
-loginSuccessful :: (MonadIO m, HttpM Response m, QueueM m) => TUserSession a -> User -> m ()
+loginSuccessful :: (MonadIO m, HttpM Response m, SendM m) => TUserSession a -> User -> m ()
 loginSuccessful session user =
   do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
      liftIO $ atomically (readTVar session >>= writeTVar session . f)
      response (status =: OK)
-     hSend "login successful\n"
+     send "login successful\n"
 
 {- | Logout the current user by emptying the session payload. -}
 
@@ -211,20 +210,25 @@ identifier, session start and expiration date and the possible user payload
 that is included.
 -}
 
-hLoginfo :: (MonadIO m, QueueM m) => TUserSession a -> m ()
+hLoginfo :: (MonadIO m, SendM m) => TUserSession a -> m ()
 hLoginfo session =
   do s' <- liftIO $ atomically $ readTVar session
 
-     hSend ("sID="    ++ show (sID     s') ++ "\n")
-     hSend ("start="  ++ show (sStart  s') ++ "\n")
-     hSend ("expire=" ++ show (sExpire s') ++ "\n")
+  -- todo: use keyValues pp
+     send $ intercalate "\n"
+       [ "sID="    ++ show (sID     s')
+       , "start="  ++ show (sStart  s')
+       , "expire=" ++ show (sExpire s')
+       ]
 
      case sPayload s' of
        Nothing -> return ()
        Just (UserPayload (User uname _ mail acts) _ _) ->
-         do hSend ("username=" ++ uname                ++ "\n")
-            hSend ("email="    ++ mail                 ++ "\n")
-            hSend ("actions="  ++ intercalate " " acts ++ "\n")
+         do send $ intercalate "\n"
+              [ "username=" ++ uname
+              , "email="    ++ mail
+              , "actions="  ++ intercalate " " acts
+              ]
 
 {- |
 Execute a handler only when the user for the current session is authorized to
@@ -235,7 +239,7 @@ the guest account from the user database is used for authorization.
 -}
 
 hAuthorized
-  :: (MonadIO m, HttpM Response m, QueueM m)
+  :: (MonadIO m, HttpM Response m, SendM m)
   => UserDatabase b        -- ^ The user database to read guest account from.
   -> Action                -- ^ The actions that should be authorized.
   -> (Maybe User -> m ())  -- ^ The handler to perform when authorized.
@@ -259,7 +263,7 @@ guest user will not be used in any case.
 -}
 
 hAuthorizedUser
-  :: (MonadIO m, HttpM Response m, QueueM m)
+  :: (MonadIO m, HttpM Response m, SendM m)
   => Action          -- ^ The actions that should be authorized.
   -> (User -> m ())  -- ^ The handler to perform when authorized.
   -> TUserSession a  -- ^ This handler requires a user session

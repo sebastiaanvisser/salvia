@@ -23,7 +23,7 @@ writeable by a `PUT' request. Files that do not exists will be created as long
 as the directory in which they will be created exists.
 -}
 
-hPutFileSystem :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m, BodyM Request m) => FilePath -> m ()
+hPutFileSystem :: (MonadIO m, HttpM' m, SendM m, BodyM Request m) => FilePath -> m ()
 hPutFileSystem = hFileTypeDispatcher hDirectoryResource (hPutResource hFileResource)
 
 {- |
@@ -32,7 +32,7 @@ the fallback handler otherwiser.
 -}
 
 hPutResource
-  :: (MonadIO m, BodyM Request m, HttpM Response m, QueueM m, HttpM Request m)
+  :: (MonadIO m, BodyM Request m, HttpM' m, SendM m)
   => (FilePath -> m ()) -> FilePath -> m ()
 hPutResource def fp = hMethod PUT (hStore fp) (def fp)
 
@@ -44,7 +44,7 @@ that file. When the request body could for some reason not be fetch a
 -}
 
 hStore
-  :: (MonadIO m, BodyM Request m, HttpM Response m, QueueM m)
+  :: (MonadIO m, BodyM Request m, HttpM Response m, SendM m)
   => FilePath -> m ()
 hStore name =
   do b <- hRawRequestBody

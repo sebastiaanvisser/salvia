@@ -15,7 +15,6 @@ import Network.Protocol.Uri (path)
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
-import Network.Salvia.Handler.Queue
 import Prelude hiding ((.), id, mod)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 
@@ -25,7 +24,7 @@ filesystem.
 -}
 
 hDirectoryResource
-  :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m)
+  :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m)
   => FilePath  -- ^ Directory to produce a listing for.
   -> m ()
 hDirectoryResource dirName =
@@ -39,12 +38,12 @@ hDirectoryResource dirName =
 Like `hDirectoryResource` but uses the path from the current request URI.
 -}
 
-hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m) => m ()
+hDirectory :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
 hDirectory = hResource hDirectoryResource
 
 -- Helper function that does all the work.
 
-dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, QueueM m) => FilePath -> m ()
+dirHandler :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => FilePath -> m ()
 dirHandler dirName =
   do p <- request (getM (path . asUri))
      filenames <- liftIO $ getDirectoryContents dirName
@@ -54,7 +53,7 @@ dirHandler dirName =
        do contentType   =: Just ("text/html", Nothing)
           contentLength =: Just (length b)
           status        =: OK
-     hSend b
+     send b
 
 -- Add trailing slash to a directory name.
 processFilename :: FilePath -> FilePath -> IO FilePath

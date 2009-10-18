@@ -7,7 +7,7 @@ import Network.Protocol.Http
 import Network.Salvia.Core.Config
 import Network.Socket
 import System.IO
-import qualified Data.ByteString.Lazy as B
+import Data.ByteString.Lazy (ByteString)
 
 -- | The `HttpM' type class indicates is parametrized with the directon
 -- (`Request' or `Response') for which the implementation should be able to
@@ -60,11 +60,33 @@ class (Applicative m, Monad m) => QueueM m where
   enqueue  :: SendAction -> m ()
   dequeue  :: m (Maybe SendAction)
 
-  -- TODO:  queue and dequeue are probably enough.
---   sendStr  :: String                                   -> m ()
---   sendBs   :: B.ByteString                             -> m ()
---   spoolStr :: (String       -> String)       -> Handle -> m ()
---   spoolBs  :: (B.ByteString -> B.ByteString) -> Handle -> m ()
+class (Applicative m, Monad m) => SendM m where
+
+  -- | Enqueue the action of sending one regular Haskell `String' over the wire
+  -- to the other endpoint.
+
+  send :: String -> m ()
+
+  -- | Enqueue the action of sending one `ByteString' over the wire to the
+  -- other endpoint.
+
+  sendBs :: ByteString -> m ()
+
+  -- | Like the `spool' function but allows a custom filter over the contents.
+  -- the wire to the other endpoint.
+
+  spoolWith :: (String -> String) -> Handle -> m ()
+
+  -- | Like the `spoolWith' function but uses a direct `ByteString' filter
+  -- which might be more efficient.
+
+  spoolWithBs :: (ByteString -> ByteString) -> Handle -> m ()
+
+-- | Enqueue the action of spooling the entire contents of a file handle over
+-- the wire to the other endpoint.
+
+spool :: SendM m => Handle -> m ()
+spool = spoolWithBs id
 
 -- | The `FlushM' type class can be used to flush the message headers and the
 -- message body directly over the wire to the other endpoint.
@@ -74,7 +96,7 @@ class (Applicative m, Monad m) => FlushM dir m where
   flushQueue   :: dir -> m ()
 
 class (Applicative m, Monad m) => BodyM dir m where
-  body :: dir -> m (Maybe B.ByteString)
+  body :: dir -> m (Maybe ByteString)
 
 -- | The `ServerM' type class can be used to acesss the static server
 -- configuration.

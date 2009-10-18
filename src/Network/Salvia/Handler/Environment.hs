@@ -28,11 +28,30 @@ requests (`hHead`) and printing the `salvia-httpd` server banner (`hBanner`).
 -}
 
 hDefaultEnv
-  :: (MonadIO m, FlushM Response m, PeerM m, HttpM Request m, HttpM Response m, ServerM m, QueueM m)
+  :: (MonadIO m, FlushM Response m, PeerM m, HttpM' m, ServerM m, QueueM m, SendM m)
   => Handle  -- ^ File handle to log to.
   -> m a     -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv log handler = wrapper log Nothing (hHead handler)
+
+-- Helper with common functionality.
+
+wrapper
+  :: (MonadIO m, HttpM' m, FlushM Response m, PeerM m, QueueM m, SendM m)
+  => Handle -> Maybe (TVar Int) -> m a -> m ()
+wrapper log count handler = 
+  let logger = maybe (hLog log) (\c -> hCounter c >> hLogWithCounter c log) count
+      f h = h >> hResponsePrinter >> logger
+  in hKeepAlive $ 
+    do hBanner "salvia-httpd"
+       hRequestParser (1000 * 4)
+         (f . hCustomError BadRequest)
+         (f handler)
+
+
+
+
+
 
 {- |
 This function is a more advanced version of the `hDefaultEnv` handler
@@ -53,18 +72,4 @@ hSessionEnv log count sessions handler =
   wrapper log (Just count) $
     do session <- hSession sessions 300
        hHead (handler session)-}
-
--- Helper with common functionality.
-
-wrapper
-  :: (MonadIO m, HttpM Response m, HttpM Request m, FlushM Response m, PeerM m, QueueM m)
-  => Handle -> Maybe (TVar Int) -> m a -> m ()
-wrapper log count handler = 
-  let logger = maybe (hLog log) (\c -> hCounter c >> hLogWithCounter c log) count
-      f h = h >> hResponsePrinter >> logger
-  in hKeepAlive $ 
-    do hBanner "salvia-httpd"
-       hRequestParser (1000 * 4)
-         (f . hCustomError BadRequest)
-         (f handler)
 
