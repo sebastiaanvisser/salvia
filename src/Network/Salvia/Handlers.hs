@@ -6,7 +6,6 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
   -- ** Default handler environments.
 
     hDefaultEnv
---   , hSessionEnv
 
   -- ** Parse client requests.
 
@@ -62,10 +61,6 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
   , hLog
   , hLogWithCounter
-
-  -- ** Request counter.
-
-  , hCounter
 
 -- * Redirecting and rewriting.
 
@@ -210,6 +205,8 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
   )
 where
 
+-- todo: cleanup handler exports and export entire modules?
+
 -- import Network.Salvia.Handler.Login
 -- import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Banner
@@ -218,7 +215,6 @@ import Network.Salvia.Handler.CGI
 import Network.Salvia.Handler.Client
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Cookie
-import Network.Salvia.Handler.Counter
 import Network.Salvia.Handler.Directory
 import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Handler.Environment

@@ -58,7 +58,6 @@ Library
                     Network.Salvia.Handler.Close
                     Network.Salvia.Handler.Client
                     Network.Salvia.Handler.Cookie
-                    Network.Salvia.Handler.Counter
                     Network.Salvia.Handler.Directory
                     Network.Salvia.Handler.Dispatching
                     Network.Salvia.Handler.Environment
@@ -90,16 +89,16 @@ Library
                     MultiParamTypeClasses
                     GeneralizedNewtypeDeriving
 
-Executable          salvia-demo
-  Executable:       salvia-demo
-  Main-is:          Demo.hs
-  GHC-Options:      -threaded -Wall -fno-warn-orphans
-  HS-Source-Dirs:   src 
-  Extensions:       FlexibleContexts
-                    FlexibleInstances 
-                    RankNTypes
-                    ScopedTypeVariables
-                    TypeOperators
-                    MultiParamTypeClasses
-                    GeneralizedNewtypeDeriving
+-- Executable          salvia-demo
+--   Executable:       salvia-demo
+--   Main-is:          Demo.hs
+--   GHC-Options:      -threaded -Wall -fno-warn-orphans
+--   HS-Source-Dirs:   src 
+--   Extensions:       FlexibleContexts
+--                     FlexibleInstances 
+--                     RankNTypes
+--                     ScopedTypeVariables
+--                     TypeOperators
+--                     MultiParamTypeClasses
+--                     GeneralizedNewtypeDeriving
 

@@ -15,6 +15,7 @@ module Network.Salvia.Httpd
   , http
   , request
   , response
+  , HttpM'
 
   , PeerM
   , rawSock
