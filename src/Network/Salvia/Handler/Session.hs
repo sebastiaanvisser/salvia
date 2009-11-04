@@ -46,13 +46,22 @@ data Session p =
 
 $(mkLabels [''Session])
 
-sID      :: Session p :-> SessionID  -- ^ A globally unique session identifier.
-sStart   :: Session p :-> UTCTime    -- ^ The time the session started.
-sLast    :: Session p :-> UTCTime    -- ^ Last time session was used.
-sExpire  :: Session p :-> Integer    -- ^ Expire after this amount of time when unused.
-sPayload :: Session p :-> Maybe p    -- ^ The information this session stores.
+-- | A globally unique session identifier.
+sID :: Session p :-> SessionID
 
--- | Session type classes that hide the inner workings from the outside world.
+-- | The time the session started.
+sStart :: Session p :-> UTCTime
+
+-- | Last time session was used.
+sLast :: Session p :-> UTCTime
+
+-- | Expire after this amount of time when unused.
+sExpire :: Session p :-> Integer
+
+-- | The information this session stores.
+sPayload :: Session p :-> Maybe p
+
+-- | Session type classes that hides the inner workings from the outside world.
 
 class (Applicative m, Monad m) => SessionM m p | m -> p where
   prolongSession :: Integer -> m ()

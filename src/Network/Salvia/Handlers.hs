@@ -142,18 +142,18 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hVirtualHosting
 , hPortRouter
 
--- * Session and user management.
+-- * HTTP client and proxy.
 
--- ** HTTP client.
-
--- * Client requests.
+-- ** Client requests.
 
 , hGetRequest
 , hClientEnvironment
 
--- * Proxy.
+-- ** Proxy.
 
 --, hProxy
+
+-- * Session management.
 
 -- ** Cookie handling.
 
@@ -162,14 +162,12 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hDelCookie
 , hNewCookie
 
--- ** Session management.
-
--- * Session identifier.
+-- ** Session identifier.
 
 , SessionID (SID)
 , sid
 
--- * Session data type.
+-- ** Session data type.
 
 , Session (Session)
 , sID
@@ -178,16 +176,16 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , sExpire
 , sPayload 
 
--- * Session interface throught type class.
+-- ** Session interface through type class.
 
 , SessionM (..)
 
--- * Collection of sessions.
+-- ** Collection of sessions.
 
 , Sessions
 , mkSessions 
 
--- * Session handlers.
+-- ** Session handlers.
 
 , hProlongSession
 , hGetSession
@@ -196,9 +194,9 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hWithSession
 , hSessionInfo
 
--- ** User management.
+-- * User management.
 
--- * Basic types.
+-- ** Basic types.
 
 , Username
 , Password
@@ -208,16 +206,16 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , password
 , actions
 
--- * Login server aspect.
+-- ** Login server aspect.
 
 , LoginM (..)
 
--- * User Sessions.
+-- ** User Sessions.
 
 , UserPayload (..)
 , UserSession
 
--- * User database backend.
+-- ** User database backend.
 
 , UserDatabase (UserDatabase)
 , users
@@ -227,7 +225,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , noBackend
 , fileBackend
 
--- * Handlers.
+-- ** Handlers.
 
 , hSignup
 , hLogin

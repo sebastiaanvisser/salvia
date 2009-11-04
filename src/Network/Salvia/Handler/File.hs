@@ -79,11 +79,11 @@ hUri rh = request (getM asUri) >>= rh
 
 -- | Like `hFileResource` but uses the path of the current request URI.
 
-hFile :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => m ()
+hFile :: (MonadIO m, HttpM' m, SendM m) => m ()
 hFile = hResource hFileResource
 
 -- | Like `hFileResourceFilter` but uses the path of the current request URI.
 
-hFileFilter :: (MonadIO m, HttpM Request m, HttpM Response m, SendM m) => (String -> String) -> m ()
+hFileFilter :: (MonadIO m, HttpM' m, SendM m) => (String -> String) -> m ()
 hFileFilter = hResource . hFileResourceFilter
 
