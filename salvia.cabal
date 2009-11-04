@@ -43,7 +43,8 @@ Library
                     transformers,
                     utf8-string,
                     salvia-protocol,
-                    split
+                    split,
+                    text
 
   Exposed-modules:  Network.Salvia
                     Network.Salvia.Core.Aspects
@@ -88,6 +89,7 @@ Library
                     TypeOperators
                     MultiParamTypeClasses
                     GeneralizedNewtypeDeriving
+                    FunctionalDependencies
 
 -- Executable          salvia-demo
 --   Executable:       salvia-demo

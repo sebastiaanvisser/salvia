@@ -1,43 +1,49 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Network.Salvia.Handler.Login
-  (
+(
+-- * Basic types.
 
-  -- * Basic types.
+  Username
+, Password
+, Action
+, User (User)
+, username
+, password
+, actions
 
-    Username
-  , Password
-  , Action
-  , Actions
-  , User (..)
-  , Users
-  , UserDatabase
-  , TUserDatabase
+-- * Login server aspect.
 
-  -- * User Sessions.
+, LoginM (..)
 
-  , UserPayload (..)
-  , UserSession
-  , TUserSession
+-- * User Sessions.
 
-  -- * Handlers.
+, UserPayload (..)
+, UserSession
 
-  , hSignup
-  , hLogin
-  , hLogout
-  , hLoginfo
+-- * User database backend.
 
-  , hAuthorized
-  , hAuthorizedUser
+, UserDatabase (UserDatabase)
+, users
+, backend
 
-  -- * Helper functions.
+, Backend (..)
+, noBackend
+, fileBackend
 
-  , readUserDatabase
+-- * Handlers.
 
-  )
+, hSignup
+, hLogin
+, hLogout
+, hLoginfo
+, hAuthorized
+
+)
 where
 
 import Control.Applicative
 import Control.Concurrent.STM
-import Control.Monad.State
+import Control.Monad.State hiding (get)
 import Data.ByteString.Lazy.UTF8 hiding (lines)
 import Data.Digest.Pure.MD5
 import Data.List
@@ -47,49 +53,35 @@ import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Handler.Body
-import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Session
+import Prelude hiding (mod)
 import Safe
-
-type Username = String
-type Password = String
-type Action   = String
-type Actions  = [Action]
 
 {- |
 User containg a username, password and a list of actions this user is allowed
 to perform within the system.
 -}
 
+type Username = String
+type Password = String
+type Action   = String
+
 data User = User
-  { username :: Username
-  , password :: Password
-  , email    :: String
-  , actions  :: Actions
+  { _username :: Username
+  , _password :: Password
+  , _actions  :: [Action]
   } deriving (Eq, Show)
 
-type Users = [User]
+$(mkLabels [''User])
 
-{- |
-A user database containing a list of users, a list of default actions the guest
-or `no-user' user is allowed to perform and a polymorphic reference to the
-place the database originates from. This source field can be used by update
-functions synchronizing changes back to the database.
--}
-
-data UserDatabase src =
-  UserDatabase
-  { dbUsers  :: Users
-  , dbGuest  :: Actions
-  , dbSource :: src
-  } deriving Show
-
-type TUserDatabase src = TVar (UserDatabase src)
+username :: User :-> Username
+password :: User :-> Password
+actions  :: User :-> [Action]
 
 {- |
 A user payload instance contains user related session information and can be
 used as the payload for regular sessions. It contains a reference to the user
-it is bound to, a flag to indicate whether the user is logged in or not and a
+it belongs to, a flag to indicate whether the user is logged in or not and a
 possible user specific session payload.
 -}
 
@@ -99,180 +91,160 @@ data UserPayload a = UserPayload
   , upPayload  :: Maybe a
   } deriving (Eq, Show)
 
-type UserSession  a = Session  (UserPayload a)
-type TUserSession a = TSession (UserPayload a)
+type UserSession a = Session (UserPayload a)
 
--- | Read a user data from file. Format: /username password email action*/.
+data Backend = Backend
+  { read :: MonadIO m => m UserDatabase
+  , add  :: MonadIO m => User -> m ()
+  }
 
-readUserDatabase :: FilePath -> IO (TUserDatabase FilePath)
-readUserDatabase file =
-  do -- First line contains the default `guest` actions, tail lines contain users.
-     gst:ls <- lines <$> readFile file
+{- |
+A user database containing a list of users and a reference to the backend the
+database originates from and can be synchronized back to.
+-}
 
-     atomically $ newTVar $ UserDatabase
-       (catMaybes $ map parseUserLine ls)
-       (words gst)
-       file
-     where
-       parseUserLine line =
-         case words line of
-           user:pass:mail:acts -> Just (User user pass mail acts)
-           _                   -> Nothing
+data UserDatabase = UserDatabase
+  { _backend :: Backend
+  , _users   :: [User]
+  }
 
-printUserLine :: User -> String
-printUserLine u = intercalate " "
-  ([ username u
-   , password u
-   , email u
-   ] ++ actions u)
+$(mkLabels [''UserDatabase])
+
+users   :: UserDatabase :-> [User]
+backend :: UserDatabase :-> Backend
+
+class (Applicative m, Monad m) => LoginM m p | m -> p where
+  login      :: TVar UserDatabase ->             m a -> (User -> m a) -> m a
+  logout     ::                                                          m ()
+  signup     :: TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
+  authorized :: Action            ->             m a -> (User -> m a) -> m a
 
 {- |
 The signup handler is used to create a new entry in the user database. It reads
-a new username and password from the HTTP POST parameters and adds a new entry
-in the database when no user with such name exists. The user gets the specified
-initial set of actions assigned. On failure an `Unauthorized' error will be
-produced.
+a new username and password from the post parameters and adds a new entry into
+the backend of the user database when no user with such name exists. The user
+gets the specified initial set of actions assigned. When the signup fails the
+first handler will be executed when the signup succeeds the second handler will
+be executed which may access the fresh user object.
 -}
 
 hSignup
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
-  => TUserDatabase FilePath -> Actions -> m ()
-hSignup tdb acts =
-  do db <- liftIO . atomically $ readTVar tdb
-     ps <- hRequestParameters "utf-8"
-     case freshUserInfo ps (dbUsers db) acts of
-       Nothing -> hCustomError Unauthorized "signup failed"
-       Just u  -> liftIO $
-         do atomically
-              . writeTVar tdb
-              $ UserDatabase (u : dbUsers db) (dbGuest db) (dbSource db)
-            appendFile (dbSource db) (printUserLine u)
+  :: (MonadIO m, BodyM Request m, HttpM Request m)
+  => TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
+hSignup tdb acts onFail onOk =
+  do ps <- hRequestParameters "utf-8"
+     join . liftIO . atomically $
+       do db <- readTVar tdb
+          case freshUserInfo ps (get users db) acts of
+            Nothing -> return onFail
+            Just user -> 
+              do writeTVar tdb (mod users (user:) db)
+                 return $
+                   do add (get backend db) user
+                      onOk user
 
-freshUserInfo :: Maybe Parameters -> Users -> Actions -> Maybe User
+-- | Helper functions that generates fresh user information.
+
+freshUserInfo :: Maybe Parameters -> [User] -> [Action] -> Maybe User
 freshUserInfo ps us acts =
   do p <- ps
      user <- "username" `lookup` p >>= id
      pass <- "password" `lookup` p >>= id
-     mail <- "email"    `lookup` p >>= id
-     case headMay $ filter ((==user).username) us of
-       Nothing -> return $ User user (show $ md5 $ fromString pass) mail acts
+     case headMay $ filter ((==user) . get username) us of
+       Nothing -> return $ User user (show (md5 (fromString pass))) acts
        Just _  -> Nothing
 
 {- |
 The login handler. Read the username and password values from the post data and
 use that to authenticate the user. When the user can be found in the database
-the user is logged in and stored in the session payload. Otherwise a
-`Unauthorized' response will be sent and the user has not logged in.
+the user is logged in and stored in the session payload. When the login fails
+the first handler will be executed when the login succeeds the second handler
+will be executed which may access the fresh user object.
 -}
 
 hLogin
-  :: (MonadIO m, BodyM Request m, HttpM Request m, HttpM Response m, SendM m)
-  => UserDatabase b -> TUserSession a -> m ()
-hLogin db session =
+  :: (SessionM m (UserPayload p), HttpM Request m, MonadIO m, BodyM Request m)
+  => TVar UserDatabase -> m a -> (User -> m a) -> m a
+hLogin tdb onFail onOk =
   do ps <- hRequestParameters "utf-8"
-     maybe
-       (hCustomError Unauthorized "login failed")
-       (loginSuccessful session)
-       (authenticate ps db)
+     db <- (liftIO . atomically . readTVar) tdb
+     case authenticate ps db of
+       Nothing   -> onFail
+       Just user -> do let pl = Just (UserPayload user True Nothing)
+                       withSession (set sPayload pl)
+                       onOk user
 
-authenticate :: Maybe Parameters -> UserDatabase a -> Maybe User
+-- | Helper functions that performs the authentication check.
+
+authenticate :: Maybe Parameters -> UserDatabase -> Maybe User
 authenticate ps db =
   do p <- ps
      user <- "username" `lookup` p >>= id
      pass <- "password" `lookup` p >>= id
-     case headMay $ filter ((==user).username) (dbUsers db) of
-       Nothing -> Nothing
-       Just u  ->
-         if password u == (show $ md5 $ fromString pass)
-         then return u
-         else Nothing
+     case headMay $ filter ((==user) . get username) (get users db) of
+       Just u | get password u == show (md5 (fromString pass)) -> Just u
+       _                                                       -> Nothing
 
--- Login user and create `Ok' response on successful user.
-loginSuccessful :: (MonadIO m, HttpM Response m, SendM m) => TUserSession a -> User -> m ()
-loginSuccessful session user =
-  do let f = (\s -> s {sPayload = Just (UserPayload user True Nothing)})
-     liftIO $ atomically (readTVar session >>= writeTVar session . f)
-     response (status =: OK)
-     send "login successful\n"
+-- | Logout the current user by emptying the session payload.
 
-{- | Logout the current user by emptying the session payload. -}
-
-hLogout :: MonadIO m => TUserSession a -> m ()
-hLogout session =
-  do let f =(\s -> s {sPayload = Nothing})
-     liftIO $ atomically (readTVar session >>= writeTVar session . f)
-     return ()
+hLogout :: SessionM m p => m ()
+hLogout = withSession (set sPayload Nothing)
 
 {- |
 The `loginfo' handler exposes the current user session to the world using a
-simple text based file. The file contains information about the current session
-identifier, session start and expiration date and the possible user payload
-that is included.
+simple text based response. The response contains information about the current
+session identifier, session start and expiration date and the possible user
+payload that is included.
 -}
 
-hLoginfo :: (MonadIO m, SendM m) => TUserSession a -> m ()
-hLoginfo session =
-  do s' <- liftIO $ atomically $ readTVar session
-
-  -- todo: use keyValues pp
-     send $ intercalate "\n"
-       [ "sID="    ++ show (sID     s')
-       , "start="  ++ show (sStart  s')
-       , "expire=" ++ show (sExpire s')
-       ]
-
-     case sPayload s' of
+hLoginfo :: (SessionM m (UserPayload p), SendM m) => m ()
+hLoginfo =
+  do hSessionInfo
+     s <- getSession
+     case get sPayload s of
        Nothing -> return ()
-       Just (UserPayload (User uname _ mail acts) _ _) ->
-         do send $ intercalate "\n"
+       Just (UserPayload (User uname _ acts) _ _) ->
+         do send $ "\n" ++ intercalate "\n"
               [ "username=" ++ uname
-              , "email="    ++ mail
               , "actions="  ++ intercalate " " acts
               ]
 
 {- |
 Execute a handler only when the user for the current session is authorized to
 do so. The user must have the specified action contained in its actions list in
-order to be authorized. Otherwise an `Unauthorized' error will be produced.
-When no user can be found in the current session or this user is not logged in
-the guest account from the user database is used for authorization.
+order to be authorized. When the authorization fails the first handler will be
+executed when the authorization succeeds the second handler will be executed
+which may access the current user object.
 -}
 
-hAuthorized
-  :: (MonadIO m, HttpM Response m, SendM m)
-  => UserDatabase b        -- ^ The user database to read guest account from.
-  -> Action                -- ^ The actions that should be authorized.
-  -> (Maybe User -> m ())  -- ^ The handler to perform when authorized.
-  -> TUserSession a        -- ^ This handler requires a user session.
-  -> m ()  
-
-hAuthorized db action handler session =
-  do load <- liftIO (sPayload <$> atomically (readTVar session))
-     case load of
+hAuthorized :: SessionM m (UserPayload p) => Action -> m b -> (User -> m b) -> m b
+hAuthorized action onFail onOk =
+  do session <- getSession
+     case get sPayload session of
        Just (UserPayload user _ _)
-         | action `elem` actions user -> handler (Just user)
-       Nothing
-         | action `elem` dbGuest db   -> handler Nothing
-       _                              -> hError Unauthorized
+         | action `elem` get actions user -> onOk user
+       _                                  -> onFail
 
-{- |
-Execute a handler only when the user for the current session is authorized to
-do so. The user must have the specified action contained in its actions list in
-order to be authorized. Otherwise an `Unauthorized' error will be produced. The
-guest user will not be used in any case.
--}
+-- | User database backend that does nothing and discards all changes made.
 
-hAuthorizedUser
-  :: (MonadIO m, HttpM Response m, SendM m)
-  => Action          -- ^ The actions that should be authorized.
-  -> (User -> m ())  -- ^ The handler to perform when authorized.
-  -> TUserSession a  -- ^ This handler requires a user session
-  -> m ()    
+noBackend :: Backend
+noBackend = let b = Backend (return (UserDatabase b [])) (const (return ())) in b
 
-hAuthorizedUser action handler session =
-  do load <- liftIO (sPayload <$> atomically (readTVar session))
-     case load of
-       Just (UserPayload user _ _)
-         | action `elem` actions user -> handler user
-       _                              -> hError Unauthorized
+-- | File based user database backend. Format: /username password action*/.
+
+fileBackend :: FilePath -> Backend
+fileBackend file = bcknd
+  where 
+    bcknd = Backend
+      ((UserDatabase bcknd . parse) `liftM` liftIO (readFile file))
+      (liftIO . appendFile file . printUserLine)
+    parse = catMaybes . map parseUserLine . lines
+    parseUserLine line =
+      case words line of
+        user:pass:acts -> Just (User user pass acts)
+        _              -> Nothing
+    printUserLine u = intercalate " " $
+      [ get username u
+      , get password u
+      ] ++ get actions u
 

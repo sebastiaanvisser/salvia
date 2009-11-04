@@ -7,7 +7,7 @@ import Network.Protocol.Http
 import Network.Salvia.Core.Config
 import Network.Socket
 import System.IO
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString (ByteString)
 
 -- | The `HttpM' type class indicates is parametrized with the directon
 -- (`Request' or `Response') for which the implementation should be able to
@@ -114,6 +114,6 @@ class (Applicative m, Monad m) => ClientM m where
 -- payload can be an arbitrary piece of data that gets shared between all the
 -- handlers. Can be used to implement sessions.
 
-class (Applicative m, Monad m) => PayloadM m p where
+class (Applicative m, Monad m) => PayloadM m p | m -> p where
   payload :: State p a -> m a
 

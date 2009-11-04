@@ -1,35 +1,39 @@
 module Network.Salvia.Handler.Cookie
-  ( hSetCookies
-  , hGetCookies
-  , hDelCookie
-  , hNewCookie
-  )
+( hSetCookie
+, hCookie
+, hDelCookie
+, hNewCookie
+)
 where
 
-import Prelude hiding ((.), id)
-import Control.Category
 import Control.Applicative hiding (empty)
+import Control.Category
 import Data.Record.Label
 import Data.Time.Format
 import Network.Protocol.Cookie
 import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
+import Prelude hiding ((.), id)
 import System.Locale
 import qualified Network.Protocol.Http as H
 
-{- | Set the `cookie` HTTP response header (Set-Cookie) with the specified `Cookies`. -}
+{- | Set the `Set-Cookie` HTTP response header with the specified `Cookies`. -}
 
-hSetCookies :: HttpM H.Response m => Cookies -> m ()
-hSetCookies = response . (H.setCookie =:) . Just . show
+hSetCookie :: HttpM H.Response m => Cookies -> m ()
+hSetCookie = response . setM H.setCookie . Just . show
 
 {- | Try to get the cookies from the HTTP `cookie` request header. -}
 
-hGetCookies :: HttpM H.Request m => m (Maybe Cookies)
-hGetCookies = fmap (fw cookies) <$> request (getM H.cookie)
+hCookie :: (HttpM H.Request m) => m (Maybe Cookies)
+hCookie = fmap (fw cookies) <$> request (getM H.cookie)
+
+{- | Delete one cookie by removing it from the `Set-Cookie' header. -}
 
 hDelCookie :: HttpM H.Response m => String -> m ()
-hDelCookie s = response (setM lab (Just Nothing))
-  where lab = fmapL (oneCookie s) . fmapL (cookies `iso` id) . H.setCookie
+hDelCookie nm = response (theCookie =: Just Nothing)
+  where theCookie = fmapL (pickCookie nm)
+                  . fmapL (cookies `iso` id)
+                  . H.setCookie
 
 {- |
 Convenient method for creating cookies that expire in the near future and are

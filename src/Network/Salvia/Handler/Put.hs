@@ -1,8 +1,8 @@
 module Network.Salvia.Handler.Put
-  ( hPutFileSystem
-  , hPutResource
-  , hStore
-  )
+( hPutFileSystem
+, hPutResource
+, hStore
+)
 where
 
 import Control.Monad.State
@@ -15,7 +15,7 @@ import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Method
 import System.IO
-import qualified Data.ByteString.Lazy as B
+import qualified Data.ByteString as B
 
 {- |
 Create a browseable filesystem handler (like `hFileSystem') but make all files

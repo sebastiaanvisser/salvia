@@ -1,5 +1,5 @@
 module Network.Salvia.Handler.Body
-( hRawRequestBody
+{-( hRawRequestBody
 , hRawResponseBody
 , hRawBody
 , hRequestBody
@@ -8,18 +8,36 @@ module Network.Salvia.Handler.Body
 , hRequestParameters
 , hResponseParameters
 , hParameters
-)
+)-}
 where
 
 import Control.Applicative
 import Control.Monad.State hiding (get)
-import Data.Encoding
-import Data.Maybe
+import Data.Char
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
+import Data.Text.Encoding
 import Network.Salvia.Core.Aspects
-import qualified Data.ByteString.Lazy as B
+import Data.Text (Text, unpack)
+-- import qualified Data.Text as T
+import qualified Data.ByteString as B
+
+-- | Lookup an Data.Text encoding function from a named identifier, currently
+-- identifies "utf-8", "utf-16", "utf-32" with possible little/big endian
+-- postfixes ("le", "be"). The comparision is quite fuzzy so, for example, both
+-- "UTF16le" and "utf-16-LE" will be mapped to the same decoder.
+
+encodingFromName :: String -> Maybe (B.ByteString -> Text)
+encodingFromName s = k `lookup`
+  [ ("utf8",    decodeUtf8)
+  , ("utf16",   decodeUtf16LE)
+  , ("utf16le", decodeUtf16LE)
+  , ("utf16be", decodeUtf16BE)
+  , ("utf32",   decodeUtf32LE)
+  , ("utf32le", decodeUtf32LE)
+  , ("utf32be", decodeUtf32BE)
+  ] where k = map toLower (filter (\c -> isAlpha c || isDigit c) s)
 
 {- |
 First (possibly naive) handler to retreive the client request or server
@@ -63,21 +81,25 @@ encoding supplied as the function's argument can be used to specify what
 encoding to use in the absence of a proper encoding in the HTTP message itself.
 -}
 
-hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe String)
+hBody :: forall m d. (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Text)
 hBody d def = 
   do let h = http :: State (Http d) a -> m a
      c <- body d
-     e <- (>>= snd) <$> h (getM contentType)
-     return (decodeWith def <$> e <*> c)
+     e <- (>>= snd) <$> h (getM contentType) :: m (Maybe String)
+     return $
+       case (e >>= encodingFromName, encodingFromName def) of
+         (Just enc, _) -> fmap enc c
+         (_, Just enc) -> fmap enc c
+         (_, _)        -> error "hBody: wrong default encoding specified"
 
 -- | Like `hBody' but specifically for `HTTP' `Request's.
 
-hRequestBody :: (MonadIO m, BodyM Request m, HttpM Request m) => String -> m (Maybe String)
+hRequestBody :: (MonadIO m, BodyM Request m, HttpM Request m) => String -> m (Maybe Text)
 hRequestBody = hBody forRequest
 
 -- | Like `hBody' but specifically for `HTTP' `Response's.
 
-hResponseBody :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe String)
+hResponseBody :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Text)
 hResponseBody = hBody forResponse
 
 {- |
@@ -86,7 +108,7 @@ parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
 hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
-hParameters d def = fmap (fw params) <$> hBody d def
+hParameters d def = fmap (fw params . unpack) <$> hBody d def
 
 -- | Like `hParameters' but specifically for `HTTP' `Request's.
 
@@ -97,9 +119,4 @@ hRequestParameters = hParameters forRequest
 
 hResponseParameters :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Parameters)
 hResponseParameters = hParameters forResponse
-
--- Decoding helper.
-
-decodeWith :: String -> String -> B.ByteString -> String
-decodeWith def enc = decodeLazyByteString (fromMaybe (encodingFromString def) (encodingFromStringExplicit enc))
 

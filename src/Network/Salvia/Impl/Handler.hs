@@ -11,10 +11,11 @@ import Network.Salvia.Core.Context
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
+import Network.Salvia.Handler.Login
 import Safe
 import System.IO
 import qualified Network.Salvia.Core.Aspects as A
-import qualified Data.ByteString.Lazy as ByteString
+import qualified Data.ByteString as ByteString
 
 newtype Handler c p a = Handler { unHandler :: StateT (Context c p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context c p))
@@ -95,7 +96,15 @@ instance A.ClientM (Handler () ()) where
   client = return ()
 
 instance SessionM (Handler Config (Sessions p)) p where
-  useSession  = hUseSession
-  putSession  = hPutSession
-  delSession  = hDelSession
+  prolongSession = hProlongSession
+  getSession     = hGetSession
+  putSession     = hPutSession
+  delSession     = hDelSession
+  withSession    = hWithSession
+
+instance LoginM (Handler Config (Sessions (UserPayload p))) p where
+  signup     = hSignup
+  login      = hLogin
+  logout     = hLogout
+  authorized = hAuthorized
 

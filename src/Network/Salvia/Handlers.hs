@@ -157,57 +157,24 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
   -- ** Cookie handling.
 
-  , hSetCookies
-  , hGetCookies
+  , hSetCookie
+  , hCookie
   , hDelCookie
   , hNewCookie
 
   -- ** Session management.
+
   , module Network.Salvia.Handler.Session
-
---   , hSession
-
---   , SessionID
---   , Session (..)
---   , TSession
---   , Sessions
-
---   , hSessionID
---   , hSetSessionCookie
-
---   , mkSessions
 
   -- ** User management.
 
---   , Username
---   , Password
---   , Action
---   , Actions
---   , User (..)
---   , Users
---   , UserDatabase
---   , TUserDatabase
-
---   , UserPayload (..)
---   , UserSession
---   , TUserSession
-
---   , hSignup
---   , hLogin
---   , hLogout
---   , hLoginfo
-
---   , hAuthorized
---   , hAuthorizedUser
-
---   , readUserDatabase
+  , module Network.Salvia.Handler.Login
 
   )
 where
 
 -- todo: cleanup handler exports and export entire modules?
 
--- import Network.Salvia.Handler.Login
 -- import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.Body
@@ -224,6 +191,7 @@ import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Head
 import Network.Salvia.Handler.Log
+import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Method
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path

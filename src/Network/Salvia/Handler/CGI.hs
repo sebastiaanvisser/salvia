@@ -19,7 +19,7 @@ import Prelude hiding ((.), id)
 import System.IO
 import System.Process
 import Text.Parsec hiding (many, (<|>))
-import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString as B
 
 -- | Handler to run CGI scripts. Not entirely finished.
 
@@ -66,7 +66,7 @@ hCGI fn =
      liftIO $
        case b of
          Nothing -> hClose inp
-         Just b' -> forkIO (L.hPut inp b' >> hClose inp) >> return ()
+         Just b' -> forkIO (B.hPut inp b' >> hClose inp) >> return ()
 
      -- Read the headers produced by the CGI script and store them as the
      -- response headers of this handler.
