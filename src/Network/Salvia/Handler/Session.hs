@@ -61,13 +61,9 @@ class (Applicative m, Monad m) => SessionM m p | m -> p where
   delSession     :: m ()
   withSession    :: (Session p -> Session p) -> m ()
 
--- | A shared session.
-
-type TSession p = TVar (Session p)
-
 -- | A mapping from unique session IDs to shared session variables.
 
-type Sessions p = TVar (M.Map SessionID (TSession p))
+type Sessions p = TVar (M.Map SessionID (TVar (Session p)))
 
 -- | Create a new, empty, store of sessions.
 
@@ -135,13 +131,13 @@ the `newSessionVar' function. Otherwise the expiration date of the existing
 session is updated.
 -}
 
-existingSessionVarOrNew :: (Applicative m, MonadIO m, HttpM Request m, PayloadM m (Sessions p)) => m (TSession p)
+existingSessionVarOrNew :: (Applicative m, MonadIO m, HttpM Request m, PayloadM m (Sessions p)) => m (TVar (Session p))
 existingSessionVarOrNew =
   getCookieSessionID `andAlso` lookupSessionVar `andAlso` whenNotExpired >>=
      (newSessionVar `maybe` return)
   where andAlso m c = m >>= liftM join . sequence . fmap c
 
-whenNotExpired :: MonadIO m => TSession p -> m (Maybe (TSession p))
+whenNotExpired :: MonadIO m => TVar (Session p) -> m (Maybe (TVar (Session p)))
 whenNotExpired var =
   do n <- liftIO getCurrentTime
      session <- getVar var
@@ -174,7 +170,7 @@ delCookieSession = hDelCookie "sid"
 -- | Create a new session with a specified expiration date. The session will be
 -- stored in the session map.
 
-newSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => m (TSession p)
+newSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => m (TVar (Session p))
 newSessionVar =
   do var <- payload S.get
      sd <- newSessionID var
@@ -195,7 +191,7 @@ newSessionID var =
 willExpireAt :: Session p -> UTCTime
 willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast session 
 
-lookupSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => SessionID -> m (Maybe (TSession p))
+lookupSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => SessionID -> m (Maybe (TVar (Session p)))
 lookupSessionVar sd = M.lookup sd <$> (payload S.get >>= getVar)
 
 -- STM utilities.

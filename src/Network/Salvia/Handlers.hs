@@ -1,176 +1,241 @@
 module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
-  (
+(
 
-  -- * Fundamental protocol handlers.
+-- * Fundamental protocol handlers.
 
-  -- ** Default handler environments.
+-- ** Default handler environments.
 
-    hDefaultEnv
+  hDefaultEnv
 
-  -- ** Parse client requests.
+-- ** Parse client requests.
 
-  , hRequestParser
-  , hResponseParser
-  , hParser
-  , readNonEmptyLines
+, hRequestParser
+, hResponseParser
+, hParser
+, readNonEmptyLines
 
-  -- ** Print server responses.
-  
-  , hResponsePrinter
-  , hRequestPrinter
-  , hFlushHeaders
-  , hFlushQueue
+-- ** Print server responses.
 
-  -- ** Accessing request and response bodies.
+, hResponsePrinter
+, hRequestPrinter
+, hFlushHeaders
+, hFlushQueue
 
-  , hRawRequestBody
-  , hRawResponseBody
-  , hRawBody
-  
-  , hRequestBody
-  , hResponseBody
-  , hBody
+-- ** Accessing request and response bodies.
 
-  , hRequestParameters
-  , hResponseParameters
-  , hParameters
+, hRawRequestBody
+, hRawResponseBody
+, hRawBody
 
-  -- ** HTTP header banner.
+, hRequestBody
+, hResponseBody
+, hBody
 
-  , hBanner
+, hRequestParameters
+, hResponseParameters
+, hParameters
 
-  -- ** Closing or keeping alive connections.
+-- ** HTTP header banner.
 
-  , hCloseConn
-  , hKeepAlive
+, hBanner
 
-  -- ** Enable HTTP HEAD requests.
-  
-  , hHead
+-- ** Closing or keeping alive connections.
 
-  -- * Error handling and logging.
+, hCloseConn
+, hKeepAlive
 
-  -- ** Default error handlers.
+-- ** Enable HTTP HEAD requests.
 
-  , hError
-  , hCustomError
-  , hIOError
-  , hSafeIO
+, hHead
 
-  -- ** Logging of client requests.
+-- * Error handling and logging.
 
-  , hLog
-  , hLogWithCounter
+-- ** Default error handlers.
+
+, hError
+, hCustomError
+, hIOError
+, hSafeIO
+
+-- ** Logging of client requests.
+
+, hLog
+, hLogWithCounter
 
 -- * Redirecting and rewriting.
 
-  -- ** Redirecting the client.
+-- ** Redirecting the client.
 
-  , hRedirect
+, hRedirect
 
-  -- ** Request URI rewriting.
+-- ** Request URI rewriting.
 
-  , hRewrite
-  , hRewriteHost
-  , hRewritePath
-  , hRewriteExt
-  , hWithDir
-  , hWithoutDir
+, hRewrite
+, hRewriteHost
+, hRewritePath
+, hRewriteExt
+, hWithDir
+, hWithoutDir
 
-  -- * File and directory serving.
+-- * File and directory serving.
 
-  -- ** Serve static file resources.
+-- ** Serve static file resources.
 
-  , hFileResource
-  , hFileResourceFilter
-  , hResource
-  , fileMime
-  , hUri
-  , hFile
-  , hFileFilter
+, hFileResource
+, hFileResourceFilter
+, hResource
+, fileMime
+, hUri
+, hFile
+, hFileFilter
 
-  -- ** Serve directory indices.
+-- ** Serve directory indices.
 
-  , hDirectory
-  , hDirectoryResource
+, hDirectory
+, hDirectoryResource
 
-  -- ** Serve file system directory.
+-- ** Serve file system directory.
 
-  , hFileTypeDispatcher
-  , hFileSystem
-  , hFileSystemNoIndexes
+, hFileTypeDispatcher
+, hFileSystem
+, hFileSystemNoIndexes
 
-  -- ** Enable PUTing resources to the files ystem.
+-- ** Enable PUTing resources to the files ystem.
 
-  , hPutFileSystem
-  , hPutResource
-  , hStore
+, hPutFileSystem
+, hPutResource
+, hStore
 
-  -- ** Serving CGI scripts.
+-- ** Serving CGI scripts.
 
-  , hCGI
+, hCGI
 
-  -- * Dispatching.
+-- * Dispatching.
 
-  -- ** Custom request dispatchers.
+-- ** Custom request dispatchers.
 
-  , Dispatcher
-  , ListDispatcher
-  , hDispatch
-  , hRequestDispatch
-  , hListDispatch
+, Dispatcher
+, ListDispatcher
+, hDispatch
+, hRequestDispatch
+, hListDispatch
 
-  -- ** Dispatch based on request method.
+-- ** Dispatch based on request method.
 
-  , hMethodRouter
+, hMethodRouter
 
-  -- ** Dispatch based on request path.
+-- ** Dispatch based on request path.
 
-  , hPath
-  , hPathRouter
-  , hPrefix
-  , hPrefixRouter
-  , hQueryParameters
+, hPath
+, hPathRouter
+, hPrefix
+, hPrefixRouter
+, hQueryParameters
 
-  -- ** Dispatch based on filename extension.
+-- ** Dispatch based on filename extension.
 
-  , hExtension
-  , hExtensionRouter
+, hExtension
+, hExtensionRouter
 
-  -- ** Dispatch based on host name.
+-- ** Dispatch based on host name.
 
-  , hVirtualHosting
-  , hPortRouter
+, hVirtualHosting
+, hPortRouter
 
-  -- * Session and user management.
+-- * Session and user management.
 
-  -- ** HTTP client.
+-- ** HTTP client.
 
-  -- * Client requests.
+-- * Client requests.
 
-  , hGetRequest
-  , hClientEnvironment
+, hGetRequest
+, hClientEnvironment
 
-  -- * Proxy.
+-- * Proxy.
 
---   , hProxy
+--, hProxy
 
-  -- ** Cookie handling.
+-- ** Cookie handling.
 
-  , hSetCookie
-  , hCookie
-  , hDelCookie
-  , hNewCookie
+, hSetCookie
+, hCookie
+, hDelCookie
+, hNewCookie
 
-  -- ** Session management.
+-- ** Session management.
 
-  , module Network.Salvia.Handler.Session
+-- * Session identifier.
 
-  -- ** User management.
+, SessionID (SID)
+, sid
 
-  , module Network.Salvia.Handler.Login
+-- * Session data type.
 
-  )
+, Session (Session)
+, sID
+, sStart
+, sLast
+, sExpire
+, sPayload 
+
+-- * Session interface throught type class.
+
+, SessionM (..)
+
+-- * Collection of sessions.
+
+, Sessions
+, mkSessions 
+
+-- * Session handlers.
+
+, hProlongSession
+, hGetSession
+, hPutSession
+, hDelSession
+, hWithSession
+, hSessionInfo
+
+-- ** User management.
+
+-- * Basic types.
+
+, Username
+, Password
+, Action
+, User (User)
+, username
+, password
+, actions
+
+-- * Login server aspect.
+
+, LoginM (..)
+
+-- * User Sessions.
+
+, UserPayload (..)
+, UserSession
+
+-- * User database backend.
+
+, UserDatabase (UserDatabase)
+, users
+, backend
+
+, Backend (..)
+, noBackend
+, fileBackend
+
+-- * Handlers.
+
+, hSignup
+, hLogin
+, hLogout
+, hLoginfo
+, hAuthorized
+
+)
 where
 
 -- todo: cleanup handler exports and export entire modules?
