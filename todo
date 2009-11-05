@@ -2,6 +2,7 @@ comet?
 IPv6?
 proxy?
 
+get rid of parsec dep
 
 jailIO
 

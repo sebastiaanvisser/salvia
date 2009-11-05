@@ -246,5 +246,5 @@ fileBackend file = bcknd
     printUserLine u = intercalate " " $
       [ get username u
       , get password u
-      ] ++ get actions u
+      ] ++ get actions u ++ ["\n"]
 
