@@ -117,7 +117,7 @@ class (Applicative m, Monad m) => LoginM m p | m -> p where
   login      :: TVar UserDatabase ->             m a -> (User -> m a) -> m a
   logout     ::                                                          m ()
   signup     :: TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
-  authorized :: Action            ->             m a -> (User -> m a) -> m a
+  authorized :: Maybe Action      ->             m a -> (User -> m a) -> m a
 
 {- |
 The signup handler is used to create a new entry in the user database. It reads
@@ -150,9 +150,11 @@ freshUserInfo ps us acts =
   do p <- ps
      user <- "username" `lookup` p >>= id
      pass <- "password" `lookup` p >>= id
-     case headMay $ filter ((==user) . get username) us of
-       Nothing -> return $ User user (show (md5 (fromString pass))) acts
-       Just _  -> Nothing
+     if null user || null pass
+       then Nothing
+       else case headMay $ filter ((==user) . get username) us of
+              Nothing -> return $ User user (show (md5 (fromString pass))) acts
+              Just _  -> Nothing
 
 {- |
 The login handler. Read the username and password values from the post data and
@@ -214,16 +216,16 @@ Execute a handler only when the user for the current session is authorized to
 do so. The user must have the specified action contained in its actions list in
 order to be authorized. When the authorization fails the first handler will be
 executed when the authorization succeeds the second handler will be executed
-which may access the current user object.
+which may access the current user object. 
 -}
 
-hAuthorized :: SessionM m (UserPayload p) => Action -> m b -> (User -> m b) -> m b
-hAuthorized action onFail onOk =
+hAuthorized :: SessionM m (UserPayload p) => Maybe Action -> m b -> (User -> m b) -> m b
+hAuthorized maction onFail onOk =
   do session <- getSession
-     case get sPayload session of
-       Just (UserPayload user _ _)
-         | action `elem` get actions user -> onOk user
-       _                                  -> onFail
+     case (maction, get sPayload session) of
+       (Nothing,     Just (UserPayload user _ _))                                  -> onOk user
+       (Just action, Just (UserPayload user _ _)) | action `elem` get actions user -> onOk user
+       _                                                                           -> onFail
 
 -- | User database backend that does nothing and discards all changes made.
 
@@ -240,9 +242,10 @@ fileBackend file = bcknd
       (liftIO . appendFile file . printUserLine)
     parse = catMaybes . map parseUserLine . lines
     parseUserLine line =
-      case words line of
-        user:pass:acts -> Just (User user pass acts)
-        _              -> Nothing
+      case (line, words line) of
+        ('#':_,          _) -> Nothing
+        (_, user:pass:acts) -> Just (User user pass acts)
+        _                   -> Nothing
     printUserLine u = intercalate " " $
       [ get username u
       , get password u
