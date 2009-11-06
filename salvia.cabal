@@ -33,7 +33,6 @@ Library
                     monads-fd,
                     network,
                     old-locale,
-                    parsec,
                     process,
                     pureMD5,
                     random,

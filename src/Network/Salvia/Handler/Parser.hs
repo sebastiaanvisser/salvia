@@ -15,7 +15,6 @@ import Network.Salvia.Handler.Error
 import Prelude hiding (sequence)
 import System.IO
 import System.Timeout
-import Text.Parsec.Error (ParseError)
 
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
@@ -50,7 +49,7 @@ specified with the first argument the function silently returns.
 hParser
   :: (PeerM m, MonadIO m)
   => (Http d -> m b)                        -- ^ What to do with message.
-  -> (String -> Either ParseError (Http d)) -- ^ Custom message parser.
+  -> (String -> Either String (Http d))     -- ^ Custom message parser.
   -> Int                                    -- ^ Timeout in milliseconds.
   -> (String -> m a)                        -- ^ The fail handler.
   -> m a                                    -- ^ The success handler.

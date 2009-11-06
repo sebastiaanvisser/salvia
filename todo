@@ -2,8 +2,6 @@ comet?
 IPv6?
 proxy?
 
-get rid of parsec dep
-
 jailIO
 
 server running on multiple TCP ports
@@ -12,7 +10,4 @@ can logger and color logger share things
 http-get ranges
 http-accept
 http-cache
-
-streaming big files?
-get a good notion of all true IO actions (SocketM) and create debug error catcher.
 

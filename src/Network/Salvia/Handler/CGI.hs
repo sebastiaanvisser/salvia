@@ -18,7 +18,6 @@ import Network.Salvia.Handler.Parser
 import Prelude hiding ((.), id)
 import System.IO
 import System.Process
-import Text.Parsec hiding (many, (<|>))
 import qualified Data.ByteString as B
 
 -- | Handler to run CGI scripts. Not entirely finished.
@@ -71,8 +70,8 @@ hCGI fn =
      -- Read the headers produced by the CGI script and store them as the
      -- response headers of this handler.
      hs <- liftIO (readNonEmptyLines out)
-     case parse pHeaders "" hs of
-       Left e  -> hCustomError InternalServerError (show e)
+     case parseHeaders hs of
+       Left e  -> hCustomError InternalServerError e
        Right r -> response (headers =: r)
 
      -- Spool all data from the CGI script's output to the client. When
