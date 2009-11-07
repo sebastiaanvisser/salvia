@@ -15,7 +15,7 @@ import System.IO
 
 -- | Run a handler once and close the connection afterwards.
 
-hCloseConn :: (PeerM m, MonadIO m) => m a -> m ()
+hCloseConn :: (SockM m, MonadIO m) => m a -> m ()
 hCloseConn h = h >> sock >>= flip catchIO () . hClose
 
 {- |
@@ -33,7 +33,7 @@ the following criteria are met:
 * The HTTP version is HTTP/1.0.
 -}
 
-hKeepAlive :: (QueueM m, PeerM m, HttpM' m, MonadIO m) => m a -> m ()
+hKeepAlive :: (QueueM m, SockM m, HttpM' m, MonadIO m) => m a -> m ()
 hKeepAlive handler =
   do _ <- handler
      h      <- sock

@@ -1,11 +1,5 @@
-module Network.Salvia.Handler.Log
-  ( hLog
-  , hLogWithCounter
-  )
-where
+module Network.Salvia.Handler.Log where
 
-import Control.Applicative
-import Control.Concurrent.STM
 import Control.Monad.State
 import Data.List
 import Data.Record.Label
@@ -18,32 +12,22 @@ A simple logger that prints a summery of the request information to the
 specified file handle.
 -}
 
-hLog :: (PeerM m, MonadIO m, HttpM' m) => Handle -> m ()
-hLog = logger Nothing
-
-{- | Like `hLog` but also prints the request count since server startup. -}
-
-hLogWithCounter :: (PeerM m, MonadIO m, HttpM' m) => TVar Int -> Handle -> m ()
-hLogWithCounter a = logger (Just a)
-
-logger :: (PeerM m, MonadIO m, HttpM' m) => Maybe (TVar Int) -> Handle -> m ()
-logger count handle =
-  do c <- case count of
-       Nothing -> return "-"
-       Just c' -> liftIO (show <$> atomically (readTVar c'))
-     mt   <- request  (getM method)
-     ur   <- request  (getM uri)
-     st   <- response (getM status)
-     dt   <- response (getM date)
-     addr <- peer
+hLog :: (AddressM' m , MonadIO m, HttpM' m) => Handle -> m ()
+hLog handle =
+  do mt <- request  (getM method)
+     ur <- request  (getM uri)
+     st <- response (getM status)
+     dt <- response (getM date)
+     ca <- clientAddress
+     sa <- serverAddress
      let code = codeFromStatus st
      liftIO
-       $ hPutStrLn handle
+       . hPutStrLn handle
        $ intercalate " ; "
          [ maybe "" id dt
-         , c
-         , show addr
+         , show sa
          , show mt
+         , show ca
          , ur
          , show code ++ " " ++ show st
          ]

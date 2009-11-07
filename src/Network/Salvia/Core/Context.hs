@@ -1,28 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Network.Salvia.Core.Context
-{-  ( SendAction
-  , SendQueue
+module Network.Salvia.Core.Context where
 
-  , Context (..)
-
-  , config
-  , payload
-  , request
-  , response
-  , rawSock
-  , sock
-  , peer
-  , queue
-
-  , mkContext
-  )-}
-where
-
-import Control.Category
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Socket (SockAddr, Socket)
-import Prelude hiding ((.), id)
+import Network.Socket
 import System.IO
 
 -- | A send action is some thing that works on a socket or handle.
@@ -37,19 +18,7 @@ queue can be flushed to the client at once after the HTTP headers have been
 sent at the end of a request handler.
 -}
 
-type SendQueue  = [SendAction]
-
-data PeerInfo = PeerInfo
-  { __rawSock :: Socket
-  , __sock    :: Handle
-  , __peer    :: SockAddr
-  }
-
-$(mkLabels [''PeerInfo])
-
-_rawSock :: PeerInfo :-> Socket
-_sock    :: PeerInfo :-> Handle
-_peer    :: PeerInfo :-> SockAddr
+type SendQueue = [SendAction]
 
 {- |
 A handler context contains all the information needed by the request handlers
@@ -57,54 +26,71 @@ to perform their task and to set up a proper response. All the fields in the
 context are accessible using the read/write labels defined below.
 -}
 
-
 data Context c p = Context
-  { _config   :: c             -- ^ The client or server configuration.
-  , _payload  :: p             -- ^ Connection wide payload.
-  , _request  :: Http Request  -- ^ The HTTP request header.
-  , _response :: Http Response -- ^ The HTTP response header.
-  , _peerInfo :: PeerInfo      -- ^ The raw socket for the connection with the other endpoint. 
-  , _queue    :: SendQueue     -- ^ The queue of send actions.
+  { _cConfig     :: c
+  , _cPayload    :: p
+  , _cRequest    :: Http Request
+  , _cResponse   :: Http Response
+  , _cRawSock    :: Socket
+  , _cSock       :: Handle
+  , _cClientAddr :: SockAddr
+  , _cServerAddr :: SockAddr
+  , _cQueue      :: SendQueue
   }
 
 $(mkLabels [''Context])
 
-config   :: Context c p :-> c
-payload  :: Context c p :-> p
-queue    :: Context c p :-> SendQueue
-peerInfo :: Context c p :-> PeerInfo
-request  :: Context c p :-> Http Request
-response :: Context c p :-> Http Response
+-- | The client or server configuration.
+cConfig :: Context c p :-> c
 
-rawSock :: Context c p :-> Socket
-rawSock = _rawSock . peerInfo
+-- | Connection wide payload.
+cPayload :: Context c p :-> p
 
-sock :: Context c p :-> Handle
-sock = _sock . peerInfo
+-- | The HTTP request header.
+cRequest :: Context c p :-> Http Request
 
-peer :: Context c p :-> SockAddr
-peer = _peer . peerInfo
+-- | The HTTP response header.
+cResponse :: Context c p :-> Http Response
+
+-- | Raw socket for connection to the other peer.
+cRawSock :: Context c p :-> Socket
+
+-- | Socket file descriptor for connection to the ohter peer.
+cSock :: Context c p :-> Handle
+
+-- | Client address.
+cClientAddr :: Context c p :-> SockAddr
+
+-- | Server address.
+cServerAddr :: Context c p :-> SockAddr
+
+-- | The queue of send actions.
+cQueue :: Context c p :-> SendQueue
 
 {- |
 Create and default server context with the specified server configuration,
 client address and socket.
 -}
 
-mkContext :: c -> p -> SockAddr -> Socket -> Handle -> Context c p
-mkContext c p a r s =
+mkContext :: c -> p -> SockAddr -> SockAddr -> Socket -> Handle -> Context c p
+mkContext c p ca sa r s =
   Context
-    { _config   = c
-    , _payload  = p
-    , _request  = emptyRequest
-    , _response = emptyResponse  -- 200 OK, by default.
-    , _peerInfo = PeerInfo r s a
-    , _queue    = []
+    { _cConfig     = c
+    , _cPayload    = p
+    , _cRequest    = emptyRequest
+    , _cResponse   = emptyResponse  -- 200 OK, by default.
+    , _cRawSock    = r
+    , _cSock       = s
+    , _cClientAddr = ca
+    , _cServerAddr = sa
+    , _cQueue      = []
     }
 
 -- todo: make peerInfo a Maybe.
 emptyContext :: Context () ()
 emptyContext = mkContext () ()
-  (error "emptyContext: no peer info available")
-  (error "emptyContext: no peer info available")
-  (error "emptyContext: no peer info available")
+  (error "emptyContext: no rawSock available")
+  (error "emptyContext: no sock available")
+  (error "emptyContext: no client address available")
+  (error "emptyContext: no server address available")
 

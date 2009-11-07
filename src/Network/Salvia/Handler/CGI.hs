@@ -15,16 +15,24 @@ import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Parser
+import Network.Socket
 import Prelude hiding ((.), id)
 import System.IO
 import System.Process
 import qualified Data.ByteString as B
 
--- | Handler to run CGI scripts. Not entirely finished.
+-- | Handler to run CGI scripts.
 
-hCGI :: (MonadIO m, BodyM Request m, HttpM' m, SendM m, QueueM m, ServerM m) => FilePath -> m ()
+-- todo: fails on ipv6 en unix sockets.
+-- todo: stderr?
+
+hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, QueueM m, ServerM m, AddressM' m) => FilePath -> m ()
 hCGI fn =
   do cfg     <- server
+     SockAddrInet cp ca <- clientAddress
+     SockAddrInet sp sa <- serverAddress
+     sa' <- liftIO (inet_ntoa sa)
+     ca' <- liftIO (inet_ntoa ca)
      hdrs    <- request (getM headers)
      _query  <- request (getM (query . asUri))
      _path   <- request (getM (path . asUri))
@@ -44,14 +52,14 @@ hCGI fn =
            : ("SERVER_SOFTWARE",   "Salvia")
            : ("SERVER_SIGNATURE",  "")
            : ("SERVER_PROTOCOL",   "HTTP/1.1")
-           : ("SERVER_ADDR",       show (listenAddr cfg)) -- todo: fix show.
            : ("SERVER_ADMIN",      admin cfg)
            : ("SERVER_NAME",       hostname cfg)
-           : ("SERVER_PORT",       show (listenPort cfg))
-           : ("REMOTE_ADDR",       "") -- todo
-           : ("REMOTE_PORT",       "") -- todo
-           : ("SCRIPT_FILENAME",   "") -- todo
-           : ("SCRIPT_NAME",       "") -- todo
+           : ("SERVER_ADDR",       sa')
+           : ("SERVER_PORT",       show sp)
+           : ("REMOTE_ADDR",       ca')
+           : ("REMOTE_PORT",       show cp)
+           : ("SCRIPT_FILENAME",   fn)
+           : ("SCRIPT_NAME",       fn)
            : headerDecls hdrs
 
      -- Start up the CGI script with the appropriate environment variables.

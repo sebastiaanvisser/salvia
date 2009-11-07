@@ -5,16 +5,14 @@ import Control.Monad.State hiding (get)
 import Data.Maybe
 import Data.Record.Label
 import Network.BSD
-import Network.Protocol.Uri
 import Network.Protocol.Http
+import Network.Protocol.Uri
 import Network.Salvia.Core.Aspects
+import Network.Salvia.Core.Context
 import Network.Salvia.Impl.Handler
--- import Network.Salvia.Handler.Body
--- import Network.Salvia.Handler.Client
 import Network.Socket
 import System.IO
 import System.IO.Error
-import qualified Network.Salvia.Core.Context as C
 
 runClient
   :: ClientHandler a -- ^ Handler to setup request.
@@ -23,7 +21,7 @@ runClient
 
 runClient hReq hRes = 
   do -- Run the handler to setup the request.
-     req <- get C.request . snd <$> runHandler hReq C.emptyContext
+     req <- get cRequest . snd <$> runHandler hReq emptyContext
      let u = get asUri req
          p = fromMaybe 80 (get port u)
          h = get host u
@@ -44,7 +42,7 @@ runClient hReq hRes =
      -- Put the request in the context and run the response handler.
      fst <$> runHandler 
        (request (put req) >> hRes)
-       (C.mkContext () () name sck fd)
+       (mkContext () () name (error "help help aap help") sck fd)
 
 -- getRequest :: String -> IO (Maybe String)
 -- getRequest u = join . join <$>

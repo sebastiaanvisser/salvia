@@ -40,14 +40,31 @@ request = http
 response :: HttpM Response m => State (Http Response) a -> m a
 response = http
 
--- | The `PeerM` type class allows access to peer (the other endpoint of the
--- connection) specific information like the socket and asscociated file handle
--- and the socket address.
+-- | The `SockM` type class allows access to peer (the other endpoint of the
+-- connection) specific information like the socket and file handle associated
+-- with the socket.
 
-class (Applicative m, Monad m) => PeerM m where
+class (Applicative m, Monad m) => SockM m where
   rawSock :: m Socket
   sock    :: m Handle
-  peer    :: m SockAddr
+
+-- | The `ClientAddressM` type class gives access to socket address of the
+-- client part of the connection.
+
+class (Applicative m, Monad m) => ClientAddressM m where
+  clientAddress :: m SockAddr
+
+-- | The `ServerAddressM` type class gives access to socket address of the
+-- client part of the connection.
+
+class (Applicative m, Monad m) => ServerAddressM m where
+  serverAddress :: m SockAddr
+
+-- | Type class alias indicating an instances for both `ClientAddressM' and
+-- `ServerAddressM'.
+
+class (ClientAddressM m, ServerAddressM m) => AddressM' m
+instance (ClientAddressM m, ServerAddressM m) => AddressM' m
 
 type SendAction = (Socket, Handle) -> IO ()
 

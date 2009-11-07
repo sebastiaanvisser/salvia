@@ -87,7 +87,7 @@ seconds in the future. When no session can be found a new one will be created.
 A cookie will be set that informs the client of the current session.
 -}
 
-hProlongSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m (Sessions p)) => Integer -> m ()
+hProlongSession :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m (Sessions p)) => Integer -> m ()
 hProlongSession e =
   do n <- liftIO getCurrentTime
      var <- existingSessionVarOrNew
@@ -98,7 +98,7 @@ hProlongSession e =
 hGetSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m (Sessions p)) => m (Session p)
 hGetSession = existingSessionVarOrNew >>= getVar
 
-hPutSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m (Sessions p)) => Session p -> m ()
+hPutSession :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m (Sessions p)) => Session p -> m ()
 hPutSession session =
   do var <- existingSessionVarOrNew
      putVar var session
@@ -158,7 +158,7 @@ default cookie with an additional `sid' attribute with the session identifier
 as value. The session expiration date will be used as the cookie expire field.
 -}
 
-setCookieSession :: (MonadIO m, ServerM m, HttpM Response m) => SessionID -> UTCTime -> m ()
+setCookieSession :: (MonadIO m, ServerM m, ServerAddressM m, HttpM Response m) => SessionID -> UTCTime -> m ()
 setCookieSession sd ex =
   do zone <- liftIO getCurrentTimeZone
      let time = utcToLocalTime zone ex

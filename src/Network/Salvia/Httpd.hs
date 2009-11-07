@@ -1,48 +1,28 @@
 module Network.Salvia.Httpd
+( Config (..)
+, defaultConfig
 
-  -- Httpd.Core.Config
-  ( Config (..)
-  , defaultConfig
+, forRequest
+, forResponse
+, request
+, response
 
-  -- Httpd.Core.Aspects
-  , forRequest
-  , forResponse
-
-  , ServerM
-  , server
-
-  , HttpM
-  , http
-  , request
-  , response
-  , HttpM'
-
-  , PeerM
-  , rawSock
-  , sock
-  , peer
-
-  , QueueM
-  , enqueue
-  , dequeue
-
-  , SendM
-  , send
-  , sendBs
-  , spoolWith
-  , spoolWithBs
-
-  , FlushM
-  , flushHeaders
-  , flushQueue
-
-  , BodyM 
-  , body
-  )
+, ServerM (..)
+, ClientM (..)
+, HttpM (..)
+, HttpM'
+, SockM (..)
+, ClientAddressM (..)
+, ServerAddressM (..)
+, AddressM'
+, QueueM (..)
+, SendM (..)
+, FlushM (..)
+, BodyM (..)
+)
 where
 
--- Abstract implementation.
+-- Middle ware.
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Aspects
--- import Network.Salvia.Core.Context
 

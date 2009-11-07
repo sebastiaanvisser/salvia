@@ -19,7 +19,7 @@ import System.Timeout
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (PeerM m, HttpM Request m, MonadIO m)
+  :: (SockM m, HttpM Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -29,7 +29,7 @@ hRequestParser = hParser (request . put) parseRequest
 -- | Like the `hParser' but always parses `HTTP` `Response`s.
 
 hResponseParser
-  :: (PeerM m, HttpM Response m, MonadIO m)
+  :: (SockM m, HttpM Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -47,7 +47,7 @@ specified with the first argument the function silently returns.
 -}
 
 hParser
-  :: (PeerM m, MonadIO m)
+  :: (SockM m, MonadIO m)
   => (Http d -> m b)                        -- ^ What to do with message.
   -> (String -> Either String (Http d))     -- ^ Custom message parser.
   -> Int                                    -- ^ Timeout in milliseconds.

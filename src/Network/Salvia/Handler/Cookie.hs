@@ -15,6 +15,7 @@ import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Prelude hiding ((.), id)
 import System.Locale
+import Network.Socket
 import qualified Network.Protocol.Http as H
 
 {- | Set the `Set-Cookie` HTTP response header with the specified `Cookies`. -}
@@ -41,13 +42,14 @@ bound to the domain and port this server runs on. The path will be locked to
 root.
 -}
 
-hNewCookie :: (ServerM m, FormatTime t) => t -> m Cookie
+hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> m Cookie
 hNewCookie expire = do
   httpd <- server
+  sAddr <- serverAddress
   return 
     . (path    `set` Just "/")
     . (domain  `set` Just ('.' : hostname httpd))
-    . (port    `set` [fromEnum (listenPort httpd)])
+    . (port    `set` [(\(SockAddrInet p _) -> fromIntegral p) sAddr])
     . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
     $ empty
 

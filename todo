@@ -4,8 +4,8 @@ proxy?
 
 jailIO
 
-server running on multiple TCP ports
-can logger and color logger share things
+HLists for server payload
+todo:s fixen
 
 http-get ranges
 http-accept
