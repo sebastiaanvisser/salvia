@@ -90,6 +90,7 @@ Library
                     MultiParamTypeClasses
                     GeneralizedNewtypeDeriving
                     FunctionalDependencies
+                    TypeFamilies
 
 -- Executable          salvia-demo
 --   Executable:       salvia-demo

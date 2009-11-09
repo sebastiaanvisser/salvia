@@ -1,10 +1,12 @@
-{-# LANGUAGE StandaloneDeriving, TypeSynonymInstances #-}
+{-# LANGUAGE StandaloneDeriving, TypeSynonymInstances, UndecidableInstances, OverlappingInstances, IncoherentInstances #-}
 module Network.Salvia.Impl.Handler where
 
 import Control.Applicative
 import Control.Monad.State
+import Prelude hiding (mod)
 import Data.Monoid
 import Data.Record.Label hiding (get)
+import qualified Data.Record.Label as L
 import Network.Protocol.Http
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
@@ -89,10 +91,16 @@ instance BodyM Request (Handler c p) where
 instance BodyM Response (Handler c p) where
   body = hRawBody
 
-instance PayloadM (Handler c p) p where
+instance Contains p q => PayloadM (Handler c p) p q where
   payload st =
     do (a, s) <- runState st <$> getM cPayload
-       cPayload =: s >> return a
+       cPayload =: s
+       return a
+  partial st =
+    do pl <- getM cPayload :: Handler c p p
+       let (a, s) = runState st (L.get select pl)
+       cPayload =: L.set select s pl
+       return a
 
 instance ServerM (Handler Config p) where
   server = getM cConfig
@@ -100,16 +108,18 @@ instance ServerM (Handler Config p) where
 instance ClientM (Handler () ()) where
   client = return ()
 
-instance SessionM (Handler Config (Sessions p)) p where
-  prolongSession = hProlongSession
+instance Contains q (Sessions p)
+      => SessionM (Handler Config q) p where
+  prolongSession = hProlongSession (undefined :: p)
   getSession     = hGetSession
   putSession     = hPutSession
-  delSession     = hDelSession
+  delSession     = hDelSession     (undefined :: p)
   withSession    = hWithSession
 
-instance LoginM (Handler Config (Sessions (UserPayload p))) p where
-  signup     = hSignup
-  login      = hLogin
-  logout     = hLogout
-  authorized = hAuthorized
+instance Contains q (Sessions (UserPayload p))
+      => LoginM (Handler Config q) p where
+  login      = hLogin      (undefined :: p)
+  logout     = hLogout     (undefined :: p)
+  signup     = hSignup     (undefined :: p)
+  authorized = hAuthorized (undefined :: p)
 

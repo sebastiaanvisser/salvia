@@ -72,12 +72,12 @@ class (Applicative m, Monad m) => SessionM m p | m -> p where
 
 -- | A mapping from unique session IDs to shared session variables.
 
-type Sessions p = TVar (M.Map SessionID (TVar (Session p)))
+newtype Sessions p = Sessions { unSessions :: TVar (M.Map SessionID (TVar (Session p))) }
 
 -- | Create a new, empty, store of sessions.
 
 mkSessions :: MonadIO m => m (Sessions p)
-mkSessions = newVar M.empty
+mkSessions = liftM Sessions (newVar M.empty)
 
 {- | todo doc:
 The session handler. This handler will try to return an existing session from
@@ -87,36 +87,39 @@ seconds in the future. When no session can be found a new one will be created.
 A cookie will be set that informs the client of the current session.
 -}
 
-hProlongSession :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m (Sessions p)) => Integer -> m ()
-hProlongSession e =
+hProlongSession
+  :: forall m q p. (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m q (Sessions p))
+  => p -> Integer -> m ()
+hProlongSession _ e =
   do n <- liftIO getCurrentTime
      var <- existingSessionVarOrNew
-     session <- modVar (set sLast n . set sExpire e) var >>= getVar
+     session <- modVar (set sLast n . set sExpire e) (var :: TVar (Session p)) >>= getVar
      setCookieSession (get sID session) (willExpireAt session)
-     return ()
 
-hGetSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m (Sessions p)) => m (Session p)
+hGetSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m q (Sessions p)) => m (Session p)
 hGetSession = existingSessionVarOrNew >>= getVar
 
-hPutSession :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m (Sessions p)) => Session p -> m ()
+hPutSession
+  :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m q (Sessions p))
+  => Session p -> m ()
 hPutSession session =
   do var <- existingSessionVarOrNew
      putVar var session
      setCookieSession (get sID session) (willExpireAt session)
 
-hDelSession :: (PayloadM m (Sessions p), HttpM' m, MonadIO m) => m ()
-hDelSession =
+hDelSession :: forall q p m. (PayloadM m q (Sessions p), HttpM' m, MonadIO m) => p -> m ()
+hDelSession _ =
   do msid <- getCookieSessionID
      case msid of
        Just sd ->
          do delCookieSession
-            var <- payload S.get
-            _   <- modVar (M.delete sd) var
+            var <- partial S.get :: m (Sessions p)
+            _   <- modVar (M.delete sd) (unSessions var)
             return ()
        Nothing -> return ()
 
 hWithSession
-  :: (PayloadM m (Sessions p), MonadIO m, HttpM Request m)
+  :: (PayloadM m q (Sessions p), MonadIO m, HttpM Request m)
   => (Session p -> Session p) -> m ()
 hWithSession f =
   do _ <- existingSessionVarOrNew >>= modVar f
@@ -140,7 +143,9 @@ the `newSessionVar' function. Otherwise the expiration date of the existing
 session is updated.
 -}
 
-existingSessionVarOrNew :: (Applicative m, MonadIO m, HttpM Request m, PayloadM m (Sessions p)) => m (TVar (Session p))
+existingSessionVarOrNew
+  :: (Applicative m, MonadIO m, HttpM Request m, PayloadM m q (Sessions p))
+  => m (TVar (Session p))
 existingSessionVarOrNew =
   getCookieSessionID `andAlso` lookupSessionVar `andAlso` whenNotExpired >>=
      (newSessionVar `maybe` return)
@@ -170,6 +175,7 @@ setCookieSession sd ex =
 
 getCookieSessionID :: (MonadIO m, HttpM Request m) => m (Maybe SessionID)
 getCookieSessionID =
+  -- todo : join . fmap == (=<<)
   fmap SID . join . fmap readMay . join . fmap (get (fmapL value . pickCookie "sid"))
      <$> hCookie
 
@@ -179,17 +185,17 @@ delCookieSession = hDelCookie "sid"
 -- | Create a new session with a specified expiration date. The session will be
 -- stored in the session map.
 
-newSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => m (TVar (Session p))
+newSessionVar :: (MonadIO m, PayloadM m q (Sessions p)) => m (TVar (Session p))
 newSessionVar =
-  do var <- payload S.get
+  do var <- partial S.get
      sd <- newSessionID var
      session <- liftIO getCurrentTime >>= newVar . (\n -> Session sd n n 0 Nothing)
-     _ <- modVar (M.insert sd session) var
+     _ <- modVar (M.insert sd session) (unSessions var)
      return session
 
 newSessionID :: MonadIO m => Sessions p -> m SessionID
 newSessionID var =
-  do store <- getVar var
+  do store <- getVar (unSessions var)
      let generate =
            do r <- liftIO randomIO
               case M.lookup r store of
@@ -200,8 +206,10 @@ newSessionID var =
 willExpireAt :: Session p -> UTCTime
 willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast session 
 
-lookupSessionVar :: (MonadIO m, PayloadM m (Sessions p)) => SessionID -> m (Maybe (TVar (Session p)))
-lookupSessionVar sd = M.lookup sd <$> (payload S.get >>= getVar)
+lookupSessionVar
+  :: (MonadIO m, PayloadM m q (Sessions p))
+  => SessionID -> m (Maybe (TVar (Session p)))
+lookupSessionVar sd = M.lookup sd <$> (partial S.get >>= getVar . unSessions)
 
 -- STM utilities.
 

@@ -32,6 +32,7 @@ module Network.Salvia.Handler.Login
 
 -- * Handlers.
 
+, hGetUser
 , hSignup
 , hLogin
 , hLogout
@@ -119,6 +120,9 @@ class (Applicative m, Monad m) => LoginM m p | m -> p where
   signup     :: TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
   authorized :: Maybe Action      ->             m a -> (User -> m a) -> m a
 
+hGetUser :: LoginM m p => m (Maybe User)
+hGetUser = authorized Nothing (return Nothing) (return . Just)
+
 {- |
 The signup handler is used to create a new entry in the user database. It reads
 a new username and password from the post parameters and adds a new entry into
@@ -129,9 +133,9 @@ be executed which may access the fresh user object.
 -}
 
 hSignup
-  :: (MonadIO m, BodyM Request m, HttpM Request m)
-  => TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
-hSignup tdb acts onFail onOk =
+  :: (MonadIO m, SessionM m (UserPayload p), BodyM Request m, HttpM Request m)
+  => p -> TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
+hSignup _ tdb acts onFail onOk =
   do ps <- hRequestParameters "utf-8"
      join . liftIO . atomically $
        do db <- readTVar tdb
@@ -166,8 +170,8 @@ will be executed which may access the fresh user object.
 
 hLogin
   :: (SessionM m (UserPayload p), HttpM Request m, MonadIO m, BodyM Request m)
-  => TVar UserDatabase -> m a -> (User -> m a) -> m a
-hLogin tdb onFail onOk =
+  => p -> TVar UserDatabase -> m a -> (User -> m a) -> m a
+hLogin _ tdb onFail onOk =
   do ps <- hRequestParameters "utf-8"
      db <- (liftIO . atomically . readTVar) tdb
      case authenticate ps db of
@@ -189,8 +193,8 @@ authenticate ps db =
 
 -- | Logout the current user by emptying the session payload.
 
-hLogout :: SessionM m p => m ()
-hLogout = withSession (set sPayload Nothing)
+hLogout :: SessionM m (UserPayload p) => p -> m ()
+hLogout _ = withSession (set sPayload Nothing)
 
 {- |
 The `loginfo' handler exposes the current user session to the world using a
@@ -219,8 +223,8 @@ executed when the authorization succeeds the second handler will be executed
 which may access the current user object. 
 -}
 
-hAuthorized :: SessionM m (UserPayload p) => Maybe Action -> m b -> (User -> m b) -> m b
-hAuthorized maction onFail onOk =
+hAuthorized :: SessionM m (UserPayload p) => p -> Maybe Action -> m b -> (User -> m b) -> m b
+hAuthorized _ maction onFail onOk =
   do session <- getSession
      case (maction, get sPayload session) of
        (Nothing,     Just (UserPayload user _ _))                                  -> onOk user

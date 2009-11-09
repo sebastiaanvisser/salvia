@@ -1,4 +1,4 @@
-module Network.Salvia.Impl.Server (server) where
+module Network.Salvia.Impl.Server (start) where
 
 import Control.Concurrent.ThreadManager
 import Control.Monad.State
@@ -23,8 +23,8 @@ listening socket and pass execution to the application specific connection
 handler.
 -}
 
-server :: Config -> Handler Config p () -> p -> IO ()
-server conf handler payload =
+start :: Config -> Handler Config p () -> p -> IO ()
+start conf handler payload =
   do tm <- make
      forM_ (listenOn conf) $ \(SockAddrInet port addr) ->
        fork tm $

@@ -1,13 +1,16 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances, OverlappingInstances, IncoherentInstances #-}
 module Network.Salvia.Core.Aspects where
 
 import Control.Applicative
-import Control.Monad.State
+import Control.Category
+import Control.Monad.State hiding (get)
+import Data.ByteString (ByteString)
+import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Config
 import Network.Socket
+import Prelude hiding ((.), id)
 import System.IO
-import Data.ByteString (ByteString)
 
 -- | The `HttpM' type class indicates is parametrized with the directon
 -- (`Request' or `Response') for which the implementation should be able to
@@ -129,8 +132,25 @@ class (Applicative m, Monad m) => ClientM m where
 
 -- | The `PayloadM' type class provides access to the server payload. The
 -- payload can be an arbitrary piece of data that gets shared between all the
--- handlers. Can be used to implement sessions.
+-- handlers. Can be used to implement sessions and such. Heterogeneous lists
+-- implemented as right associated nested tuples can be used to store multiple
+-- pieces of information and still let individual handlers pick out the right
+-- thing they need. Picking the right pieces of information from the payload
+-- can be done with the `select' function from the `Contains' type class.
 
-class (Applicative m, Monad m) => PayloadM m p | m -> p where
+class (Applicative m, Monad m, Contains p q) => PayloadM m p q | m -> p where
   payload :: State p a -> m a
+  partial :: State q a -> m a
+
+class Contains a b where
+  select :: a :-> b
+
+instance (a ~ a') => Contains a a' where
+  select = id
+
+instance Contains (a, c) a where
+  select = label fst (\a (_, b) -> (a, b))
+
+instance Contains a b => Contains (c, a) b where
+  select = select . label snd (\b (a, _) -> (a, b))
 
