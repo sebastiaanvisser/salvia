@@ -19,6 +19,9 @@ module Network.Salvia.Httpd
 , SendM (..)
 , FlushM (..)
 , BodyM (..)
+, PayloadM (..)
+, Contains (..)
+, (&)
 )
 where
 

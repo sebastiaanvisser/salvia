@@ -142,6 +142,10 @@ class (Applicative m, Monad m) => ClientM m where
 class (Applicative m, Monad m, Contains p (TVar q)) => PayloadM m p q | m -> p where
   payload :: State q a -> m a
 
+infixr 5 &
+(&) :: a -> b -> (a, b)
+(&) a b = (a, b)
+
 class Contains a b where
   select :: a :-> b
 
