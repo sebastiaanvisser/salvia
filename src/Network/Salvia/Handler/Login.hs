@@ -43,7 +43,6 @@ module Network.Salvia.Handler.Login
 where
 
 import Control.Applicative
-import Control.Concurrent.STM
 import Control.Monad.State hiding (get)
 import Data.ByteString.Lazy.UTF8 hiding (lines)
 import Data.Digest.Pure.MD5
@@ -57,6 +56,7 @@ import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Session
 import Prelude hiding (mod)
 import Safe
+import qualified Control.Monad.State as S
 
 {- |
 User containg a username, password and a list of actions this user is allowed
@@ -115,10 +115,10 @@ users   :: UserDatabase :-> [User]
 backend :: UserDatabase :-> Backend
 
 class (Applicative m, Monad m) => LoginM m p | m -> p where
-  login      :: TVar UserDatabase ->             m a -> (User -> m a) -> m a
-  logout     ::                                                          m ()
-  signup     :: TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
-  authorized :: Maybe Action      ->             m a -> (User -> m a) -> m a
+  login      ::                  m a -> (User -> m a) -> m a
+  logout     ::                                          m ()
+  signup     :: [Action]      -> m a -> (User -> m a) -> m a
+  authorized :: Maybe Action  -> m a -> (User -> m a) -> m a
 
 hGetUser :: LoginM m p => m (Maybe User)
 hGetUser = authorized Nothing (return Nothing) (return . Just)
@@ -133,16 +133,16 @@ be executed which may access the fresh user object.
 -}
 
 hSignup
-  :: (MonadIO m, SessionM m (UserPayload p), BodyM Request m, HttpM Request m)
-  => p -> TVar UserDatabase -> [Action] -> m a -> (User -> m a) -> m a
-hSignup _ tdb acts onFail onOk =
+  :: forall m q p a. (MonadIO m, PayloadM m q UserDatabase, SessionM m (UserPayload p), BodyM Request m, HttpM Request m)
+  => p -> [Action] -> m a -> (User -> m a) -> m a
+hSignup _ acts onFail onOk =
   do ps <- hRequestParameters "utf-8"
-     join . liftIO . atomically $
-       do db <- readTVar tdb
+     join . payload $
+       do db <- S.get
           case freshUserInfo ps (get users db) acts of
             Nothing -> return onFail
-            Just user -> 
-              do writeTVar tdb (mod users (user:) db)
+            Just user  -> 
+              do modM users (user:)
                  return $
                    do add (get backend db) user
                       onOk user
@@ -169,11 +169,11 @@ will be executed which may access the fresh user object.
 -}
 
 hLogin
-  :: (SessionM m (UserPayload p), HttpM Request m, MonadIO m, BodyM Request m)
-  => p -> TVar UserDatabase -> m a -> (User -> m a) -> m a
-hLogin _ tdb onFail onOk =
+  :: forall m q p a. (PayloadM m q UserDatabase, SessionM m (UserPayload p), HttpM Request m, MonadIO m, BodyM Request m)
+  => p -> m a -> (User -> m a) -> m a
+hLogin _ onFail onOk =
   do ps <- hRequestParameters "utf-8"
-     db <- (liftIO . atomically . readTVar) tdb
+     db <- payload S.get :: m UserDatabase
      case authenticate ps db of
        Nothing   -> onFail
        Just user -> do let pl = Just (UserPayload user True Nothing)

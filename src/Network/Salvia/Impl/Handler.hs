@@ -2,6 +2,7 @@
 module Network.Salvia.Impl.Handler where
 
 import Control.Applicative
+import Control.Concurrent.STM
 import Control.Monad.State
 import Prelude hiding (mod)
 import Data.Monoid
@@ -91,24 +92,23 @@ instance BodyM Request (Handler c p) where
 instance BodyM Response (Handler c p) where
   body = hRawBody
 
-instance Contains p q => PayloadM (Handler c p) p q where
-  payload st =
-    do (a, s) <- runState st <$> getM cPayload
-       cPayload =: s
-       return a
-  partial st =
-    do pl <- getM cPayload :: Handler c p p
-       let (a, s) = runState st (L.get select pl)
-       cPayload =: L.set select s pl
-       return a
-
 instance ServerM (Handler Config p) where
   server = getM cConfig
 
 instance ClientM (Handler () ()) where
   client = return ()
 
-instance Contains q (Sessions p)
+instance Contains p (TVar q) => PayloadM (Handler c p) p q where
+  payload st =
+    do pl <- getM cPayload :: Handler c p p
+       let var = L.get select pl :: TVar q
+       liftIO . atomically $
+          do q <- readTVar var
+             let (s, q') = runState st q
+             writeTVar var q'
+             return s
+
+instance Contains q (TVar (Sessions p))
       => SessionM (Handler Config q) p where
   prolongSession = hProlongSession (undefined :: p)
   getSession     = hGetSession
@@ -116,8 +116,9 @@ instance Contains q (Sessions p)
   delSession     = hDelSession     (undefined :: p)
   withSession    = hWithSession
 
-instance Contains q (Sessions (UserPayload p))
-      => LoginM (Handler Config q) p where
+instance ( Contains q (TVar (Sessions (UserPayload p)))
+         , Contains q (TVar UserDatabase)
+         ) => LoginM (Handler Config q) p where
   login      = hLogin      (undefined :: p)
   logout     = hLogout     (undefined :: p)
   signup     = hSignup     (undefined :: p)

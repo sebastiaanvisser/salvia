@@ -113,7 +113,7 @@ hDelSession _ =
      case msid of
        Just sd ->
          do delCookieSession
-            var <- partial S.get :: m (Sessions p)
+            var <- payload S.get :: m (Sessions p)
             _   <- modVar (M.delete sd) (unSessions var)
             return ()
        Nothing -> return ()
@@ -187,7 +187,7 @@ delCookieSession = hDelCookie "sid"
 
 newSessionVar :: (MonadIO m, PayloadM m q (Sessions p)) => m (TVar (Session p))
 newSessionVar =
-  do var <- partial S.get
+  do var <- payload S.get
      sd <- newSessionID var
      session <- liftIO getCurrentTime >>= newVar . (\n -> Session sd n n 0 Nothing)
      _ <- modVar (M.insert sd session) (unSessions var)
@@ -209,7 +209,7 @@ willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast 
 lookupSessionVar
   :: (MonadIO m, PayloadM m q (Sessions p))
   => SessionID -> m (Maybe (TVar (Session p)))
-lookupSessionVar sd = M.lookup sd <$> (partial S.get >>= getVar . unSessions)
+lookupSessionVar sd = M.lookup sd <$> (payload S.get >>= getVar . unSessions)
 
 -- STM utilities.
 

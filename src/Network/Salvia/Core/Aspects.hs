@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances, OverlappingInstances, IncoherentInstances #-}
 module Network.Salvia.Core.Aspects where
 
+import Control.Concurrent.STM
 import Control.Applicative
 import Control.Category
 import Control.Monad.State hiding (get)
@@ -138,9 +139,8 @@ class (Applicative m, Monad m) => ClientM m where
 -- thing they need. Picking the right pieces of information from the payload
 -- can be done with the `select' function from the `Contains' type class.
 
-class (Applicative m, Monad m, Contains p q) => PayloadM m p q | m -> p where
-  payload :: State p a -> m a
-  partial :: State q a -> m a
+class (Applicative m, Monad m, Contains p (TVar q)) => PayloadM m p q | m -> p where
+  payload :: State q a -> m a
 
 class Contains a b where
   select :: a :-> b
