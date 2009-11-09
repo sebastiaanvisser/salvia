@@ -151,6 +151,6 @@ instance (a ~ a') => Contains a a' where
 instance Contains (a, c) a where
   select = label fst (\a (_, b) -> (a, b))
 
-instance Contains a b => Contains (c, a) b where
+instance (b ~ b', Contains a b') => Contains (c, a) b' where
   select = select . label snd (\b (a, _) -> (a, b))
 
