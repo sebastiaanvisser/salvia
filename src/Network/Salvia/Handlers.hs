@@ -27,9 +27,13 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hRawResponseBody
 , hRawBody
 
-, hRequestBody
-, hResponseBody
-, hBody
+, hRequestBodyText
+, hResponseBodyText
+, hBodyText
+
+, hRequestBodyStringUTF8
+, hResponseBodyStringUTF8
+, hBodyStringUTF8
 
 , hRequestParameters
 , hResponseParameters

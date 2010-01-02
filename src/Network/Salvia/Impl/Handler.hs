@@ -4,21 +4,21 @@ module Network.Salvia.Impl.Handler where
 import Control.Applicative
 import Control.Concurrent.STM
 import Control.Monad.State
-import Prelude hiding (mod)
 import Data.Monoid
 import Data.Record.Label hiding (get)
-import qualified Data.Record.Label as L
 import Network.Protocol.Http
+import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
 import Network.Salvia.Handler.Body
+import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
-import Network.Salvia.Handler.Login
+import Prelude hiding (mod)
 import Safe
 import System.IO
-import Network.Salvia.Core.Aspects
-import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as ByteString
+import qualified Data.Record.Label as L
 
 newtype Handler c p a = Handler { unHandler :: StateT (Context c p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context c p))

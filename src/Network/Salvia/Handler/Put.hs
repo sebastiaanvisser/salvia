@@ -15,7 +15,7 @@ import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Method
 import System.IO
-import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as B
 
 {- |
 Create a browseable filesystem handler (like `hFileSystem') but make all files

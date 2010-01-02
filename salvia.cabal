@@ -28,7 +28,6 @@ Library
                     bytestring,
                     containers,
                     directory,
-                    encoding,
                     fclabels,
                     monads-fd,
                     network,

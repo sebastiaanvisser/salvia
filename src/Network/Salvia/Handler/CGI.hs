@@ -19,7 +19,7 @@ import Network.Socket
 import Prelude hiding ((.), id)
 import System.IO
 import System.Process
-import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as B
 
 -- | Handler to run CGI scripts.
 

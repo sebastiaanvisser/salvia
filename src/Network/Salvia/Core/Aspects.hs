@@ -5,7 +5,7 @@ import Control.Concurrent.STM
 import Control.Applicative
 import Control.Category
 import Control.Monad.State hiding (get)
-import Data.ByteString (ByteString)
+import Data.ByteString.Lazy (ByteString)
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Core.Config
