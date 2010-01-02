@@ -23,7 +23,7 @@ Library
   GHC-Options:      -threaded -Wall -fno-warn-orphans
   HS-Source-Dirs:   src
 
-  Build-Depends:    base,
+  Build-Depends:    base ==4.*,
                     bimap,
                     bytestring,
                     containers,
