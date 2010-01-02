@@ -81,16 +81,3 @@ Library
                     Network.Salvia.Handlers
                     Network.Salvia.Httpd
 
--- Executable          salvia-demo
---   Executable:       salvia-demo
---   Main-is:          Demo.hs
---   GHC-Options:      -threaded -Wall -fno-warn-orphans
---   HS-Source-Dirs:   src 
---   Extensions:       FlexibleContexts
---                     FlexibleInstances 
---                     RankNTypes
---                     ScopedTypeVariables
---                     TypeOperators
---                     MultiParamTypeClasses
---                     GeneralizedNewtypeDeriving
-
