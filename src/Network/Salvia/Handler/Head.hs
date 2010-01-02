@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Head (hHead) where
 
 import Control.Monad.Trans

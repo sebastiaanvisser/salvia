@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Client where
 
 import Control.Monad.State hiding (get)

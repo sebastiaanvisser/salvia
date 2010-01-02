@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Environment (hDefaultEnv) where
 
 import Control.Monad.State

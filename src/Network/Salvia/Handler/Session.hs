@@ -1,4 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE
+    FlexibleContexts
+  , TemplateHaskell
+  , TypeOperators
+  , ScopedTypeVariables
+  , GeneralizedNewtypeDeriving
+  , MultiParamTypeClasses
+  , FunctionalDependencies
+ #-}
 module Network.Salvia.Handler.Session where
 
 import Control.Applicative hiding (empty)

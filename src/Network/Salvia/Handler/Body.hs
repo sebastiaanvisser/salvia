@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables #-}
 module Network.Salvia.Handler.Body
 ( hRawRequestBody
 , hRawResponseBody

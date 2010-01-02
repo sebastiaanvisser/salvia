@@ -81,16 +81,6 @@ Library
                     Network.Salvia.Handlers
                     Network.Salvia.Httpd
 
-  Extensions:       FlexibleContexts
-                    FlexibleInstances 
-                    RankNTypes
-                    ScopedTypeVariables
-                    TypeOperators
-                    MultiParamTypeClasses
-                    GeneralizedNewtypeDeriving
-                    FunctionalDependencies
-                    TypeFamilies
-
 -- Executable          salvia-demo
 --   Executable:       salvia-demo
 --   Main-is:          Demo.hs

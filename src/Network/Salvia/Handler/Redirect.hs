@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Redirect (hRedirect) where
 
 import Data.Record.Label

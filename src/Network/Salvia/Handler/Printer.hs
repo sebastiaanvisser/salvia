@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts, ScopedTypeVariables, RankNTypes #-}
 module Network.Salvia.Handler.Printer
 ( hRequestPrinter
 , hResponsePrinter

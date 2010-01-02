@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.VirtualHosting
   ( hVirtualHosting
   , hPortRouter

@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes, TypeOperators, FlexibleContexts, ScopedTypeVariables #-}
 module Network.Salvia.Handler.Dispatching
   ( Dispatcher
   , ListDispatcher

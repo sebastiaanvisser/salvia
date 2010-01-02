@@ -1,4 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE
+    FlexibleContexts
+  , TemplateHaskell
+  , ScopedTypeVariables
+  , TypeOperators
+  , RankNTypes
+  , MultiParamTypeClasses
+  , FunctionalDependencies
+  #-}
 module Network.Salvia.Handler.Login
 (
 -- * Basic types.

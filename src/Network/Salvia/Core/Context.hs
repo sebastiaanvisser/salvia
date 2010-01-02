@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, DeriveFunctor #-}
+{-# LANGUAGE TemplateHaskell, DeriveFunctor, TypeOperators #-}
 module Network.Salvia.Core.Context where
 
 import Data.Record.Label

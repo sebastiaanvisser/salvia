@@ -1,4 +1,14 @@
-{-# LANGUAGE StandaloneDeriving, TypeSynonymInstances, UndecidableInstances, OverlappingInstances, IncoherentInstances #-}
+{-# LANGUAGE
+    FlexibleInstances
+  , StandaloneDeriving
+  , TypeSynonymInstances
+  , UndecidableInstances
+  , OverlappingInstances
+  , IncoherentInstances
+  , MultiParamTypeClasses
+  , GeneralizedNewtypeDeriving
+  , ScopedTypeVariables
+ #-}
 module Network.Salvia.Impl.Handler where
 
 import Control.Applicative

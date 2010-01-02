@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts, TypeOperators #-}
 module Network.Salvia.Handler.Rewrite
   ( hLocalRequest
 

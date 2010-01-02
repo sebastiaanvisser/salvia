@@ -1,4 +1,13 @@
-{-# LANGUAGE UndecidableInstances, OverlappingInstances, IncoherentInstances #-}
+{-# LANGUAGE
+    UndecidableInstances
+  , TypeOperators
+  , MultiParamTypeClasses
+  , FunctionalDependencies
+  , FlexibleContexts
+  , FlexibleInstances
+  , TypeFamilies
+  , IncoherentInstances
+  #-}
 module Network.Salvia.Core.Aspects where
 
 import Control.Concurrent.STM
