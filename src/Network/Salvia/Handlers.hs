@@ -156,7 +156,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
 -- ** Proxy.
 
---, hProxy
+, hProxy
 
 -- * Session management.
 
@@ -265,6 +265,7 @@ import Network.Salvia.Handler.Method
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path
 import Network.Salvia.Handler.Printer
+import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Put
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Handler.Rewrite
