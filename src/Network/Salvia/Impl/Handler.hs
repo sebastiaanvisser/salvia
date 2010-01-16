@@ -63,8 +63,8 @@ instance RawHttpM Response (Handler c p) where
        cRawResponse =: s >> return a
 
 instance QueueM (Handler c p) where
-  enqueue f     = modM cQueue (++[f])
-  dequeue       = headMay <$> getM cQueue <* modM cQueue (tailDef [])
+  enqueue f = modM cQueue (++[f])
+  dequeue   = headMay <$> getM cQueue <* modM cQueue (tailDef [])
 
 instance SendM (Handler c p) where
   send        s    = enqueue (flip hPutStr s . snd)

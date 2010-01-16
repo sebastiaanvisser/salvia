@@ -27,11 +27,12 @@ runClient hReq hRes =
          h = get host u
 
      -- Get the host address first by trying a hostname lookup and when this
-     -- fails trying to parse as an IP address.
+     -- fails by trying to parse as an IP address.
      hbn <- try (getHostByName h)
-     (fam, addr) <- case hbn of
-       Left _  -> inet_addr h >>= return . (,) AF_INET
-       Right e -> return (hostFamily e, head (hostAddresses e))
+     (fam, addr) <-
+       case hbn of
+         Left _  -> inet_addr h >>= return . (,) AF_INET
+         Right e -> return (hostFamily e, head (hostAddresses e))
 
      -- Open up connection to client
      sck <- socket fam Stream 0
