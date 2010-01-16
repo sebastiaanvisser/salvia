@@ -39,6 +39,9 @@ runHandler h = runStateT (unHandler h)
 type ServerHandler p a = Handler Config p a
 type ClientHandler   a = Handler () () a
 
+instance ForkM (Handler c p) IO where
+  forkM a = get >>= return . fmap fst . runHandler a
+
 instance HttpM Request (Handler c p) where
   http st =
     do (a, s) <- runState st <$> getM cRequest

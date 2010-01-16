@@ -22,6 +22,11 @@ import Network.Socket
 import Prelude hiding ((.), id)
 import System.IO
 
+-- todo: comment
+
+class ForkM m n where
+  forkM :: m a -> m (n a)
+
 -- | The `HttpM' type class indicates is parametrized with the directon
 -- (`Request' or `Response') for which the implementation should be able to
 -- supply and modify the values. The `http` method allow for running arbitrary
