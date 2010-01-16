@@ -49,9 +49,7 @@ hStore
   => FilePath -> m ()
 hStore name =
   do b <- hRawRequestBody
-     case b of
-       Nothing -> hCustomError BadRequest "Document has not been stored."
-       Just b' -> hSafeIO
-         (withBinaryFile name WriteMode (flip B.hPut b'))
-         (const (hCustomError OK "Document stored."))
+     hSafeIO
+       (withBinaryFile name WriteMode (flip B.hPut b))
+       (const (hCustomError OK "Document stored."))
 

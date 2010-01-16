@@ -25,7 +25,7 @@ module Network.Salvia.Handler.Proxy where
      case r of
        Just (Right (res, bdy)) ->
          do response (put res)
-            maybe (return ()) sendBs bdy
+            sendBs bdy
        a -> liftIO (print a)
 
 hReq :: HttpM Request m => Http Request -> m ()

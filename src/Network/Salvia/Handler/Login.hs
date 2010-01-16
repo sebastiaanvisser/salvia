@@ -157,11 +157,10 @@ hSignup _ acts onFail onOk =
 
 -- | Helper functions that generates fresh user information.
 
-freshUserInfo :: Maybe Parameters -> [User] -> [Action] -> Maybe User
+freshUserInfo :: Parameters -> [User] -> [Action] -> Maybe User
 freshUserInfo ps us acts =
-  do p <- ps
-     user <- "username" `lookup` p >>= id
-     pass <- "password" `lookup` p >>= id
+  do user <- "username" `lookup` ps >>= id
+     pass <- "password" `lookup` ps >>= id
      if null user || null pass
        then Nothing
        else case headMay $ filter ((==user) . get username) us of
@@ -190,11 +189,10 @@ hLogin _ onFail onOk =
 
 -- | Helper functions that performs the authentication check.
 
-authenticate :: Maybe Parameters -> UserDatabase -> Maybe User
+authenticate :: Parameters -> UserDatabase -> Maybe User
 authenticate ps db =
-  do p <- ps
-     user <- "username" `lookup` p >>= id
-     pass <- "password" `lookup` p >>= id
+  do user <- "username" `lookup` ps >>= id
+     pass <- "password" `lookup` ps >>= id
      case headMay $ filter ((==user) . get username) (get users db) of
        Just u | get password u == show (md5 (fromString pass)) -> Just u
        _                                                       -> Nothing

@@ -71,10 +71,7 @@ hCGI fn =
      -- script's input. After spooling, or when there is no data, the scripts
      -- input will be closed.
      b <- body forRequest
-     liftIO $
-       case b of
-         Nothing -> hClose inp
-         Just b' -> forkIO (B.hPut inp b' >> hClose inp) >> return ()
+     liftIO $ forkIO (B.hPut inp b >> hClose inp) >> return ()
 
      -- Read the headers produced by the CGI script and store them as the
      -- response headers of this handler.

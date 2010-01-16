@@ -126,7 +126,7 @@ class (Applicative m, Monad m) => FlushM dir m where
   flushQueue   :: dir -> m ()
 
 class (Applicative m, Monad m) => BodyM dir m where
-  body :: dir -> m (Maybe ByteString)
+  body :: dir -> m ByteString
 
 -- | The `ServerM' type class can be used to acesss the static server
 -- configuration.

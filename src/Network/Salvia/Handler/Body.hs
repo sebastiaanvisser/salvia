@@ -57,7 +57,7 @@ the socket. The function is parametrized with a the direction of the HTTP
 message, client request or server response.
 -}
 
-hRawBody :: forall m d. (MonadIO m, SockM m, HttpM d m) => d -> m (Maybe B.ByteString)
+hRawBody :: forall m d. (MonadIO m, SockM m, HttpM d m) => d -> m B.ByteString
 hRawBody _ =
   do let h = http :: State (Http d) a -> m a
      con <- h (getM connection)
@@ -66,18 +66,18 @@ hRawBody _ =
      s   <- sock
      liftIO $
        case (con, kpa :: Maybe Integer, len :: Maybe Integer) of
-         (_, _,       Just n)                           -> Just <$> B.hGet s (fromIntegral n)
-         (k, Nothing, Nothing) | k /= Just "keep-alive" -> Just <$> B.hGetContents s
-         _                                              -> return Nothing
+         (_, _,       Just n)                           -> B.hGet s (fromIntegral n)
+         (k, Nothing, Nothing) | k /= Just "keep-alive" -> B.hGetContents s
+         _                                              -> return B.empty
 
 -- | Like `hRawBody' but specifically for `Http' `Request's.
 
-hRawRequestBody :: BodyM Request m => m (Maybe B.ByteString)
+hRawRequestBody :: BodyM Request m => m B.ByteString
 hRawRequestBody = body forRequest
 
 -- | Like `hRawBody' but specifically for `Http' `Request's.
 
-hRawResponseBody :: BodyM Response m => m (Maybe B.ByteString)
+hRawResponseBody :: BodyM Response m => m B.ByteString
 hRawResponseBody = body forResponse
 
 {- |
@@ -88,40 +88,40 @@ encoding supplied as the function's argument can be used to specify what
 encoding to use in the absence of a proper encoding in the HTTP message itself.
 -}
 
-hBodyText :: forall m dir. (MonadIO m, BodyM dir m, HttpM dir m) => dir -> String -> m (Maybe Text)
+hBodyText :: forall m dir. (BodyM dir m, HttpM dir m) => dir -> String -> m Text
 hBodyText d def = 
   do let h = http :: State (Http dir) a -> m a
      c <- body d
      e <- (>>= snd) <$> h (getM contentType) :: m (Maybe String)
      return $
        case (e >>= encodingFromName, encodingFromName def) of
-         (Just enc, _) -> fmap enc c
-         (_, Just enc) -> fmap enc c
+         (Just enc, _) -> enc c
+         (_, Just enc) -> enc c
          (_, _)        -> error "hBodyText: wrong default encoding specified"
 
 -- | Like `hBodyText' but specifically for `Http' `Request's.
 
-hRequestBodyText :: (MonadIO m, BodyM Request m, HttpM Request m) => String -> m (Maybe Text)
+hRequestBodyText :: (BodyM Request m, HttpM Request m) => String -> m Text
 hRequestBodyText = hBodyText forRequest
 
 -- | Like `hBodyText' but specifically for `Http' `Response's.
 
-hResponseBodyText :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Text)
+hResponseBodyText :: (BodyM Response m, HttpM Response m) => String -> m Text
 hResponseBodyText = hBodyText forResponse
 
 -- | Like the `hRawBody' but decodes it as UTF-8 to a `String'.
 
-hBodyStringUTF8 :: BodyM dir m => dir -> m (Maybe String)
-hBodyStringUTF8 d = fmap U.toString <$> body d
+hBodyStringUTF8 :: BodyM dir m => dir -> m String
+hBodyStringUTF8 d = U.toString <$> body d
 
 -- | Like `hBodyStringUTF8' but specifically for `Http' `Request's.
 
-hRequestBodyStringUTF8 :: BodyM Request m => m (Maybe String)
+hRequestBodyStringUTF8 :: BodyM Request m => m String
 hRequestBodyStringUTF8 = hBodyStringUTF8 forRequest
 
 -- | Like `hBodyStringUTF8' but specifically for `Http' `Response's.
 
-hResponseBodyStringUTF8 :: BodyM Response m => m (Maybe String)
+hResponseBodyStringUTF8 :: BodyM Response m => m String
 hResponseBodyStringUTF8 = hBodyStringUTF8 forResponse
 
 {- |
@@ -129,16 +129,16 @@ Try to parse the message body, as a result of `hBodyText', as URI encoded `POST`
 parameters. Returns as a URI `Parameter' type or nothing when parsing fails.
 -}
 
-hParameters :: (MonadIO m, BodyM d m, HttpM d m) => d -> String -> m (Maybe Parameters)
-hParameters d def = fmap (fw params . unpack) <$> hBodyText d def
+hParameters :: (BodyM d m, HttpM d m) => d -> String -> m Parameters
+hParameters d def = fw params . unpack <$> hBodyText d def
 
 -- | Like `hParameters' but specifically for `HTTP' `Request's.
 
-hRequestParameters :: (MonadIO m, BodyM Request m, HttpM Request m) => String -> m (Maybe Parameters)
+hRequestParameters :: (BodyM Request m, HttpM Request m) => String -> m Parameters
 hRequestParameters = hParameters forRequest
 
 -- | Like `hParameters' but specifically for `HTTP' `Response's.
 
-hResponseParameters :: (MonadIO m, BodyM Response m, HttpM Response m) => String -> m (Maybe Parameters)
+hResponseParameters :: (BodyM Response m, HttpM Response m) => String -> m Parameters
 hResponseParameters = hParameters forResponse
 
