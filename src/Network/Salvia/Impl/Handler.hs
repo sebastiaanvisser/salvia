@@ -21,6 +21,7 @@ import Network.Salvia.Core.Aspects
 import Network.Salvia.Core.Config
 import Network.Salvia.Core.Context
 import Network.Salvia.Handler.Body
+import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
@@ -98,7 +99,10 @@ instance MonadPlus (Handler c p) where
     do r <- a
        s <- http (getM status)
        if statusFailure s
-         then http (put emptyResponse) >> mzero >> b
+         then do response $
+                   do status        =: OK
+                      contentLength =: (Nothing :: Maybe Integer)
+                 emptyQueue >> mzero >> b
          else return r
 
 instance FlushM Response (Handler c p) where
