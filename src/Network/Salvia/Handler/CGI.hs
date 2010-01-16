@@ -8,7 +8,6 @@ import Control.Monad.State
 import Data.Char
 import Data.List
 import Data.List.Split
-import Data.Map (toList)
 import Data.Record.Label
 import Network.Protocol.Http hiding (hostname, server)
 import Network.Protocol.Uri
@@ -42,7 +41,7 @@ hCGI fn =
      -- Helper function to convert all headers to environment variables.
      let headerDecls =
            map (\(a, b) -> ("HTTP_" ++ (map toUpper . intercalate "_" . splitOn "-") a, b))
-             . toList . unHeaders
+             . unHeaders
 
      -- Set the of expoerted server knowledge.
      let envs =
