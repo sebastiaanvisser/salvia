@@ -20,22 +20,26 @@ import System.Timeout
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (SockM m, HttpM Request m, MonadIO m)
+  :: (SockM m, RawHttpM Request m, HttpM Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
   -> m (Maybe a)
-hRequestParser = hParser (request . put) parseRequest
+hRequestParser = hParser pt parseRequest
+  where pt x = do request (put x)
+                  rawRequest (put x)
 
 -- | Like the `hParser' but always parses `HTTP` `Response`s.
 
 hResponseParser
-  :: (SockM m, HttpM Response m, MonadIO m)
+  :: (SockM m, RawHttpM Response m, HttpM Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
   -> m (Maybe a)
-hResponseParser = hParser (response . put) parseResponse
+hResponseParser = hParser pt parseResponse
+  where pt x = do response (put x)
+                  rawResponse (put x)
 
 {- |
 The 'hParser' handler is used to parse the raw `HTTP` message into the

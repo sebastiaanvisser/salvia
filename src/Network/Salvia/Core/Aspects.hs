@@ -35,6 +35,9 @@ class ForkM m n where
 class (Applicative m, Monad m) => HttpM dir m where
   http :: State (Http dir) a -> m a
 
+class (Applicative m, Monad m) => RawHttpM dir m where
+  rawHttp :: State (Http dir) a -> m a
+
 -- | Stub request and response used to fill in type level gaps for message
 -- directions.
 
@@ -50,6 +53,9 @@ forResponse = undefined
 class (HttpM Request m, HttpM Response m) => HttpM' m
 instance (HttpM Request m, HttpM Response m) => HttpM' m
 
+class (RawHttpM Request m, RawHttpM Response m) => RawHttpM' m
+instance (RawHttpM Request m, RawHttpM Response m) => RawHttpM' m
+
 -- | Direction specific aliases for the `http' method.
 
 request :: HttpM Request m => State (Http Request) a -> m a
@@ -57,6 +63,12 @@ request = http
 
 response :: HttpM Response m => State (Http Response) a -> m a
 response = http
+
+rawRequest :: RawHttpM Request m => State (Http Request) a -> m a
+rawRequest = rawHttp
+
+rawResponse :: RawHttpM Response m => State (Http Response) a -> m a
+rawResponse = rawHttp
 
 -- | The `SockM` type class allows access to peer (the other endpoint of the
 -- connection) specific information like the socket and file handle associated

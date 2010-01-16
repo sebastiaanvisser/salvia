@@ -22,7 +22,7 @@ hGetRequest s =
      return ()
 
 hClientEnvironment
-  :: (SockM m, HttpM Response m, MonadIO m)
+  :: (SockM m, RawHttpM Response m, HttpM Response m, MonadIO m)
   => (String -> m a) -> m a -> m (Maybe a)
 hClientEnvironment = hResponseParser (4 * 1000)
 

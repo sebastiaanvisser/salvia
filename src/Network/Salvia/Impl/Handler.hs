@@ -52,6 +52,16 @@ instance HttpM Response (Handler c p) where
     do (a, s) <- runState st <$> getM cResponse
        cResponse =: s >> return a
 
+instance RawHttpM Request (Handler c p) where
+  rawHttp st =
+    do (a, s) <- runState st <$> getM cRawRequest
+       cRawRequest =: s >> return a
+
+instance RawHttpM Response (Handler c p) where
+  rawHttp st =
+    do (a, s) <- runState st <$> getM cRawResponse
+       cRawResponse =: s >> return a
+
 instance QueueM (Handler c p) where
   enqueue f     = modM cQueue (++[f])
   dequeue       = headMay <$> getM cQueue <* modM cQueue (tailDef [])

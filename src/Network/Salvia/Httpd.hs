@@ -6,11 +6,16 @@ module Network.Salvia.Httpd
 , forResponse
 , request
 , response
+, rawRequest
+, rawResponse
 
+, ForkM (..)
 , ServerM (..)
 , ClientM (..)
 , HttpM (..)
 , HttpM'
+, RawHttpM (..)
+, RawHttpM'
 , SockM (..)
 , ClientAddressM (..)
 , ServerAddressM (..)
