@@ -19,6 +19,8 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hResponsePrinter
 , hRequestPrinter
 , hFlushHeaders
+, hFlushRequestHeaders
+, hFlushResponseHeaders
 , hFlushQueue
 
 -- ** Accessing request and response bodies.

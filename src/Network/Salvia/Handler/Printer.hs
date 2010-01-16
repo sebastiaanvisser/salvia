@@ -3,6 +3,8 @@ module Network.Salvia.Handler.Printer
 ( hRequestPrinter
 , hResponsePrinter
 , hFlushHeaders
+, hFlushRequestHeaders
+, hFlushResponseHeaders
 , hFlushQueue
 )
 where
@@ -34,11 +36,23 @@ hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 
 -- | Send all the message headers directly over the socket.
 
+-- | todo: printer for rawResponse over response!!
+
 hFlushHeaders :: forall m d. (Show (Http d), SockM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeaders _ =
   do r <- http get :: m (Http d)
      h <- sock 
      catchIO (hPutStr h (show r) >> hFlush h) ()
+
+-- | Like `hFlushHeaders` but specifically for the request headers.
+
+hFlushRequestHeaders :: FlushM Request m => m ()
+hFlushRequestHeaders = flushHeaders forRequest
+
+-- | Like `hFlushHeaders` but specifically for the response headers.
+
+hFlushResponseHeaders :: FlushM Response m => m ()
+hFlushResponseHeaders = flushHeaders forResponse
 
 -- | One by one apply all enqueued send actions to the socket.
 
