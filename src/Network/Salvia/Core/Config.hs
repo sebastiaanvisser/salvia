@@ -17,8 +17,8 @@ data Config =
 
 {- |
 The default server configuration sets some safe default values. The server will
-by default bind to 0.0.0.0 (`iNADDR_ANY') at port 80. The default value for the
-TCP backlog is 64.
+by default bind to 0.0.0.0 (`iNADDR_ANY') at port 8080. The default value for
+the TCP backlog is 64.
 -}
 
 defaultConfig :: Config
@@ -26,7 +26,7 @@ defaultConfig =
   Config
   { hostname = "localhost"
   , admin    = "admin@localhost"
-  , listenOn = [SockAddrInet 80 iNADDR_ANY]
+  , listenOn = [SockAddrInet 8080 iNADDR_ANY]
   , backlog  = 64
   }
 
