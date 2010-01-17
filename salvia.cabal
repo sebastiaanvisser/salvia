@@ -29,7 +29,7 @@ Library
                     directory ==1.0.*,
                     fclabels ==0.4.*,
                     monads-fd ==0.0.*,
-                    network ==2.2.*,
+                    network >= 2.2.1.7 && < 2.3,
                     old-locale ==1.0.*,
                     process ==1.0.*,
                     threadmanager ==0.1.3,
