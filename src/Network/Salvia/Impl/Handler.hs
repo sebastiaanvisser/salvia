@@ -14,6 +14,7 @@ module Network.Salvia.Impl.Handler where
 import Control.Applicative
 import Control.Concurrent.STM
 import Control.Monad.State
+import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Monoid
 import Data.Record.Label hiding (get)
 import Network.Protocol.Http
@@ -68,9 +69,9 @@ instance QueueM (Handler c p) where
   dequeue   = headMay <$> getM cQueue <* modM cQueue (tailDef [])
 
 instance SendM (Handler c p) where
-  send        s    = enqueue (flip hPutStr s . snd)
-  sendBs      bs   = enqueue (flip ByteString.hPutStr bs . snd)
-  spoolWith   f fd = enqueue (\(_, h) -> hGetContents fd >>= hPutStr h . f)
+  send        s    = enqueue (\(_, h) -> hSetEncoding h utf8 >> ByteString.hPut h (fromString s))
+  sendBs      bs   = enqueue (\(_, h) -> ByteString.hPutStr h bs)
+  spoolWith   f fd = enqueue (\(_, h) -> hGetContents fd >>= ByteString.hPut h . fromString . f)
   spoolWithBs f fd = enqueue (\(_, h) -> ByteString.hGetContents fd >>= ByteString.hPut h . f)
 
 instance SockM (Handler c p) where

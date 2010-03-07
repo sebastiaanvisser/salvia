@@ -29,13 +29,12 @@ the filename extension using the `mimetype` function. The `contentLength` will
 be set the file's size.
 -}
 
--- TODO: what to do with encoding?
 hFileResource :: (MonadIO m, HttpM Response m, SendM m) => FilePath -> m ()
 hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
        response $
-         do contentType   =: Just (fileMime file, Just "utf-8")
+         do contentType   =: Just (fileMime file, Nothing)
             contentLength =: Just fs
             status        =: OK
        spool fd
@@ -53,14 +52,14 @@ the possibly unpredictable behavior of the filter, no `contentLength` header
 will be set using this handler.
 -}
 
--- TODO: what to do with encoding?
 hFileResourceFilter :: (MonadIO m, HttpM Response m, SendM m) => (String -> String) -> FilePath -> m ()
-hFileResourceFilter fFilter file =
-  hSafeIO (openBinaryFile file ReadMode) $ \fd ->
-    do response $
+hFileResourceFilter f file =
+  hSafeIO (openFile file ReadMode) $ \fd ->
+    do liftIO (hSetEncoding fd utf8)
+       response $
          do contentType =: Just (fileMime file, Just "utf-8")
             status      =: OK
-       spoolWith fFilter fd
+       spoolWith f fd
 
 {- |
 Turn a handler that is parametrized by a file resources into a regular handler
