@@ -209,6 +209,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , Action
 , User (User)
 , username
+, email
 , password
 , actions
 

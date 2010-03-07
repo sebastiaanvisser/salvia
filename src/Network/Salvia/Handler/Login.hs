@@ -15,6 +15,7 @@ module Network.Salvia.Handler.Login
 , Password
 , Action
 , User (User)
+, email
 , username
 , password
 , actions
@@ -72,11 +73,13 @@ to perform within the system.
 -}
 
 type Username = String
+type Email    = String
 type Password = String
 type Action   = String
 
 data User = User
   { _username :: Username
+  , _email    :: Email
   , _password :: Password
   , _actions  :: [Action]
   } deriving (Eq, Show)
@@ -84,6 +87,7 @@ data User = User
 $(mkLabels [''User])
 
 username :: User :-> Username
+email    :: User :-> Email
 password :: User :-> Password
 actions  :: User :-> [Action]
 
@@ -160,13 +164,16 @@ hSignup _ acts onFail onOk =
 
 freshUserInfo :: Parameters -> [User] -> [Action] -> Maybe User
 freshUserInfo ps us acts =
-  do user <- "username" `lookup` ps >>= id
-     pass <- "password" `lookup` ps >>= id
-     if null user || null pass
+  do user  <- "username" `lookup` ps >>= id
+     mail  <- "email"    `lookup` ps >>= id
+     pass  <- "password" `lookup` ps >>= id
+     if null user || null mail || null pass
        then Nothing
-       else case headMay $ filter ((==user) . get username) us of
-              Nothing -> return $ User user (show (md5 (fromString pass))) acts
-              Just _  -> Nothing
+       else case ( headMay $ filter ((==user) . get username) us
+                 , headMay $ filter ((==mail) . get email)   us
+                 ) of
+              (Nothing, Nothing) -> return $ User user mail (show (md5 (fromString pass))) acts
+              _                  -> Nothing
 
 {- |
 The login handler. Read the username and password values from the post data and
@@ -216,9 +223,10 @@ hLoginfo _ =
      s <- getSession
      case get sPayload s of
        Nothing -> return ()
-       Just (UserPayload (User uname _ acts) _ _) ->
+       Just (UserPayload (User uname mail _ acts) _ _) ->
          do send $ "\n" ++ intercalate "\n"
               [ "username=" ++ uname
+              , "mail="     ++ mail
               , "actions="  ++ intercalate " " acts
               ]
 
@@ -254,11 +262,12 @@ fileBackend file = bcknd
     parse = catMaybes . map parseUserLine . lines
     parseUserLine line =
       case (line, words line) of
-        ('#':_,          _) -> Nothing
-        (_, user:pass:acts) -> Just (User user pass acts)
-        _                   -> Nothing
+        ('#':_,               _) -> Nothing
+        (_, user:mail:pass:acts) -> Just (User user mail pass acts)
+        _                        -> Nothing
     printUserLine u = intercalate " " $
       [ get username u
+      , get email u
       , get password u
       ] ++ get actions u ++ ["\n"]
 
