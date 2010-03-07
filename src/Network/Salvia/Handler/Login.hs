@@ -124,6 +124,7 @@ backend :: UserDatabase :-> Backend
 
 class (Applicative m, Monad m) => LoginM m p | m -> p where
   login      ::                  m a -> (User -> m a) -> m a
+  loginfo    ::                                          m ()
   logout     ::                                          m ()
   signup     :: [Action]      -> m a -> (User -> m a) -> m a
   authorized :: Maybe Action  -> m a -> (User -> m a) -> m a
@@ -209,8 +210,8 @@ session identifier, session start and expiration date and the possible user
 payload that is included.
 -}
 
-hLoginfo :: (SessionM m (UserPayload p), SendM m) => m ()
-hLoginfo =
+hLoginfo :: (SessionM m (UserPayload p), SendM m) => p -> m ()
+hLoginfo _ =
   do hSessionInfo
      s <- getSession
      case get sPayload s of

@@ -148,6 +148,7 @@ instance ( Contains q (TVar (Sessions (UserPayload p)))
          ) => LoginM (Handler Config q) p where
   login      = hLogin      (undefined :: p)
   logout     = hLogout     (undefined :: p)
+  loginfo    = hLoginfo    (undefined :: p)
   signup     = hSignup     (undefined :: p)
   authorized = hAuthorized (undefined :: p)
 
