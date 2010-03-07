@@ -127,6 +127,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
 -- ** Dispatch based on request method.
 
+, hMethod
 , hMethodRouter
 
 -- ** Dispatch based on request path.
