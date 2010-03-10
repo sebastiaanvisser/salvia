@@ -1,10 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Parser
-  ( hRequestParser
-  , hResponseParser
-  , hParser
-  , readNonEmptyLines
-  )
+( hRequestParser
+, hResponseParser
+, hParser
+, readNonEmptyLines
+)
 where
 
 import Control.Applicative
@@ -60,7 +60,7 @@ hParser
   -> m a                                    -- ^ The success handler.
   -> m (Maybe a)
 hParser action parse _ onfail onsuccess =
-  do h <- sock
+  do h <- handle
      mmsg <-
        liftM join
          . flip catchIO Nothing

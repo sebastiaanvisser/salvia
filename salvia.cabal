@@ -51,7 +51,6 @@ Library
 
                     Network.Salvia.Impl.Config
                     Network.Salvia.Impl.Context
-                    Network.Salvia.Impl.Client
                     Network.Salvia.Impl.Handler
                     Network.Salvia.Impl.Server
 
@@ -59,7 +58,6 @@ Library
                     Network.Salvia.Handler.Body
                     Network.Salvia.Handler.CGI
                     Network.Salvia.Handler.Close
-                    Network.Salvia.Handler.Client
                     Network.Salvia.Handler.Cookie
                     Network.Salvia.Handler.Directory
                     Network.Salvia.Handler.Dispatching

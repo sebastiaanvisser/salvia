@@ -2,6 +2,7 @@ module Network.Salvia.Impl.Server (start) where
 
 import Control.Concurrent.ThreadManager
 import Control.Monad.State
+import Network.Protocol.Http hiding (accept, hostname)
 import Network.Salvia.Impl.Config
 import Network.Salvia.Impl.Context 
 import Network.Salvia.Impl.Handler
@@ -23,7 +24,7 @@ listening socket and pass execution to the application specific connection
 handler.
 -}
 
-start :: Config -> Handler Config p () -> p -> IO ()
+start :: Config -> Handler p () -> p -> IO ()
 start conf handler payload =
   do tm <- make
      forM_ (listenOn conf) $ \(SockAddrInet port addr) ->
@@ -36,9 +37,24 @@ start conf handler payload =
             bindSocket s sAddr
             listen s (backlog conf)
             forever $
-              do (raw, cAddr) <- accept s
+              do (sck, cAddr) <- accept s
                  fork tm $
-                   do sck <- socketToHandle raw ReadWriteMode
-                      evalStateT (unHandler handler) (mkContext conf payload cAddr sAddr raw sck)
+                   do hndl <- socketToHandle sck ReadWriteMode
+                      evalStateT (unHandler handler)
+                        Context
+                          { _cServerHost  = hostname conf
+                          , _cAdminMail   = adminMail conf
+                          , _cListenOn    = listenOn conf
+                          , _cPayload     = payload
+                          , _cRequest     = emptyRequest
+                          , _cResponse    = emptyResponse
+                          , _cRawRequest  = emptyRequest
+                          , _cRawResponse = emptyResponse
+                          , _cSocket      = sck
+                          , _cHandle      = hndl
+                          , _cClientAddr  = cAddr
+                          , _cServerAddr  = sAddr
+                          , _cQueue       = []
+                          }
      waitForAll tm
 

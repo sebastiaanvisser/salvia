@@ -63,7 +63,7 @@ hRawBody _ =
      con <- h (getM connection)
      kpa <- h (getM keepAlive)
      len <- h (getM contentLength)
-     s   <- sock
+     s   <- handle
      liftIO $
        case (con, kpa :: Maybe Integer, len :: Maybe Integer) of
          (_, _,       Just n)                           -> B.hGet s (fromIntegral n)

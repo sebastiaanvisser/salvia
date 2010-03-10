@@ -8,12 +8,12 @@ import Network.Salvia.Interface
 import System.IO
 
 {- |
-A simple logger that prints a summery of the request information to the
-specified file handle.
+A simple logger that prints a summery of the request information to
+the specified file handle.
 -}
 
 hLog :: (AddressM' m , MonadIO m, HttpM' m) => Handle -> m ()
-hLog handle =
+hLog h =
   do mt <- request  (getM method)
      ur <- request  (getM uri)
      st <- response (getM status)
@@ -22,7 +22,7 @@ hLog handle =
      sa <- serverAddress
      let code = codeFromStatus st
      liftIO
-       . hPutStrLn handle
+       . hPutStrLn h
        $ intercalate " ; "
          [ maybe "" id dt
          , show sa

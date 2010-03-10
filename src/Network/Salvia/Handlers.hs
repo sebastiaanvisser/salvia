@@ -148,13 +148,6 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hVirtualHosting
 , hPortRouter
 
--- * HTTP client and proxy.
-
--- ** Client requests.
-
-, hGetRequest
-, hClientEnvironment
-
 -- * Session management.
 
 -- ** Cookie handling.
@@ -245,7 +238,6 @@ where
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.CGI
-import Network.Salvia.Handler.Client
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Cookie
 import Network.Salvia.Handler.Directory

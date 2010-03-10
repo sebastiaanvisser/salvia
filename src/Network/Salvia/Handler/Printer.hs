@@ -41,7 +41,7 @@ hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 hFlushHeaders :: forall m d. (Show (Http d), SockM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeaders _ =
   do r <- http get :: m (Http d)
-     h <- sock 
+     h <- handle 
      catchIO (hPutStr h (show r) >> hFlush h) ()
 
 -- | Like `hFlushHeaders` but specifically for the request headers.
@@ -58,8 +58,8 @@ hFlushResponseHeaders = flushHeaders forResponse
 
 hFlushQueue :: (QueueM m, SockM m, MonadIO m) => m ()
 hFlushQueue =
-  do s <- rawSock
-     h <- sock
+  do s <- socket
+     h <- handle
      q <- queue
      flip catchIO () $
        sequence_ (map ($ (s, h)) q) >> hFlush h

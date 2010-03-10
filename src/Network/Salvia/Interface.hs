@@ -74,8 +74,8 @@ rawResponse = rawHttp
 -- with the socket.
 
 class (Applicative m, Monad m) => SockM m where
-  rawSock :: m Socket
-  sock    :: m Handle
+  socket :: m Socket
+  handle :: m Handle
 
 -- | The `ClientAddressM` type class gives access to socket address of the
 -- client part of the connection.
