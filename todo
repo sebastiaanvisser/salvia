@@ -2,7 +2,8 @@ IPv6?
 proxy?
 websocket
 
-first session set seems to be wrong
+get rid off stupid config from handler!
+
 todo:s fixen
 
 http-get ranges
