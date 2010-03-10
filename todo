@@ -1,12 +1,6 @@
-comet?
 IPv6?
 proxy?
 websocket
-
-request in reader?
-response in writer?
-
-jailIO
 
 first session set seems to be wrong
 todo:s fixen
