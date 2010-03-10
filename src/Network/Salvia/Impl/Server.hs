@@ -40,7 +40,7 @@ start conf handler payload =
               do (sck, cAddr) <- accept s
                  fork tm $
                    do hndl <- socketToHandle sck ReadWriteMode
-                      evalStateT (unHandler handler)
+                      _ <- runHandler handler
                         Context
                           { _cServerHost  = hostname conf
                           , _cAdminMail   = adminMail conf
@@ -56,5 +56,6 @@ start conf handler payload =
                           , _cServerAddr  = sAddr
                           , _cQueue       = []
                           }
+                      return ()
      waitForAll tm
 
