@@ -1,14 +1,5 @@
 {-# LANGUAGE RankNTypes, TypeOperators, FlexibleContexts, ScopedTypeVariables #-}
-module Network.Salvia.Handler.Dispatching
-  ( Dispatcher
-  , ListDispatcher
-  , hDispatch
-  , hListDispatch
-
-  , hRequestDispatch
-  , hResponseDispatch
-  )
-where
+module Network.Salvia.Handler.Dispatching where
 
 import Control.Monad.State
 import Data.Record.Label
@@ -38,7 +29,7 @@ handler will be invoked, otherwise the second handler will be used.
 -}
 
 hDispatch
-  :: forall a b c d m. HttpM d m => d -> (Http d :-> b) -> (c -> b -> Bool) -> c -> m a -> m a -> m a
+  :: forall a b c d m. HttpM d m => d -> (Http d :-> b) -> (c -> b -> Bool) -> Dispatcher c m a
 hDispatch _ f match a handler _default =
   do let h = http :: State (Http d) b -> m b
      ctx <- h (getM f)
@@ -53,7 +44,7 @@ in the `ListDispatcher` type hold the default handler will be invoked.
 -}
 
 hListDispatch :: Dispatcher a m b -> ListDispatcher a m b
-hListDispatch disp = flip $ foldr $ uncurry disp
+hListDispatch disp = flip $ foldr (uncurry disp)
 
 {- |
 Like the `hDispatch` but always dispatches on a (part of) the `HTTP

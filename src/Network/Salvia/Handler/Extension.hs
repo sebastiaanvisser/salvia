@@ -14,11 +14,11 @@ import Prelude hiding ((.), id)
 
 {- | Request dispatcher based on the request path file extenstion. -}
 
-hExtension :: HttpM Request m => Maybe String -> m a -> m a -> m a
+hExtension :: HttpM Request m => Dispatcher (Maybe String) m a
 hExtension = hRequestDispatch (extension . path . asUri) (==)
 
 {- | List dispatcher version of `hExtension`. -}
 
-hExtensionRouter :: HttpM Request m => [(Maybe String, m a)] -> m a -> m a
+hExtensionRouter :: HttpM Request m => ListDispatcher (Maybe String) m a
 hExtensionRouter = hListDispatch hExtension
 
