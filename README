@@ -4,10 +4,5 @@ Use the Haskell cabal-install to install Salvia:
   cabal build &&
   cabal install
 
-Ringelóóo
-ringelß
-üuberha
-壹✯
-
 Please report problems to: sfvisser@cs.uu.nl
 
