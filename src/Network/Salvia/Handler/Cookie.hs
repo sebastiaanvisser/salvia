@@ -43,7 +43,10 @@ hNewCookie expire = do
   return 
     . (path    `set` Just "/")
     . (domain  `set` Just ('.' : hst))
-    . (port    `set` [(\(SockAddrInet p _) -> fromIntegral p) sAddr])
+    . (port    `set` [portNum sAddr])
     . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
     $ empty
+  where portNum (SockAddrInet  p _)     = fromIntegral p
+        portNum (SockAddrInet6 p _ _ _) = fromIntegral p
+        portNum _                       = -1
 

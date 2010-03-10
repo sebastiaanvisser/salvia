@@ -29,10 +29,8 @@ hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, QueueM m, ServerM m, Add
 hCGI fn =
   do adm <- admin
      hst <- host
-     SockAddrInet cp ca <- clientAddress
-     SockAddrInet sp sa <- serverAddress
-     sa' <- liftIO (inet_ntoa sa)
-     ca' <- liftIO (inet_ntoa ca)
+     (cp, ca) <- clientAddress >>= addr
+     (sp, sa) <- serverAddress >>= addr
      hdrs    <- request (getM headers)
      _query  <- request (getM (query . asUri))
      _path   <- request (getM (path . asUri))
@@ -54,9 +52,9 @@ hCGI fn =
            : ("SERVER_PROTOCOL",   "HTTP/1.1")
            : ("SERVER_ADMIN",      adm)
            : ("SERVER_NAME",       hst)
-           : ("SERVER_ADDR",       sa')
+           : ("SERVER_ADDR",       sa)
            : ("SERVER_PORT",       show sp)
-           : ("REMOTE_ADDR",       ca')
+           : ("REMOTE_ADDR",       ca)
            : ("REMOTE_PORT",       show cp)
            : ("SCRIPT_FILENAME",   fn)
            : ("SCRIPT_NAME",       fn)
@@ -83,4 +81,10 @@ hCGI fn =
      -- finished, close the handle and wait for the script to terminate.
      spool out
      enqueue (const (hClose out <* waitForProcess pid))
+
+  where
+  addr (SockAddrInet  p a)     = (,) p <$> liftIO (inet_ntoa a)
+  addr (SockAddrInet6 p _ _ _) = return (p,  "ipv6")
+  addr _                       = return (-1, "unix")
+
 
