@@ -9,7 +9,7 @@ import Data.ByteString.Lazy
 import Data.Record.Label hiding (get)
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Impl.Client
 import Network.Salvia.Handler.Client
 import Network.Salvia.Handler.Parser

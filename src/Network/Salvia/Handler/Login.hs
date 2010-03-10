@@ -13,6 +13,7 @@ module Network.Salvia.Handler.Login
 
   Username
 , Password
+, Email
 , Action
 , User (User)
 , email
@@ -60,7 +61,7 @@ import Data.Maybe
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Session
 import Prelude hiding (mod)

@@ -17,15 +17,15 @@ import Control.Monad.State
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Monoid
 import Data.Record.Label hiding (get)
-import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
-import Network.Salvia.Core.Config
-import Network.Salvia.Core.Context
+import Network.Protocol.Http hiding (hostname)
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Printer
 import Network.Salvia.Handler.Session
+import Network.Salvia.Impl.Config
+import Network.Salvia.Impl.Context
+import Network.Salvia.Interface
 import Prelude hiding (mod)
 import Safe
 import System.IO
@@ -121,7 +121,9 @@ instance BodyM Response (Handler c p) where
   body = hRawBody
 
 instance ServerM (Handler Config p) where
-  server = getM cConfig
+  host   = hostname  <$> getM cConfig
+  admin  = adminMail <$> getM cConfig
+  listen = listenOn  <$> getM cConfig
 
 instance ClientM (Handler () ()) where
   client = return ()

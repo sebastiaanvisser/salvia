@@ -7,7 +7,7 @@ where
 
 import Network.Protocol.Http
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 
 {- | Request dispatcher based on the HTTP request `Method`.  -}
 

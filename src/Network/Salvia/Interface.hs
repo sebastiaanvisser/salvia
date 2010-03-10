@@ -8,7 +8,7 @@
   , TypeFamilies
   , IncoherentInstances
   #-}
-module Network.Salvia.Core.Aspects where
+module Network.Salvia.Interface where
 
 import Control.Concurrent.STM
 import Control.Applicative
@@ -17,7 +17,6 @@ import Control.Monad.State hiding (get)
 import Data.ByteString.Lazy (ByteString)
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Core.Config
 import Network.Socket
 import Prelude hiding ((.), id)
 import System.IO
@@ -96,6 +95,17 @@ class (Applicative m, Monad m) => ServerAddressM m where
 class (ClientAddressM m, ServerAddressM m) => AddressM' m
 instance (ClientAddressM m, ServerAddressM m) => AddressM' m
 
+{- |
+The send queue is an abstraction to make sure all data that belongs to the
+message body is sent after the response headers have been sent.  Instead of
+sending data to client directly over the socket from the context it is
+preferable to queue send actions in the context's send queue. The entire send
+queue can be flushed to the client at once after the HTTP headers have been
+sent at the end of a request handler.
+-}
+
+type SendQueue = [SendAction]
+
 type SendAction = (Socket, Handle) -> IO ()
 
 -- | The `QueueM' type class allows for queing actions for sending data values
@@ -146,10 +156,13 @@ class (Applicative m, Monad m) => BodyM dir m where
   body :: dir -> m ByteString
 
 -- | The `ServerM' type class can be used to acesss the static server
--- configuration.
+-- configuration like the address/port combination the server listens on and
+-- the related hostname.
 
 class (Applicative m, Monad m) => ServerM m where
-  server :: m Config
+  host   :: m String
+  admin  :: m String
+  listen :: m [SockAddr]
 
 -- | The `ClientM' type class can be used to acesss the static client
 -- configuration. Unit for now.

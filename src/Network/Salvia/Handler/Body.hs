@@ -26,7 +26,7 @@ import Data.Text.Lazy (Text, unpack)
 import Data.Text.Lazy.Encoding
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.UTF8 as U
 

@@ -14,7 +14,7 @@ import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Dispatching
 import Network.Salvia.Handler.Rewrite
 import Prelude hiding ((.), id)

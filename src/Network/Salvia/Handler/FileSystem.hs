@@ -11,7 +11,7 @@ import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Directory
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.File

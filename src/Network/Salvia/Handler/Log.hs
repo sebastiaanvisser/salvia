@@ -4,7 +4,7 @@ import Control.Monad.State
 import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects hiding (server)
+import Network.Salvia.Interface
 import System.IO
 
 {- |

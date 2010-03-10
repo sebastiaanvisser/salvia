@@ -7,8 +7,8 @@ import Data.Record.Label
 import Network.BSD
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
-import Network.Salvia.Core.Context
+import Network.Salvia.Interface hiding (host)
+import Network.Salvia.Impl.Context
 import Network.Salvia.Impl.Handler
 import Network.Socket
 import System.IO

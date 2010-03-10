@@ -1,22 +1,15 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Network.Salvia.Handler.Cookie
-( hSetCookie
-, hCookie
-, hDelCookie
-, hNewCookie
-)
-where
+module Network.Salvia.Handler.Cookie where
 
 import Control.Applicative hiding (empty)
 import Control.Category
 import Data.Record.Label
 import Data.Time.Format
 import Network.Protocol.Cookie
-import Network.Salvia.Core.Aspects
-import Network.Salvia.Core.Config
+import Network.Salvia.Interface
+import Network.Socket
 import Prelude hiding ((.), id)
 import System.Locale
-import Network.Socket
 import qualified Network.Protocol.Http as H
 
 {- | Set the `Set-Cookie` HTTP response header with the specified `Cookies`. -}
@@ -45,11 +38,11 @@ root.
 
 hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> m Cookie
 hNewCookie expire = do
-  httpd <- server
+  hst   <- host
   sAddr <- serverAddress
   return 
     . (path    `set` Just "/")
-    . (domain  `set` Just ('.' : hostname httpd))
+    . (domain  `set` Just ('.' : hst))
     . (port    `set` [(\(SockAddrInet p _) -> fromIntegral p) sAddr])
     . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
     $ empty

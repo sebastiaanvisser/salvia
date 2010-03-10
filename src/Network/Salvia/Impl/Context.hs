@@ -1,24 +1,11 @@
 {-# LANGUAGE TemplateHaskell, DeriveFunctor, TypeOperators #-}
-module Network.Salvia.Core.Context where
+module Network.Salvia.Impl.Context where
 
 import Data.Record.Label
 import Network.Protocol.Http
+import Network.Salvia.Interface
 import Network.Socket
 import System.IO
-
--- | A send action is some thing that works on a socket or handle.
-type SendAction = (Socket, Handle) -> IO ()
-
-{- |
-The send queue is an abstraction to make sure all data that belongs to the
-message body is sent after the response headers have been sent.  Instead of
-sending data to client directly over the socket from the context it is
-preferable to queue send actions in the context's send queue. The entire send
-queue can be flushed to the client at once after the HTTP headers have been
-sent at the end of a request handler.
--}
-
-type SendQueue = [SendAction]
 
 {- |
 A handler context contains all the information needed by the request handlers

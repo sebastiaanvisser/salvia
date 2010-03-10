@@ -12,7 +12,7 @@ import Data.List (sort)
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri (path)
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
 import Prelude hiding ((.), id, mod)

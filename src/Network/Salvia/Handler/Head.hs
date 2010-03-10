@@ -7,7 +7,7 @@ import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Handler.Rewrite
 import Network.Salvia.Handler.Close
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 
 {- |
 The 'hHead' handler makes sure no `HTTP' `Response' body is sent to the client

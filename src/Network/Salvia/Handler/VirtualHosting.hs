@@ -1,9 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Network.Salvia.Handler.VirtualHosting
-  ( hVirtualHosting
-  , hPortRouter
-  )
-where
+module Network.Salvia.Handler.VirtualHosting where
 
 import Data.List.Split
 import Data.List
@@ -11,7 +7,7 @@ import Data.Maybe
 import Network.Protocol.Uri
 import Network.Protocol.Http
 import Network.Salvia.Handler.Dispatching
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 
 {- |
 Dispatcher based on the host part of the `hostname' request header. Everything

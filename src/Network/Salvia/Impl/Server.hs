@@ -2,8 +2,8 @@ module Network.Salvia.Impl.Server (start) where
 
 import Control.Concurrent.ThreadManager
 import Control.Monad.State
-import Network.Salvia.Core.Config
-import Network.Salvia.Core.Context 
+import Network.Salvia.Impl.Config
+import Network.Salvia.Impl.Context 
 import Network.Salvia.Impl.Handler
 import Network.Socket
 import System.IO

@@ -3,7 +3,7 @@ module Network.Salvia.Handler.Environment (hDefaultEnv) where
 
 import Control.Monad.State
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.Close
 import Network.Salvia.Handler.Error

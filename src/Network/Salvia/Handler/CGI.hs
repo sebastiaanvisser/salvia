@@ -9,10 +9,9 @@ import Data.Char
 import Data.List
 import Data.List.Split
 import Data.Record.Label
-import Network.Protocol.Http hiding (hostname, server)
-import Network.Protocol.Uri
-import Network.Salvia.Core.Aspects
-import Network.Salvia.Core.Config
+import Network.Protocol.Http hiding (server)
+import Network.Protocol.Uri hiding (host)
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Error
 import Network.Salvia.Handler.Parser
 import Network.Socket
@@ -28,7 +27,8 @@ import qualified Data.ByteString.Lazy as B
 
 hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, QueueM m, ServerM m, AddressM' m) => FilePath -> m ()
 hCGI fn =
-  do cfg     <- server
+  do adm <- admin
+     hst <- host
      SockAddrInet cp ca <- clientAddress
      SockAddrInet sp sa <- serverAddress
      sa' <- liftIO (inet_ntoa sa)
@@ -52,8 +52,8 @@ hCGI fn =
            : ("SERVER_SOFTWARE",   "Salvia")
            : ("SERVER_SIGNATURE",  "")
            : ("SERVER_PROTOCOL",   "HTTP/1.1")
-           : ("SERVER_ADMIN",      admin cfg)
-           : ("SERVER_NAME",       hostname cfg)
+           : ("SERVER_ADMIN",      adm)
+           : ("SERVER_NAME",       hst)
            : ("SERVER_ADDR",       sa')
            : ("SERVER_PORT",       show sp)
            : ("REMOTE_ADDR",       ca')

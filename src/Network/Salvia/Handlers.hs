@@ -155,10 +155,6 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hGetRequest
 , hClientEnvironment
 
--- ** Proxy.
-
-, hProxy
-
 -- * Session management.
 
 -- ** Cookie handling.
@@ -246,7 +242,6 @@ where
 
 -- todo: cleanup handler exports and export entire modules?
 
--- import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Banner
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.CGI
@@ -267,7 +262,6 @@ import Network.Salvia.Handler.Method
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path
 import Network.Salvia.Handler.Printer
-import Network.Salvia.Handler.Proxy
 import Network.Salvia.Handler.Put
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Handler.Rewrite

@@ -11,11 +11,11 @@ import Control.Applicative
 import Control.Monad.State hiding (sequence)
 import Data.Traversable
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Error
 import Prelude hiding (sequence)
 import System.IO
-import System.Timeout
+-- import System.Timeout
 
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
@@ -59,12 +59,13 @@ hParser
   -> (String -> m a)                        -- ^ The fail handler.
   -> m a                                    -- ^ The success handler.
   -> m (Maybe a)
-hParser action parse t onfail onsuccess =
+hParser action parse _ onfail onsuccess =
   do h <- sock
      mmsg <-
        liftM join
          . flip catchIO Nothing
-         . timeout (t * 1000)
+         . fmap Just
+--          . timeout (t * 1000)
          $ do hSetBuffering h (BlockBuffering (Just (64*1024)))
               Just <$> readNonEmptyLines h
      let hndl = (onfail . show) `either` (\x -> action x >> onsuccess)

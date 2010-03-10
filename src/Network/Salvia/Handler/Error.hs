@@ -11,7 +11,7 @@ where
 import Control.Monad.Trans
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import System.IO.Error
 
 -- | The 'hError' handler enables the creation of a default style of error

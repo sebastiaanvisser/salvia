@@ -45,12 +45,16 @@ Library
                     text ==0.7.*
 
   Exposed-modules:  Network.Salvia
-                    Network.Salvia.Core.Aspects
-                    Network.Salvia.Core.Config
-                    Network.Salvia.Core.Context
-                    Network.Salvia.Impl.Handler
+                    Network.Salvia.Interface
+                    Network.Salvia.Handlers
+                    Network.Salvia.Impl
+
+                    Network.Salvia.Impl.Config
+                    Network.Salvia.Impl.Context
                     Network.Salvia.Impl.Client
+                    Network.Salvia.Impl.Handler
                     Network.Salvia.Impl.Server
+
                     Network.Salvia.Handler.Banner
                     Network.Salvia.Handler.Body
                     Network.Salvia.Handler.CGI
@@ -71,12 +75,9 @@ Library
                     Network.Salvia.Handler.Parser
                     Network.Salvia.Handler.Path
                     Network.Salvia.Handler.Printer
-                    Network.Salvia.Handler.Proxy
                     Network.Salvia.Handler.Put
                     Network.Salvia.Handler.Redirect
                     Network.Salvia.Handler.Rewrite
                     Network.Salvia.Handler.Session
                     Network.Salvia.Handler.VirtualHosting
-                    Network.Salvia.Handlers
-                    Network.Salvia.Httpd
 

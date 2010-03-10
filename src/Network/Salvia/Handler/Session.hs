@@ -21,7 +21,7 @@ import Data.Time.LocalTime
 import Data.Traversable
 import Network.Protocol.Cookie hiding (empty)
 import Network.Protocol.Http hiding (cookie)
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 import Network.Salvia.Handler.Cookie
 import Prelude hiding ((.), id, lookup, sequence)
 import Safe

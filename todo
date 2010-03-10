@@ -1,6 +1,10 @@
 comet?
 IPv6?
 proxy?
+websocket
+
+request in reader?
+response in writer?
 
 jailIO
 

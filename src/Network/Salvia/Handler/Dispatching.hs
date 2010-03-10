@@ -13,7 +13,7 @@ where
 import Control.Monad.State
 import Data.Record.Label
 import Network.Protocol.Http
-import Network.Salvia.Core.Aspects
+import Network.Salvia.Interface
 
 {- |
 The dispatcher type takes one value to dispatch on and two handlers. The first
