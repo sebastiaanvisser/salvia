@@ -72,7 +72,7 @@ sPayload :: Session p :-> Maybe p
 
 -- | Session type classes that hides the inner workings from the outside world.
 
-class (Applicative m, Monad m) => SessionM m p | m -> p where
+class (Applicative m, Monad m) => SessionM p m | m -> p where
   prolongSession :: Integer -> m ()
   getSession     :: m (Session p)
   putSession     :: Session p -> m ()
@@ -97,7 +97,7 @@ A cookie will be set that informs the client of the current session.
 -}
 
 hProlongSession
-  :: forall m q p. (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m q (Sessions p))
+  :: forall m q p. (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM q (Sessions p) m)
   => p -> Integer -> m ()
 hProlongSession _ e =
   do n <- liftIO getCurrentTime
@@ -105,18 +105,18 @@ hProlongSession _ e =
      session <- modVar (set sLast n . set sExpire e) (var :: TVar (Session p)) >>= getVar
      setCookieSession (get sID session) (willExpireAt session)
 
-hGetSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM m q (Sessions p)) => m (Session p)
+hGetSession :: (MonadIO m, HttpM' m, ServerM m, PayloadM q (Sessions p) m) => m (Session p)
 hGetSession = existingSessionVarOrNew >>= getVar
 
 hPutSession
-  :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM m q (Sessions p))
+  :: (MonadIO m, HttpM' m, ServerM m, ServerAddressM m, PayloadM q (Sessions p) m)
   => Session p -> m ()
 hPutSession session =
   do var <- existingSessionVarOrNew
      putVar var session
      setCookieSession (get sID session) (willExpireAt session)
 
-hDelSession :: forall q p m. (PayloadM m q (Sessions p), HttpM' m, MonadIO m) => p -> m ()
+hDelSession :: forall q p m. (PayloadM q (Sessions p) m, HttpM' m, MonadIO m) => p -> m ()
 hDelSession _ =
   do msid <- getCookieSessionID
      case msid of
@@ -128,13 +128,13 @@ hDelSession _ =
        Nothing -> return ()
 
 hWithSession
-  :: (PayloadM m q (Sessions p), MonadIO m, HttpM Request m)
+  :: (PayloadM q (Sessions p) m, MonadIO m, HttpM Request m)
   => (Session p -> Session p) -> m ()
 hWithSession f =
   do _ <- existingSessionVarOrNew >>= modVar f
      return ()
 
-hSessionInfo :: (SessionM m p, SendM m) => m ()
+hSessionInfo :: (SessionM p m, SendM m) => m ()
 hSessionInfo =
   do s <- getSession
      (send . intercalate "\n")
@@ -153,7 +153,7 @@ session is updated.
 -}
 
 existingSessionVarOrNew
-  :: (Applicative m, MonadIO m, HttpM Request m, PayloadM m q (Sessions p))
+  :: (Applicative m, MonadIO m, HttpM Request m, PayloadM q (Sessions p) m)
   => m (TVar (Session p))
 existingSessionVarOrNew =
   getCookieSessionID `andAlso` lookupSessionVar `andAlso` whenNotExpired >>=
@@ -194,7 +194,7 @@ delCookieSession = hDelCookie "sid"
 -- | Create a new session with a specified expiration date. The session will be
 -- stored in the session map.
 
-newSessionVar :: (MonadIO m, PayloadM m q (Sessions p)) => m (TVar (Session p))
+newSessionVar :: (MonadIO m, PayloadM q (Sessions p) m) => m (TVar (Session p))
 newSessionVar =
   do var <- payload S.get
      sd <- newSessionID var
@@ -216,7 +216,7 @@ willExpireAt :: Session p -> UTCTime
 willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast session 
 
 lookupSessionVar
-  :: (MonadIO m, PayloadM m q (Sessions p))
+  :: (MonadIO m, PayloadM q (Sessions p) m)
   => SessionID -> m (Maybe (TVar (Session p)))
 lookupSessionVar sd = M.lookup sd <$> (payload S.get >>= getVar . unSessions)
 

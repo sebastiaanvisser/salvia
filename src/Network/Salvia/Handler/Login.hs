@@ -127,14 +127,14 @@ $(mkLabels [''UserDatabase])
 users   :: UserDatabase :-> [User]
 backend :: UserDatabase :-> Backend
 
-class (Applicative m, Monad m) => LoginM m p | m -> p where
+class (Applicative m, Monad m) => LoginM p m | m -> p where
   login      ::                  m a -> (User -> m a) -> m a
   loginfo    ::                                          m ()
   logout     ::                                          m ()
   signup     :: [Action]      -> m a -> (User -> m a) -> m a
   authorized :: Maybe Action  -> m a -> (User -> m a) -> m a
 
-hGetUser :: LoginM m p => m (Maybe User)
+hGetUser :: LoginM p m => m (Maybe User)
 hGetUser = authorized Nothing (return Nothing) (return . Just)
 
 {- |
@@ -147,7 +147,7 @@ be executed which may access the fresh user object.
 -}
 
 hSignup
-  :: forall m q p a. (MonadIO m, PayloadM m q UserDatabase, SessionM m (UserPayload p), BodyM Request m, HttpM Request m)
+  :: forall m q p a. (MonadIO m, PayloadM q UserDatabase m, SessionM (UserPayload p) m, BodyM Request m, HttpM Request m)
   => p -> [Action] -> m a -> (User -> m a) -> m a
 hSignup _ acts onFail onOk =
   do ps <- hRequestParameters "utf-8"
@@ -185,7 +185,7 @@ will be executed which may access the fresh user object.
 -}
 
 hLogin
-  :: forall m q p a. (PayloadM m q UserDatabase, SessionM m (UserPayload p), HttpM Request m, MonadIO m, BodyM Request m)
+  :: forall m q p a. (PayloadM q UserDatabase m, SessionM (UserPayload p) m, HttpM Request m, MonadIO m, BodyM Request m)
   => p -> m a -> (User -> m a) -> m a
 hLogin _ onFail onOk =
   do ps <- hRequestParameters "utf-8"
@@ -208,7 +208,7 @@ authenticate ps db =
 
 -- | Logout the current user by emptying the session payload.
 
-hLogout :: SessionM m (UserPayload p) => p -> m ()
+hLogout :: SessionM (UserPayload p) m => p -> m ()
 hLogout _ = withSession (set sPayload Nothing)
 
 {- |
@@ -218,7 +218,7 @@ session identifier, session start and expiration date and the possible user
 payload that is included.
 -}
 
-hLoginfo :: (SessionM m (UserPayload p), SendM m) => p -> m ()
+hLoginfo :: (SessionM (UserPayload p) m, SendM m) => p -> m ()
 hLoginfo _ =
   do hSessionInfo
      s <- getSession
@@ -239,7 +239,7 @@ executed when the authorization succeeds the second handler will be executed
 which may access the current user object. 
 -}
 
-hAuthorized :: SessionM m (UserPayload p) => p -> Maybe Action -> m b -> (User -> m b) -> m b
+hAuthorized :: SessionM (UserPayload p) m => p -> Maybe Action -> m b -> (User -> m b) -> m b
 hAuthorized _ maction onFail onOk =
   do session <- getSession
      case (maction, get sPayload session) of

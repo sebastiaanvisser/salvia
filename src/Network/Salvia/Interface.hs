@@ -23,7 +23,7 @@ import System.IO
 
 -- todo: comment
 
-class ForkM m n where
+class ForkM n m where
   forkM :: m a -> m (n a)
 
 -- | The `HttpM' type class indicates is parametrized with the directon
@@ -178,7 +178,7 @@ class (Applicative m, Monad m) => ClientM m where
 -- thing they need. Picking the right pieces of information from the payload
 -- can be done with the `select' function from the `Contains' type class.
 
-class (Applicative m, Monad m, Contains p (TVar q)) => PayloadM m p q | m -> p where
+class (Applicative m, Monad m, Contains p (TVar q)) => PayloadM p q m | m -> p where
   payload :: State q a -> m a
 
 infixr 5 &

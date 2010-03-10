@@ -37,7 +37,7 @@ newtype Handler p a = Handler { unHandler :: StateT (Context p) IO a }
 runHandler :: Handler p a -> Context p -> IO (a, Context p)
 runHandler h = runStateT (unHandler h)
 
-instance ForkM (Handler p) IO where
+instance ForkM IO (Handler p) where
   forkM a = get >>= return . fmap fst . runHandler a
 
 instance HttpM Request (Handler p) where
@@ -121,7 +121,7 @@ instance ServerM (Handler p) where
   admin  = getM cAdminMail
   listen = getM cListenOn
 
-instance Contains p (TVar q) => PayloadM (Handler p) p q where
+instance Contains p (TVar q) => PayloadM p q (Handler p) where
   payload st =
     do pl <- getM cPayload :: Handler p p
        let var = L.get select pl :: TVar q
@@ -131,7 +131,7 @@ instance Contains p (TVar q) => PayloadM (Handler p) p q where
              writeTVar var q'
              return s
 
-instance Contains q (TVar (Sessions p)) => SessionM (Handler q) p where
+instance Contains q (TVar (Sessions p)) => SessionM p (Handler q) where
   prolongSession = hProlongSession (undefined :: p)
   getSession     = hGetSession
   putSession     = hPutSession
@@ -140,7 +140,7 @@ instance Contains q (TVar (Sessions p)) => SessionM (Handler q) p where
 
 instance ( Contains q (TVar (Sessions (UserPayload p)))
          , Contains q (TVar UserDatabase)
-         ) => LoginM (Handler q) p where
+         ) => LoginM p (Handler q) where
   login      = hLogin      (undefined :: p)
   logout     = hLogout     (undefined :: p)
   loginfo    = hLoginfo    (undefined :: p)
