@@ -6,6 +6,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 -- ** Default handler environments.
 
   hDefaultEnv
+, hEnvNoKeepAlive
 
 -- ** Parse client requests.
 
@@ -19,6 +20,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hResponsePrinter
 , hRequestPrinter
 , hFlushHeaders
+, hFlushHeadersOnly
 , hFlushRequestHeaders
 , hFlushResponseHeaders
 , hFlushQueue
