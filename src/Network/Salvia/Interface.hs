@@ -176,12 +176,6 @@ class (Applicative m, Monad m) => ServerM m where
   admin  :: m String
   listen :: m [SockAddr]
 
--- | The `ClientM' type class can be used to acesss the static client
--- configuration. Unit for now.
-
-class (Applicative m, Monad m) => ClientM m where
-  client :: m ()
-
 -- | The `PayloadM' type class provides access to the server payload. The
 -- payload can be an arbitrary piece of data that gets shared between all the
 -- handlers. Can be used to implement sessions and such. Heterogeneous lists
