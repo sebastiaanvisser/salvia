@@ -3,6 +3,7 @@ module Network.Salvia.Handler.Printer
 ( hRequestPrinter
 , hResponsePrinter
 , hFlushHeaders
+, hFlushHeadersOnly
 , hFlushRequestHeaders
 , hFlushResponseHeaders
 , hFlushQueue
@@ -43,6 +44,14 @@ hFlushHeaders _ =
   do r <- http get :: m (Http d)
      h <- handle 
      catchIO (hPutStr h (show r) >> hFlush h) ()
+
+-- | Like `hFlushHeaders' but does not print status line, can be useful for CGI mode.
+
+hFlushHeadersOnly :: forall m d. (Show (Http d), HandleM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
+hFlushHeadersOnly _ =
+  do r <- http get :: m (Http d)
+     h <- handle 
+     catchIO (hPutStr h (unlines . tail . lines $ show r) >> hFlush h) ()
 
 -- | Like `hFlushHeaders` but specifically for the request headers.
 
