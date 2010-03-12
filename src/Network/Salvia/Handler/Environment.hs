@@ -1,5 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Network.Salvia.Handler.Environment (hDefaultEnv) where
+module Network.Salvia.Handler.Environment
+( hDefaultEnv
+, hEnvNoKeepAlive
+)
+where
 
 import Control.Monad.State
 import Network.Protocol.Http
@@ -30,4 +34,17 @@ hDefaultEnv handler =
          (hCustomError BadRequest)
          (hHead handler)
        hResponsePrinter
+
+-- | Like `hDefaultEnv' but only serves one request per connection.
+
+hEnvNoKeepAlive
+  :: (MonadIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
+  => m ()  -- ^ Handler to run in this environment.
+  -> m ()
+hEnvNoKeepAlive handler =
+  do hBanner "salvia-httpd"
+     _ <- hRequestParser (1000 * 4)
+       (hCustomError BadRequest)
+       (hHead handler)
+     hResponsePrinter
 
