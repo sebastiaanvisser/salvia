@@ -28,7 +28,7 @@ data Context p = Context
   , _cServerAddr  :: SockAddr
   , _cQueue       :: SendQueue
   , _cPayload     :: p
-  } deriving Functor
+  } deriving (Show, Functor)
 
 $(mkLabels [''Context])
 
