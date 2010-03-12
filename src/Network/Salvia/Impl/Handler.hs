@@ -60,18 +60,25 @@ instance RawHttpM Response (Handler p) where
     do (a, s) <- runState st <$> getM cRawResponse
        cRawResponse =: s >> return a
 
+instance HandleQueueM (Handler p) where
+  enqueueHandle f = modM cQueue (++[SendAction (f . snd)])
+
+instance SocketQueueM (Handler p) where
+  enqueueSock f = modM cQueue (++[SendAction (f . fst)])
+
 instance QueueM (Handler p) where
-  enqueue f = modM cQueue (++[f])
-  dequeue   = headMay <$> getM cQueue <* modM cQueue (tailDef [])
+  dequeue = headMay <$> getM cQueue <* modM cQueue (tailDef [])
 
 instance SendM (Handler p) where
-  send        s    = enqueue (\(_, h) -> hSetEncoding h utf8 >> ByteString.hPut h (fromString s))
-  sendBs      bs   = enqueue (\(_, h) -> ByteString.hPutStr h bs)
-  spoolWith   f fd = enqueue (\(_, h) -> hGetContents fd >>= ByteString.hPut h . fromString . f)
-  spoolWithBs f fd = enqueue (\(_, h) -> ByteString.hGetContents fd >>= ByteString.hPut h . f)
+  send        s    = enqueueHandle (\h -> hSetEncoding h utf8 >> ByteString.hPut h (fromString s))
+  sendBs      bs   = enqueueHandle (\h -> ByteString.hPutStr h bs)
+  spoolWith   f fd = enqueueHandle (\h -> hGetContents fd >>= ByteString.hPut h . fromString . f)
+  spoolWithBs f fd = enqueueHandle (\h -> ByteString.hGetContents fd >>= ByteString.hPut h . f)
 
-instance SockM (Handler p) where
+instance SocketM (Handler p) where
   socket = getM cSocket
+
+instance HandleM (Handler p) where
   handle = getM cHandle
 
 instance ClientAddressM (Handler p) where

@@ -38,7 +38,7 @@ hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 
 -- | todo: printer for rawResponse over response!!
 
-hFlushHeaders :: forall m d. (Show (Http d), SockM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
+hFlushHeaders :: forall m d. (Show (Http d), HandleM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeaders _ =
   do r <- http get :: m (Http d)
      h <- handle 
@@ -56,13 +56,13 @@ hFlushResponseHeaders = flushHeaders forResponse
 
 -- | One by one apply all enqueued send actions to the socket.
 
-hFlushQueue :: (QueueM m, SockM m, MonadIO m) => m ()
+hFlushQueue :: (QueueM m, HandleM m, SocketM m, MonadIO m) => m ()
 hFlushQueue =
   do s <- socket
      h <- handle
      q <- queue
      flip catchIO () $
-       sequence_ (map ($ (s, h)) q) >> hFlush h
+       sequence_ (map (\(SendAction f) -> f (s, h)) q) >> hFlush h
   where queue = dequeue >>= maybe (return []) ((<$> queue) . (:))
 
 

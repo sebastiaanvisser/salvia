@@ -57,7 +57,7 @@ the socket. The function is parametrized with a the direction of the HTTP
 message, client request or server response.
 -}
 
-hRawBody :: forall m d. (MonadIO m, SockM m, HttpM d m) => d -> m B.ByteString
+hRawBody :: forall m d. (MonadIO m, HandleM m, HttpM d m) => d -> m B.ByteString
 hRawBody _ =
   do let h = http :: State (Http d) a -> m a
      con <- h (getM connection)

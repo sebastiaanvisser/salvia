@@ -25,7 +25,7 @@ import qualified Data.ByteString.Lazy as B
 -- todo: fails on ipv6 en unix sockets.
 -- todo: stderr?
 
-hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, QueueM m, ServerM m, AddressM' m) => FilePath -> m ()
+hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, HandleQueueM m, ServerM m, AddressM' m) => FilePath -> m ()
 hCGI fn =
   do adm <- admin
      hst <- host
@@ -80,7 +80,7 @@ hCGI fn =
      -- Spool all data from the CGI script's output to the client. When
      -- finished, close the handle and wait for the script to terminate.
      spool out
-     enqueue (const (hClose out <* waitForProcess pid))
+     enqueueHandle (const (hClose out <* waitForProcess pid))
 
   where
   addr (SockAddrInet  p a)     = (,) p <$> liftIO (inet_ntoa a)

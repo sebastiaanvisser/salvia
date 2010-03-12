@@ -20,7 +20,7 @@ import System.IO
 -- | Like the `hParser' but always parses `HTTP` `Requests`s.
 
 hRequestParser
-  :: (SockM m, RawHttpM Request m, HttpM Request m, MonadIO m)
+  :: (HandleM m, RawHttpM Request m, HttpM Request m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -32,7 +32,7 @@ hRequestParser = hParser pt parseRequest
 -- | Like the `hParser' but always parses `HTTP` `Response`s.
 
 hResponseParser
-  :: (SockM m, RawHttpM Response m, HttpM Response m, MonadIO m)
+  :: (HandleM m, RawHttpM Response m, HttpM Response m, MonadIO m)
   => Int               -- ^ Timeout in milliseconds.
   -> (String -> m a)   -- ^ The fail handler.
   -> m a               -- ^ The success handler.
@@ -52,7 +52,7 @@ specified with the first argument the function silently returns.
 -}
 
 hParser
-  :: (SockM m, MonadIO m)
+  :: (HandleM m, MonadIO m)
   => (Http d -> m b)                        -- ^ What to do with message.
   -> (String -> Either String (Http d))     -- ^ Custom message parser.
   -> Int                                    -- ^ Timeout in milliseconds.

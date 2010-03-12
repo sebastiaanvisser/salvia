@@ -20,7 +20,7 @@ keep-alives (`hKeepAlive`), handling `HEAD` requests (`hHead`) and printing the
 -}
 
 hDefaultEnv
-  :: (MonadIO m, SockM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
+  :: (MonadIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
   => m ()  -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =

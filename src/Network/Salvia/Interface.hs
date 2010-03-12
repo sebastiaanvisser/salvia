@@ -69,12 +69,15 @@ rawRequest = rawHttp
 rawResponse :: RawHttpM Response m => State (Http Response) a -> m a
 rawResponse = rawHttp
 
--- | The `SockM` type class allows access to peer (the other endpoint of the
--- connection) specific information like the socket and file handle associated
--- with the socket.
+-- | The `SocketM` type class allows access to the raw socket.
 
-class (Applicative m, Monad m) => SockM m where
+class (Applicative m, Monad m) => SocketM m where
   socket :: m Socket
+
+-- | The `HandleM` type class allows access to the file handle, probabaly
+-- associated with the socket to the peer.
+
+class (Applicative m, Monad m) => HandleM m where
   handle :: m Handle
 
 -- | The `ClientAddressM` type class gives access to socket address of the
@@ -106,16 +109,25 @@ sent at the end of a request handler.
 
 type SendQueue = [SendAction]
 
-type SendAction = (Socket, Handle) -> IO ()
+data SendAction = SendAction ((Socket, Handle) -> IO ())
 
--- | The `QueueM' type class allows for queing actions for sending data values
+instance Show SendAction where
+  show _ = "<send action>"
+
+-- | todo: comment:
+-- The `QueueM' type class allows for queing actions for sending data values
 -- over the wire. Using a queue for collecting send actions instead of directly
 -- sending values over the socket allows for a more modular client or server
 -- layout.
 
+class (Applicative m, Monad m) => HandleQueueM m where
+  enqueueHandle :: (Handle -> IO ()) -> m ()
+
+class (Applicative m, Monad m) => SocketQueueM m where
+  enqueueSock :: (Socket -> IO ()) -> m ()
+
 class (Applicative m, Monad m) => QueueM m where
-  enqueue  :: SendAction -> m ()
-  dequeue  :: m (Maybe SendAction)
+  dequeue :: m (Maybe SendAction)
 
 class (Applicative m, Monad m) => SendM m where
 
