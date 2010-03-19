@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, TypeOperators #-}
 module Network.Salvia.Handler.File
 ( hFile
 , hFileResource
@@ -10,16 +10,21 @@ module Network.Salvia.Handler.File
 )
 where
 
+import Control.Applicative
 import Control.Category
 import Control.Monad.State hiding (get)
 import Data.Record.Label
+import Data.Time
+import Data.Time.Clock.POSIX
 import Network.Protocol.Http
 import Network.Protocol.Mime
 import Network.Protocol.Uri
-import Network.Salvia.Interface
 import Network.Salvia.Handler.Error
+import Network.Salvia.Interface
 import Prelude hiding ((.), id)
 import System.IO
+import System.Locale
+import System.Posix.Files
 
 {- |
 Serve a file from the filesystem indicated by the specified filepath. When
@@ -33,9 +38,15 @@ hFileResource :: (MonadIO m, HttpM Response m, SendM m) => FilePath -> m ()
 hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
+       mt <- liftIO $
+         formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %z"
+           . posixSecondsToUTCTime
+           . realToFrac
+           . modificationTime <$> getFileStatus file
        response $
          do contentType   =: Just (fileMime file, Nothing)
             contentLength =: Just fs
+            lastModified  =: Just mt
             status        =: OK
        spool fd
 
