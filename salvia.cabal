@@ -39,6 +39,7 @@ Library
                     stm ==2.1.*,
                     time ==1.1.*,
                     transformers ==0.1.*,
+                    unix >= 2.3 && < 2.5,
                     utf8-string ==0.3.*,
                     salvia-protocol ==0.1.*,
                     split ==0.1.*,
