@@ -25,7 +25,7 @@ Library
 
   Build-Depends:    base ==4.*,
                     bytestring ==0.9.*,
-                    containers ==0.3.*,
+                    containers >= 0.2 && < 0.4,
                     directory ==1.0.*,
                     fclabels ==0.4.*,
                     monads-fd ==0.0.*,
@@ -43,7 +43,7 @@ Library
                     utf8-string ==0.3.*,
                     salvia-protocol ==0.1.*,
                     split ==0.1.*,
-                    text ==0.7.*
+                    text >= 0.5 && < 0.8
 
   Exposed-modules:  Network.Salvia
                     Network.Salvia.Interface
