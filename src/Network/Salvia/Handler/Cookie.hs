@@ -45,7 +45,7 @@ hNewCookie expire wildcard = do
     . (path    `set` Just "/")
     . (domain  `set` Just ((if wildcard then ('.':) else id) hst))
     . (port    `set` [portNum sAddr])
-    . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
+    . (expires `set` Just ("\"" ++ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire ++ "\""))
     $ empty
   where portNum (SockAddrInet  p _)     = fromIntegral p
         portNum (SockAddrInet6 p _ _ _) = fromIntegral p
