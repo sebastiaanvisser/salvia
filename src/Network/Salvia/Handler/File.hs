@@ -66,8 +66,7 @@ will be set using this handler.
 hFileResourceFilter :: (MonadIO m, HttpM Response m, SendM m) => (String -> String) -> FilePath -> m ()
 hFileResourceFilter f file =
   hSafeIO (openFile file ReadMode) $ \fd ->
-    do liftIO (hSetEncoding fd utf8)
-       response $
+    do response $
          do contentType =: Just (fileMime file, Just "utf-8")
             status      =: OK
        spoolWith f fd
