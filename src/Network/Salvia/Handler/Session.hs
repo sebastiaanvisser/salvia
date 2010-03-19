@@ -166,16 +166,17 @@ whenNotExpired var =
      return $ if (willExpireAt session > n) then Just var else Nothing
 
 {- |
-This handler sets the HTTP cookie for the specified session. It will use a
-default cookie with an additional `sid' attribute with the session identifier
-as value. The session expiration date will be used as the cookie expire field.
+This handler sets the HTTP cookie for the specified session. It will
+use a default cookie with an additional `sid' attribute with the
+session identifier as value. The session expiration date will be used
+as the cookie expire field. The session is valid for all subdomains.
 -}
 
 setCookieSession :: (MonadIO m, ServerM m, ServerAddressM m, HttpM Response m) => SessionID -> UTCTime -> m ()
 setCookieSession sd ex =
   do zone <- liftIO getCurrentTimeZone
      let time = utcToLocalTime zone ex
-     ck <- set name "sid" . set value (show sd) <$> hNewCookie time
+     ck <- set name "sid" . set value (show sd) <$> hNewCookie time True
      hSetCookie (fromList [ck])
 
 -- | Given the (possibly wrong) request cookie, try to recover the existing

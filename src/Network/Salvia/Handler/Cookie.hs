@@ -33,16 +33,17 @@ hDelCookie nm = response (theCookie =: Just Nothing)
 {- |
 Convenient method for creating cookies that expire in the near future and are
 bound to the domain and port this server runs on. The path will be locked to
-root.
+root. If the second argument is set, the cookie will be valid for all
+subdomains.
 -}
 
-hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> m Cookie
-hNewCookie expire = do
+hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> Bool -> m Cookie
+hNewCookie expire wildcard = do
   hst   <- host
   sAddr <- serverAddress
   return 
     . (path    `set` Just "/")
-    . (domain  `set` Just ('.' : hst))
+    . (domain  `set` Just ((if wildcard then ('.':) else id) hst))
     . (port    `set` [portNum sAddr])
     . (expires `set` Just (formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire))
     $ empty

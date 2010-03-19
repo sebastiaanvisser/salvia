@@ -8,3 +8,4 @@ http-get ranges
 http-accept
 http-cache
 
+configure subdomain or no for session cookie
