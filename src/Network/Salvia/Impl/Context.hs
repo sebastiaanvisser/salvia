@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, DeriveFunctor, TypeOperators #-}
+{-# LANGUAGE TemplateHaskell, TypeOperators #-}
 module Network.Salvia.Impl.Context where
 
 import Data.Record.Label
@@ -28,7 +28,7 @@ data Context p = Context
   , _cServerAddr  :: SockAddr
   , _cQueue       :: SendQueue
   , _cPayload     :: p
-  } deriving (Show, Functor)
+  } deriving (Show)
 
 $(mkLabels [''Context])
 

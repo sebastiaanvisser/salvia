@@ -6,7 +6,6 @@
   , GeneralizedNewtypeDeriving
   , MultiParamTypeClasses
   , FunctionalDependencies
-  , DeriveFunctor
  #-}
 module Network.Salvia.Handler.Session where
 
@@ -51,7 +50,7 @@ data Session p =
   , _sLast    :: UTCTime
   , _sExpire  :: Integer
   , _sPayload :: Maybe p
-  } deriving (Show, Functor)
+  } deriving (Show)
 
 $(mkLabels [''Session])
 
