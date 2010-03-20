@@ -13,6 +13,10 @@ where
 import Control.Applicative
 import Control.Category
 import Control.Monad.State hiding (get)
+import Data.ByteString.Lazy.UTF8 (fromString)
+import Data.Char
+import Data.Digest.Pure.MD5
+import Data.Maybe
 import Data.Record.Label
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -20,11 +24,13 @@ import Network.Protocol.Http
 import Network.Protocol.Mime
 import Network.Protocol.Uri
 import Network.Salvia.Handler.Error
+import Network.Salvia.Handler.Range
 import Network.Salvia.Interface
 import Prelude hiding ((.), id)
 import System.IO
 import System.Locale
 import System.Posix.Files
+import qualified Data.ByteString.Lazy as B
 
 {- |
 Serve a file from the filesystem indicated by the specified filepath. When
@@ -34,21 +40,40 @@ the filename extension using the `mimetype` function. The `contentLength` will
 be set the file's size.
 -}
 
-hFileResource :: (MonadIO m, HttpM Response m, SendM m) => FilePath -> m ()
+hFileResource :: (MonadIO m, HttpM' m, SendM m) => FilePath -> m ()
 hFileResource file =
   hSafeIO (openBinaryFile file ReadMode) $ \fd ->
     do fs <- liftIO (hFileSize fd)
+       rng <- request (getM range)
        mt <- liftIO $
          formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %z"
            . posixSecondsToUTCTime
            . realToFrac
            . modificationTime <$> getFileStatus file
+
+       let etag = show . md5 $ fromString mt
        response $
          do contentType   =: Just (fileMime file, Nothing)
             contentLength =: Just fs
             lastModified  =: Just mt
+            eTag          =: Just etag
+            acceptRanges  =: Just "bytes"
             status        =: OK
-       spool fd
+
+       case rng of
+         -- todo: use peek and cleanup this range code.
+         Just (Range (Just from) to _) ->
+           do let t = fromMaybe (fs - 1) to
+                  r = Range (Just from) (Just t) (Just fs)
+              response $
+                do status        =: PartialContent
+                   contentRange  =: Just r
+                   contentLength =: Just (t - from + 1)
+              let chop = maybe id (B.take . fromIntegral . (subtract from)) to
+              spoolWithBs (chop . B.drop (fromIntegral from)) fd
+              return ()
+
+         _ -> spoolWithBs id fd
 
 fileMime :: FilePath -> Mime
 fileMime file =
