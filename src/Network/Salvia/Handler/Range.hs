@@ -1,5 +1,11 @@
 {-# LANGUAGE FlexibleContexts, TypeOperators #-}
-module Network.Salvia.Handler.Range where
+module Network.Salvia.Handler.Range
+( Range (..)
+, contentRange
+, range
+, rangeL
+)
+where
 
 import Data.Record.Label
 import Data.List
