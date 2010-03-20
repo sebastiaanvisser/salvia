@@ -180,7 +180,7 @@ setCookieSession sd ex =
      hSetCookie (fromList [ck])
 
 -- | Given the (possibly wrong) request cookie, try to recover the existing
--- session identifier. When there is none, create a new one.
+-- session identifier.
 
 getCookieSessionID :: (MonadIO m, HttpM Request m) => m (Maybe SessionID)
 getCookieSessionID =
