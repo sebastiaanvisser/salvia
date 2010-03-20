@@ -76,6 +76,7 @@ Library
                     Network.Salvia.Handler.Path
                     Network.Salvia.Handler.Printer
                     Network.Salvia.Handler.Put
+                    Network.Salvia.Handler.Range
                     Network.Salvia.Handler.Redirect
                     Network.Salvia.Handler.Rewrite
                     Network.Salvia.Handler.Session
