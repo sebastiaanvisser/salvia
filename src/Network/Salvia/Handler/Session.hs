@@ -19,12 +19,11 @@ import Data.Maybe
 import Data.Record.Label
 import Data.Time.Clock
 import Data.Time.LocalTime
-import Data.Traversable
 import Network.Protocol.Cookie hiding (empty)
 import Network.Protocol.Http hiding (cookie)
 import Network.Salvia.Interface
 import Network.Salvia.Handler.Cookie
-import Prelude hiding ((.), id, lookup, sequence)
+import Prelude hiding ((.), id, lookup, sequence, mod)
 import Safe
 import System.Random
 import qualified Control.Monad.State as S
@@ -81,12 +80,18 @@ class (Applicative m, Monad m) => SessionM p m | m -> p where
 
 -- | A mapping from unique session IDs to shared session variables.
 
-newtype Sessions p = Sessions { unSessions :: TVar (M.Map SessionID (TVar (Session p))) }
+type SessionMap p = M.Map SessionID (TVar (Session p))
+newtype Sessions p = Sessions { unSessions :: SessionMap p }
+
+-- | Apply a function to the sessions in the `Sessions` newtype.
+
+withSessions :: (SessionMap p -> SessionMap p) -> Sessions p -> Sessions p
+withSessions f = Sessions . f . unSessions
 
 -- | Create a new, empty, store of sessions.
 
-mkSessions :: MonadIO m => m (Sessions p)
-mkSessions = liftM Sessions (newVar M.empty)
+mkSessions :: Sessions p
+mkSessions = Sessions M.empty
 
 {- | todo doc:
 The session handler. This handler will try to return an existing session from
@@ -122,9 +127,7 @@ hDelSession _ =
      case msid of
        Just sd ->
          do delCookieSession
-            var <- payload S.get :: m (Sessions p)
-            _   <- modVar (M.delete sd) (unSessions var)
-            return ()
+            payload . S.modify . withSessions $ (M.delete sd :: SessionMap p -> SessionMap p)
        Nothing -> return ()
 
 hWithSession
@@ -156,8 +159,8 @@ existingSessionVarOrNew
   :: (Applicative m, MonadIO m, HttpM Request m, PayloadM q (Sessions p) m)
   => m (TVar (Session p))
 existingSessionVarOrNew = fromMaybeTM newSessionVar $
-  do sid  <- MaybeT getCookieSessionID
-     svar <- MaybeT (lookupSessionVar sid)
+  do sd  <- MaybeT getCookieSessionID
+     svar <- MaybeT (lookupSessionVar sd)
      MaybeT (whenNotExpired svar)
 
 whenNotExpired :: MonadIO m => TVar (Session p) -> m (Maybe (TVar (Session p)))
@@ -196,22 +199,20 @@ delCookieSession = hDelCookie "sid"
 -- stored in the session map.
 
 newSessionVar :: (MonadIO m, PayloadM q (Sessions p) m) => m (TVar (Session p))
-newSessionVar =
-  do var <- payload S.get
-     sd <- newSessionID var
-     session <- liftIO getCurrentTime >>= newVar . (\n -> Session sd n n 0 Nothing)
-     _ <- modVar (M.insert sd session) (unSessions var)
-     return session
+newSessionVar = do
+  t <- liftIO getCurrentTime
+  session <- newVar (Session undefined t t 0 Nothing)
+  keys <- liftIO newStdGen >>= return . randoms
+  sd <- payload $ do
+    sd <- newSessionID keys
+    S.modify . withSessions $ M.insert sd session
+    return sd
+  modVar (set sID sd) session
 
-newSessionID :: MonadIO m => Sessions p -> m SessionID
-newSessionID var =
-  do store <- getVar (unSessions var)
-     let generate =
-           do r <- liftIO randomIO
-              case M.lookup r store of
-                Nothing -> return r
-                Just _  -> generate
-     generate
+newSessionID :: (MonadState (Sessions p) m, Functor m) => [SessionID] -> m SessionID
+newSessionID keys =
+  do store <- unSessions <$> S.get
+     return . head . filter (flip M.notMember store) $ keys
 
 willExpireAt :: Session p -> UTCTime
 willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast session 
@@ -219,7 +220,7 @@ willExpireAt session = fromInteger (get sExpire session) `addUTCTime` get sLast 
 lookupSessionVar
   :: (MonadIO m, PayloadM q (Sessions p) m)
   => SessionID -> m (Maybe (TVar (Session p)))
-lookupSessionVar sd = M.lookup sd <$> (payload S.get >>= getVar . unSessions)
+lookupSessionVar sd = payload (S.gets (M.lookup sd . unSessions))
 
 -- STM utilities.
 
