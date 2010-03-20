@@ -13,6 +13,7 @@ import Control.Applicative hiding (empty)
 import Control.Category
 import Control.Concurrent.STM hiding (check)
 import Control.Monad.State hiding (get, sequence)
+import Control.Monad.Maybe
 import Data.List
 import Data.Maybe
 import Data.Record.Label
@@ -154,10 +155,10 @@ session is updated.
 existingSessionVarOrNew
   :: (Applicative m, MonadIO m, HttpM Request m, PayloadM q (Sessions p) m)
   => m (TVar (Session p))
-existingSessionVarOrNew =
-  getCookieSessionID `andAlso` lookupSessionVar `andAlso` whenNotExpired >>=
-     (newSessionVar `maybe` return)
-  where andAlso m c = m >>= liftM join . sequence . fmap c
+existingSessionVarOrNew = fromMaybeTM newSessionVar $
+  do sid  <- MaybeT getCookieSessionID
+     svar <- MaybeT (lookupSessionVar sid)
+     MaybeT (whenNotExpired svar)
 
 whenNotExpired :: MonadIO m => TVar (Session p) -> m (Maybe (TVar (Session p)))
 whenNotExpired var =
