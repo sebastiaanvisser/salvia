@@ -24,7 +24,7 @@ the TCP backlog is 64.
 defaultConfig :: Config
 defaultConfig =
   Config
-  { hostname  = "127.0.0.1"
+  { hostname  = "0.0.0.0"
   , adminMail = "admin@localhost"
   , listenOn  = [SockAddrInet 8080 iNADDR_ANY]
   , backlog   = 64
