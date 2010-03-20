@@ -1,9 +1,10 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Network.Salvia.Handler.Log where
 
 import Control.Applicative
 import Control.Monad.State
 import Data.List
-import Data.Record.Label
+import Data.Record.Label hiding (get)
 import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
@@ -39,4 +40,14 @@ hLog h =
          , ur
          , show code ++ " " ++ show st
          ]
+
+-- | Dump the request headers to the standard output, useful for debugging.
+
+hDumpRequest :: (HttpM Request m, MonadIO m) => m ()
+hDumpRequest = request get >>= liftIO . print
+
+-- | Dump the response headers to the standard output, useful for debugging.
+
+hDumpResponse :: (HttpM Response m, MonadIO m) => m ()
+hDumpResponse = response get >>= liftIO . print
 

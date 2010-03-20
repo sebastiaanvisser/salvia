@@ -68,6 +68,8 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 -- ** Logging of client requests.
 
 , hLog
+, hDumpRequest
+, hDumpResponse
 
 -- * Redirecting and rewriting.
 
