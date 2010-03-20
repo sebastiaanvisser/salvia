@@ -27,7 +27,6 @@ import Network.Salvia.Impl.Context
 import Network.Salvia.Interface
 import Prelude hiding (mod)
 import Safe
-import System.IO
 import qualified Data.ByteString.Lazy as ByteString
 import qualified Data.Record.Label as L
 
