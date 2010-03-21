@@ -36,7 +36,7 @@ Maintainer:         sfvisser@cs.uu.nl
 Build-Type:         Simple
 
 Library
-  GHC-Options:      -threaded -Wall -fno-warn-orphans
+  GHC-Options:      -Wall -fno-warn-orphans
   HS-Source-Dirs:   src
 
   Build-Depends:    base ==4.*,
