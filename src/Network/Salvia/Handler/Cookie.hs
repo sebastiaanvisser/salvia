@@ -43,7 +43,9 @@ hNewCookie expire wildcard = do
   sAddr <- serverAddress
   return 
     . (path    `set` Just "/")
-    . (domain  `set` Just ((if wildcard then ('.':) else id) hst))
+-- No domain for now, to make demoing easier. The below line doesn't
+-- work in Chrome and Webkit if hst is an IP.
+--    . (domain  `set` Just ((if wildcard then ('.':) else id) hst))
     . (port    `set` [portNum sAddr])
     . (expires `set` Just ("\"" ++ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire ++ "\""))
     $ empty
