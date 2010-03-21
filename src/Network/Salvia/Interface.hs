@@ -1,3 +1,34 @@
+{- |
+This interface module contains all the basic operations to access the server
+context. The interface is just of bunch of type classes that allow access to
+the request and response objects. Most type classes allow access to the context
+information through lifted state computations. To dig deeper into the context
+object you would probably want to use the derived /fclabels/ accessors.
+
+Example 1: To get the entire request object:
+
+> do r <- request get  -- Control.Monad.State.get
+
+Example 2: To get the request URI as a string:
+
+> do r <- request (getM uri) -- getM from Data.Record.Label
+
+Example 3: To get the query parameters and the /User-Agent/ header:
+
+> do request $
+>      do q <- getM (queryParams . asUri)  -- composed labels using the (.) from Control.Category.
+>         u <- header "user-agent"
+>         return (q, u)
+
+Example 4: To set the /Content-Type/ and response status and send some string.
+
+> do response $
+>      do status =: BadRequest    -- the (=:) operator from Data.Record.Label
+>         header "content-type" =: "text/plain"
+>    send "hello, world"
+
+-}
+
 {-# LANGUAGE
     UndecidableInstances
   , TypeOperators
