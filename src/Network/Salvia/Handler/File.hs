@@ -14,7 +14,6 @@ import Control.Applicative
 import Control.Category
 import Control.Monad.State hiding (get)
 import Data.ByteString.Lazy.UTF8 (fromString)
-import Data.Char
 import Data.Digest.Pure.MD5
 import Data.Maybe
 import Data.Record.Label
