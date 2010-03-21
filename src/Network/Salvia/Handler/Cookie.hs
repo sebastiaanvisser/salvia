@@ -38,8 +38,8 @@ subdomains.
 -}
 
 hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> Bool -> m Cookie
-hNewCookie expire wildcard = do
-  hst   <- host
+hNewCookie expire _ = do
+--   hst   <- host
   sAddr <- serverAddress
   return 
     . (path    `set` Just "/")
