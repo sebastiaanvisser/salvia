@@ -1,16 +1,32 @@
 Name:               salvia
 Version:            1.0.0
-Description:        Lightweight Haskell Web Server Framework with modular
-                    support for serving static files, directories indices,
-                    default error responses, connection counting and logging,
-                    HEAD and PUT requests, keep-alives, custom banner printing,
-                    default handler environments for parsing request and
-                    printing responses, dispatching based on request methods,
-                    URI, paths and filename extension, URI rewriting and
-                    redirection, virtual hosting, cookie, session and user
-                    management and more...
-                    
-Synopsis:           Lightweight Haskell Web Server Framework 
+Description:        
+  Salvia is a feature rich modular web server and web application framework
+  that can be used to write dynamic websites in Haskell. From the lower level
+  protocol code up to the high level application code, everything is written as
+  a Salvia handler. This approach makes the server extremely extensible. To see
+  a demo of a Salvia website, please see the /salvia-demo/ package.
+  .
+  All the low level protocol code can be found in the /salvia-protocol/
+  package, which exposes the datatypes, parsers and pretty-printers for the
+  URI, HTTP, Cookie and MIME protocols.
+  .
+  This Salvia package itself can be separated into three different parts: the
+  interface, the handlers and the implementation. The /interface/ module
+  defines a number of type classes that the user can build the web application
+  against. Reading the request object, writing to the response, or gaining
+  direct access to the socket, all of these actions are reflected using one
+  type class aspect in the interface. The /handlers/ are self contained modules
+  that implement a single aspect of the Salvia web server. The handlers expose
+  their interface requirements in their type context. Salvia can have multiple
+  /implementations/ which can be switched by using different instances for the
+  interface type classes. This package has only one implementation, a simple
+  accepting socket loop server. The /salvia-extras/ package has two additional
+  implementations. Keeping a clear distinction between the abstract server
+  aspects and the actual implementation makes it very easy to migrate existing
+  web application to different back-ends.
+
+Synopsis:           Modular web application framework.
 Cabal-version:      >= 1.6
 Category:           Network, Web
 License:            BSD3
