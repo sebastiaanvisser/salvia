@@ -70,7 +70,6 @@ Library
                     Network.Salvia.Handler.FileSystem
                     Network.Salvia.Handler.Head
                     Network.Salvia.Handler.Log
-                    Network.Salvia.Handler.Login
                     Network.Salvia.Handler.Method
                     Network.Salvia.Handler.Parser
                     Network.Salvia.Handler.Path
@@ -79,6 +78,5 @@ Library
                     Network.Salvia.Handler.Range
                     Network.Salvia.Handler.Redirect
                     Network.Salvia.Handler.Rewrite
-                    Network.Salvia.Handler.Session
                     Network.Salvia.Handler.VirtualHosting
 

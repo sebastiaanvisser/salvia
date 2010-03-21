@@ -20,9 +20,7 @@ import Data.Record.Label hiding (get)
 import Network.Protocol.Http hiding (hostname)
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Close
-import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Printer
-import Network.Salvia.Handler.Session
 import Network.Salvia.Impl.Context
 import Network.Salvia.Interface
 import Prelude hiding (mod)
@@ -136,20 +134,4 @@ instance Contains p (TVar q) => PayloadM p q (Handler p) where
              let (s, q') = runState st q
              writeTVar var q'
              return s
-
-instance Contains q (TVar (Sessions p)) => SessionM p (Handler q) where
-  prolongSession = hProlongSession (undefined :: p)
-  getSession     = hGetSession
-  putSession     = hPutSession
-  delSession     = hDelSession     (undefined :: p)
-  withSession    = hWithSession
-
-instance ( Contains q (TVar (Sessions (UserPayload p)))
-         , Contains q (TVar UserDatabase)
-         ) => LoginM p (Handler q) where
-  login      = hLogin      (undefined :: p)
-  logout     = hLogout     (undefined :: p)
-  loginfo    = hLoginfo    (undefined :: p)
-  signup     = hSignup     (undefined :: p)
-  authorized = hAuthorized (undefined :: p)
 

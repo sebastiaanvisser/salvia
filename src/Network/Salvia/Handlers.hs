@@ -159,88 +159,12 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hVirtualHosting
 , hPortRouter
 
--- * Session management.
-
--- ** Cookie handling.
+-- * Cookie management.
 
 , hSetCookie
 , hCookie
 , hDelCookie
 , hNewCookie
-
--- ** Session identifier.
-
-, SessionID (SID)
-, sid
-
--- ** Session data type.
-
-, Session (Session)
-, sID
-, sStart
-, sLast
-, sExpire
-, sPayload 
-
--- ** Session interface through type class.
-
-, SessionM (..)
-
--- ** Collection of sessions.
-
-, Sessions
-, mkSessions 
-
--- ** Session handlers.
-
-, hProlongSession
-, hGetSession
-, hPutSession
-, hDelSession
-, hWithSession
-, hSessionInfo
-
--- * User management.
-
--- ** Basic types.
-
-, Username
-, Password
-, Action
-, User (User)
-, username
-, email
-, password
-, actions
-
--- ** Login server aspect.
-
-, LoginM (..)
-
--- ** User Sessions.
-
-, UserPayload (..)
-, UserSession
-
--- ** User database backend.
-
-, UserDatabase (UserDatabase)
-, users
-, backend
-
-, Backend (..)
-, noBackend
-, fileBackend
-
--- ** Handlers.
-
-, hGetUser
-, hSignup
-, hLogin
-, hLogout
-, hLoginfo
-, hAuthorized
-
 )
 where
 
@@ -260,7 +184,6 @@ import Network.Salvia.Handler.File
 import Network.Salvia.Handler.FileSystem
 import Network.Salvia.Handler.Head
 import Network.Salvia.Handler.Log
-import Network.Salvia.Handler.Login
 import Network.Salvia.Handler.Method
 import Network.Salvia.Handler.Parser
 import Network.Salvia.Handler.Path
@@ -269,6 +192,5 @@ import Network.Salvia.Handler.Put
 import Network.Salvia.Handler.Range
 import Network.Salvia.Handler.Redirect
 import Network.Salvia.Handler.Rewrite
-import Network.Salvia.Handler.Session
 import Network.Salvia.Handler.VirtualHosting
 
