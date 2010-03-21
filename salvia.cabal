@@ -1,5 +1,5 @@
 Name:               salvia
-Version:            0.3.0
+Version:            1.0.0
 Description:        Lightweight Haskell Web Server Framework with modular
                     support for serving static files, directories indices,
                     default error responses, connection counting and logging,
@@ -42,7 +42,7 @@ Library
                     transformers ==0.1.*,
                     unix >= 2.3 && < 2.5,
                     utf8-string ==0.3.*,
-                    salvia-protocol ==0.1.*,
+                    salvia-protocol ==1.0.*,
                     split ==0.1.*,
                     text >= 0.5 && < 0.8
 
