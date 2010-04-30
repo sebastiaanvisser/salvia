@@ -42,7 +42,7 @@ hResponsePrinter = flushHeaders forResponse >> flushQueue forResponse
 hFlushHeaders :: forall m d. (Show (Http d), HandleM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeaders _ =
   do r <- http get :: m (Http d)
-     h <- handle 
+     h <- handleOut
      catchIO (hPutStr h (show r) >> hFlush h) ()
 
 -- | Like `hFlushHeaders' but does not print status line, can be useful for CGI mode.
@@ -50,7 +50,7 @@ hFlushHeaders _ =
 hFlushHeadersOnly :: forall m d. (Show (Http d), HandleM m, QueueM m, MonadIO m, HttpM d m) => d -> m ()
 hFlushHeadersOnly _ =
   do r <- http get :: m (Http d)
-     h <- handle 
+     h <- handleOut
      catchIO (hPutStr h (unlines . tail . lines $ show r) >> hFlush h) ()
 
 -- | Like `hFlushHeaders` but specifically for the request headers.
@@ -68,7 +68,7 @@ hFlushResponseHeaders = flushHeaders forResponse
 hFlushQueue :: (QueueM m, HandleM m, SocketM m, MonadIO m) => m ()
 hFlushQueue =
   do s <- socket
-     h <- handle
+     h <- handleOut
      q <- queue
      flip catchIO () $
        sequence_ (map (\(SendAction f) -> f (s, h)) q) >> hFlush h

@@ -76,7 +76,8 @@ instance SocketM (Handler p) where
   socket = getM cSocket
 
 instance HandleM (Handler p) where
-  handle = getM cHandle
+  handleIn  = getM cHandleIn
+  handleOut = getM cHandleOut
 
 instance ClientAddressM (Handler p) where
   clientAddress = getM cClientAddr

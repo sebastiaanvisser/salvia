@@ -106,10 +106,12 @@ class (Applicative m, Monad m) => SocketM m where
   socket :: m Socket
 
 -- | The `HandleM` type class allows access to the file handle, probabaly
--- associated with the socket to the peer.
+-- associated with the socket to the peer. There is a separate handle for each
+-- of the directions.
 
 class (Applicative m, Monad m) => HandleM m where
-  handle :: m Handle
+  handleIn  :: m Handle
+  handleOut :: m Handle
 
 -- | The `ClientAddressM` type class gives access to socket address of the
 -- client part of the connection.

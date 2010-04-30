@@ -60,7 +60,7 @@ hParser
   -> m a                                    -- ^ The success handler.
   -> m (Maybe a)
 hParser action parse _ onfail onsuccess =
-  do h <- handle
+  do h <- handleIn
      mmsg <-
        liftM join
          . flip catchIO Nothing

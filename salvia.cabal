@@ -1,6 +1,6 @@
 Name:               salvia
-Version:            1.0.0
-Description:        
+Version:            1.1.0
+Description:
   Salvia is a feature rich modular web server and web application framework
   that can be used to write dynamic websites in Haskell. From the lower level
   protocol code up to the high level application code, everything is written as

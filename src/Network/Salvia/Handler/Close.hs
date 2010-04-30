@@ -16,7 +16,9 @@ import System.IO
 -- | Run a handler once and close the connection afterwards.
 
 hCloseConn :: (HandleM m, MonadIO m) => m a -> m ()
-hCloseConn h = h >> handle >>= flip catchIO () . hClose
+hCloseConn h = h >>
+  do handleIn  >>= flip catchIO () . hClose
+     handleOut >>= flip catchIO () . hClose
 
 {- |
 Run a handler and keep the connection open for potential consecutive requests.
@@ -36,17 +38,18 @@ the following criteria are met:
 hKeepAlive :: (QueueM m, HandleM m, HttpM' m, MonadIO m) => m a -> m ()
 hKeepAlive handler =
   do _ <- handler
-     h      <- handle
+     hin    <- handleIn
+     hout   <- handleOut
      conn   <- request (getM connection)
      ver    <- request (getM version)
      len    <- response (getM contentLength)
-     closed <- liftIO (hIsClosed h)
+     closed <- liftIO $ liftM2 (||) (hIsClosed hin) (hIsClosed hout)
      if or [ closed
            , conn == Just "Close"
            , isNothing (len :: Maybe Integer)
            , ver == http10
            ]
-       then catchIO (hClose h) ()
+       then catchIO (hClose hin >> hClose hout) ()
        else resetContext >> hKeepAlive handler 
 
 resetContext :: (HttpM' m, QueueM m) => m ()

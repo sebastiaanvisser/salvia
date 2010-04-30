@@ -23,7 +23,8 @@ data Context p = Context
   , _cRawRequest  :: Http Request
   , _cRawResponse :: Http Response
   , _cSocket      :: Socket
-  , _cHandle      :: Handle
+  , _cHandleIn    :: Handle
+  , _cHandleOut   :: Handle
   , _cClientAddr  :: SockAddr
   , _cServerAddr  :: SockAddr
   , _cQueue       :: SendQueue
@@ -59,8 +60,13 @@ cRawResponse :: Context p :-> Http Response
 -- | Raw socket for connection to the peer.
 cSocket :: Context p :-> Socket
 
--- | File descriptor associated with socket for the connection to the peer.
-cHandle :: Context p :-> Handle
+-- | File descriptor associated with the socket for the connection to the peer.
+-- Can be used to receive from the peer.
+cHandleIn :: Context p :-> Handle
+
+-- | File descriptor associated with the socket for the connection to the peer.
+-- Can bed used to send to the peer.
+cHandleOut :: Context p :-> Handle
 
 -- | Client address.
 cClientAddr :: Context p :-> SockAddr
