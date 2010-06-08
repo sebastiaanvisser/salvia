@@ -20,17 +20,17 @@ data Range = Range (Maybe Integer) (Maybe Integer) (Maybe Integer)
 -- | Access the /Content-Range/ header field.
 
 contentRange :: Http Response :-> Maybe Range
-contentRange = lmap rangeL `iso` header "Content-Range"
+contentRange = lmap rangeL % header "Content-Range"
 
 -- | Access the /Range/ header field.
 
 range :: Http Request :-> Maybe Range
-range = lmap rangeL `iso` header "Range"
+range = lmap rangeL % header "Range"
 
 -- | Lens containing parser and pretty-printer for HTTP ranges.
 
 rangeL :: String :<->: Range
-rangeL = parser <-> printer
+rangeL = parser :<->: printer
   where
   printer (Range f t x) = concat ["bytes ", maybe "" show f, "-", maybe "" show t, maybe "" (('/':).show) x]
   parser r =

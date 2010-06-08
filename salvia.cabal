@@ -1,5 +1,5 @@
 Name:               salvia
-Version:            1.1.0
+Version:            1.2.0
 Description:
   Salvia is a feature rich modular web server and web application framework
   that can be used to write dynamic websites in Haskell. From the lower level
@@ -32,7 +32,7 @@ Category:           Network, Web
 License:            BSD3
 License-file:       LICENSE
 Author:             Sebastiaan Visser
-Maintainer:         sfvisser@cs.uu.nl
+Maintainer:         haskell@fvisser.nl
 Build-Type:         Simple
 
 Library
@@ -43,13 +43,13 @@ Library
                     bytestring ==0.9.*,
                     containers >= 0.2 && < 0.4,
                     directory ==1.0.*,
-                    fclabels ==0.4.*,
+                    fclabels ==1.0.*,
                     MaybeT-transformers == 0.1.*,
                     monads-fd ==0.0.*,
                     network >= 2.2.1.7 && < 2.3,
                     old-locale ==1.0.*,
                     process ==1.0.*,
-                    threadmanager ==0.1.3,
+                    concurrent-extra == 0.4.*,
                     pureMD5 ==1.0.*,
                     random ==1.0.*,
                     safe ==0.2.*,
@@ -58,7 +58,7 @@ Library
                     transformers ==0.1.*,
                     unix >= 2.3 && < 2.5,
                     utf8-string ==0.3.*,
-                    salvia-protocol ==1.0.*,
+                    salvia-protocol ==1.1.*,
                     split ==0.1.*,
                     text >= 0.5 && < 0.8
 

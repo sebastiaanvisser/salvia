@@ -12,7 +12,7 @@ where
 
 import Control.Applicative
 import Control.Category
-import Control.Monad.State hiding (get)
+import Control.Monad.State
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.MD5
 import Data.Maybe
@@ -78,7 +78,7 @@ fileMime :: FilePath -> Mime
 fileMime file =
     maybe defaultMime id
   $ (either (const Nothing) Just (parseUri file)
-  >>= mimetype . get path)
+  >>= mimetype . getL path)
 
 {- |
 Like the `hFileResource` handler, but with a custom filter over the content.

@@ -7,7 +7,7 @@ where
 
 import Control.Applicative
 import Control.Category
-import Control.Monad.State hiding (get)
+import Control.Monad.State
 import Data.List (sort)
 import Data.Record.Label
 import Network.Protocol.Http
@@ -15,7 +15,7 @@ import Network.Protocol.Uri (path)
 import Network.Salvia.Interface
 import Network.Salvia.Handler.File (hResource)
 import Network.Salvia.Handler.Redirect
-import Prelude hiding ((.), id, mod)
+import Prelude hiding ((.), id)
 import System.Directory (doesDirectoryExist, getDirectoryContents)
 
 {- |
@@ -29,9 +29,9 @@ hDirectoryResource
   -> m ()
 hDirectoryResource dirName =
   do u <- request (getM asUri)
-     let p = get path u
+     let p = getL path u
      if (null p) || last p /= '/'
-       then hRedirect (show $ mod path (++"/") u)
+       then hRedirect (show $ modL path (++"/") u)
        else dirHandler dirName
 
 {- |

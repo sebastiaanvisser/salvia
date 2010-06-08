@@ -16,7 +16,7 @@ Example 2: To get the request URI as a string:
 Example 3: To get the query parameters and the /User-Agent/ header:
 
 > do request $
->      do q <- getM (queryParams . asUri)  -- composed labels using the (.) from Control.Category.
+>      do q <- getM (queryParams . asUri)  -- composed lenses using the (.) from Control.Category.
 >         u <- header "user-agent"
 >         return (q, u)
 
@@ -231,8 +231,8 @@ instance (a ~ a') => Contains a a' where
   select = id
 
 instance Contains (a, c) a where
-  select = label fst (\a (_, b) -> (a, b))
+  select = lens fst (\a (_, b) -> (a, b))
 
 instance (b ~ b', Contains a b') => Contains (c, a) b' where
-  select = select . label snd (\b (a, _) -> (a, b))
+  select = select . lens snd (\b (a, _) -> (a, b))
 

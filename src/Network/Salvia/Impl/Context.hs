@@ -31,7 +31,7 @@ data Context p = Context
   , _cPayload     :: p
   } deriving (Show)
 
-$(mkLabels [''Context])
+$(mkLabelsNoTypes [''Context])
 
 -- | The server hostname.
 cServerHost :: Context p :-> String

@@ -16,7 +16,7 @@ import Control.Concurrent.STM
 import Control.Monad.State
 import Data.ByteString.Lazy.UTF8 (fromString, toString)
 import Data.Monoid
-import Data.Record.Label hiding (get)
+import Data.Record.Label
 import Network.Protocol.Http hiding (hostname)
 import Network.Salvia.Handler.Body
 import Network.Salvia.Handler.Close
@@ -26,7 +26,6 @@ import Network.Salvia.Interface
 import Prelude hiding (mod)
 import Safe
 import qualified Data.ByteString.Lazy as ByteString
-import qualified Data.Record.Label as L
 
 newtype Handler p a = Handler { unHandler :: StateT (Context p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context p))
@@ -129,7 +128,7 @@ instance ServerM (Handler p) where
 instance Contains p (TVar q) => PayloadM p q (Handler p) where
   payload st =
     do pl <- getM cPayload :: Handler p p
-       let var = L.get select pl :: TVar q
+       let var = getL select pl :: TVar q
        liftIO . atomically $
           do q <- readTVar var
              let (s, q') = runState st q

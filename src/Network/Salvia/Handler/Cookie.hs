@@ -27,7 +27,7 @@ hCookie = fmap (fw cookies) <$> request (getM H.cookie)
 hDelCookie :: HttpM H.Response m => String -> m ()
 hDelCookie nm = response (theCookie =: Just Nothing)
   where theCookie = fmapL (pickCookie nm)
-                  . fmapL (cookies `iso` id)
+                  . fmapL (cookies % id)
                   . H.setCookie
 
 {- |
@@ -38,16 +38,16 @@ subdomains.
 -}
 
 hNewCookie :: (ServerM m, ServerAddressM m, FormatTime t) => t -> Bool -> m Cookie
-hNewCookie expire _ = do
---   hst   <- host
+hNewCookie expire wildcard = do
+  hst   <- host
   sAddr <- serverAddress
   return 
-    . (path    `set` Just "/")
+    . (path    `setL` Just "/")
 -- No domain for now, to make demoing easier. The below line doesn't
 -- work in Chrome and Webkit if hst is an IP.
---    . (domain  `set` Just ((if wildcard then ('.':) else id) hst))
-    . (port    `set` [portNum sAddr])
-    . (expires `set` Just ("\"" ++ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire ++ "\""))
+    . (domain  `setL` ((Just . if wildcard then ('.':) else id) hst))
+    . (port    `setL` [portNum sAddr])
+    . (expires `setL` Just ("\"" ++ formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" expire ++ "\""))
     $ empty
   where portNum (SockAddrInet  p _)     = fromIntegral p
         portNum (SockAddrInet6 p _ _ _) = fromIntegral p
