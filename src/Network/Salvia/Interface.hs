@@ -205,9 +205,9 @@ class (Applicative m, Monad m) => BodyM dir m where
 -- the related hostname.
 
 class (Applicative m, Monad m) => ServerM m where
-  host   :: m String
-  admin  :: m String
-  listen :: m [SockAddr]
+  serverHost   :: m String
+  serverAdmin  :: m String
+  listen       :: m [SockAddr]
 
 -- | The `PayloadM' type class provides access to the server payload. The
 -- payload can be an arbitrary piece of data that gets shared between all the

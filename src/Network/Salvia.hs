@@ -10,9 +10,9 @@ module Network.Salvia
 where
 
 -- import Network.Protocol.Cookie
-import Network.Protocol.Http hiding (hostname)
+import Network.Protocol.Http
 import Network.Protocol.Mime
-import Network.Protocol.Uri hiding (host)
+import Network.Protocol.Uri hiding (domain)
 import Network.Salvia.Interface
 import Network.Salvia.Handlers
 import Network.Salvia.Impl

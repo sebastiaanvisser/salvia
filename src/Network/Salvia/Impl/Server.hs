@@ -54,9 +54,9 @@ start conf handler payload = forM (listenOn conf) (forkIO . listener) >>= waitAl
           handle (sck, cAddr) = do
             hndl <- socketToHandle sck ReadWriteMode
             void $ runHandler handler Context
-                 { _cServerHost  = hostname conf
+                 { _cServerHost  = domain    conf
                  , _cAdminMail   = adminMail conf
-                 , _cListenOn    = listenOn conf
+                 , _cListenOn    = listenOn  conf
                  , _cPayload     = payload
                  , _cRequest     = emptyRequest
                  , _cResponse    = emptyResponse

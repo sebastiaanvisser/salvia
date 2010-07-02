@@ -121,9 +121,9 @@ instance BodyM Response (Handler p) where
   body = hRawBody
 
 instance ServerM (Handler p) where
-  host   = getM cServerHost
-  admin  = getM cAdminMail
-  listen = getM cListenOn
+  serverHost  = getM cServerHost
+  serverAdmin = getM cAdminMail
+  listen      = getM cListenOn
 
 instance Contains p (TVar q) => PayloadM p q (Handler p) where
   payload st =

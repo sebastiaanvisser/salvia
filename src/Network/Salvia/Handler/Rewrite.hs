@@ -19,7 +19,7 @@ import Data.List
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Protocol.Uri
-import Network.Salvia.Interface hiding (host)
+import Network.Salvia.Interface
 import Prelude hiding ((.), id)
 
 {- |

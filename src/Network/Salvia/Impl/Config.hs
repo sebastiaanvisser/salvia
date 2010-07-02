@@ -9,7 +9,7 @@ know before being able to run.
 
 data Config =
   Config
-  { hostname  :: String       -- ^ Server hostname.
+  { domain    :: String       -- ^ Server hostname.
   , adminMail :: String       -- ^ Server admin email address.
   , listenOn  :: [SockAddr]   -- ^ Address port combinations to listen on.
   , backlog   :: Int          -- ^ TCP backlog.
@@ -24,7 +24,7 @@ the TCP backlog is 64.
 defaultConfig :: Config
 defaultConfig =
   Config
-  { hostname  = "127.0.0.1"
+  { domain    = "127.0.0.1"
   , adminMail = "admin@localhost"
   , listenOn  = [SockAddrInet 8080 iNADDR_ANY]
   , backlog   = 64

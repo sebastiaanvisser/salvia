@@ -27,8 +27,8 @@ import qualified Data.ByteString.Lazy as B
 
 hCGI :: (MonadIO m, HttpM' m, BodyM Request m, SendM m, HandleQueueM m, ServerM m, AddressM' m) => FilePath -> m ()
 hCGI fn =
-  do adm <- admin
-     hst <- host
+  do adm <- serverAdmin
+     hst <- serverHost
      (cp, ca) <- clientAddress >>= addr
      (sp, sa) <- serverAddress >>= addr
      hdrs    <- request (getM headers)
