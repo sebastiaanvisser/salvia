@@ -75,6 +75,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
 -- ** Redirecting the client.
 
+, hLocalRequest
 , hRedirect
 
 -- ** Request URI rewriting.
