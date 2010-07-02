@@ -27,21 +27,29 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 
 -- ** Accessing request and response bodies.
 
+-- *** Access the message body as raw ByteString.
+
+, hRawBody
 , hRawRequestBody
 , hRawResponseBody
-, hRawBody
 
+-- *** Access the message body as Text.
+
+, hBodyText
 , hRequestBodyText
 , hResponseBodyText
-, hBodyText
 
+-- *** Access the message body as UTF8 String.
+
+, hBodyStringUTF8
 , hRequestBodyStringUTF8
 , hResponseBodyStringUTF8
-, hBodyStringUTF8
 
+-- *** Access the message body as URI encoded parameters.
+
+, hParameters
 , hRequestParameters
 , hResponseParameters
-, hParameters
 
 -- ** HTTP header banner.
 
