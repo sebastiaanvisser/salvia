@@ -14,6 +14,7 @@ module Network.Salvia.Impl.Handler where
 import Control.Applicative
 import Control.Concurrent.STM
 import Control.Monad.State
+import Control.Concurrent
 import Data.ByteString.Lazy.UTF8 (fromString, toString)
 import Data.Monoid
 import Data.Record.Label
@@ -27,14 +28,15 @@ import Prelude hiding (mod)
 import Safe
 import qualified Data.ByteString.Lazy as ByteString
 
-newtype Handler p a = Handler { unHandler :: StateT (Context p) IO a }
+newtype Handler p a = H { unH :: StateT (Context p) IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context p))
 
 runHandler :: Handler p a -> Context p -> IO (a, Context p)
-runHandler h = runStateT (unHandler h)
+runHandler h = runStateT (unH h)
 
-instance ForkM IO (Handler p) where
-  forkM a = get >>= return . fmap fst . runHandler a
+instance ForkableMonad (Handler p) where
+  fork a = do ctx <- H get
+              liftIO (forkIO (runHandler a ctx >> return ()))
 
 instance HttpM Request (Handler p) where
   http st =

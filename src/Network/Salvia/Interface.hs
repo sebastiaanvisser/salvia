@@ -44,6 +44,7 @@ module Network.Salvia.Interface where
 import Control.Concurrent.STM
 import Control.Applicative
 import Control.Category
+import Control.Concurrent
 import Control.Monad.State hiding (get)
 import Data.ByteString.Lazy (ByteString)
 import Data.Record.Label
@@ -52,10 +53,8 @@ import Network.Socket
 import Prelude hiding ((.), id)
 import System.IO
 
--- todo: comment
-
-class ForkM n m where
-  forkM :: m a -> m (n a)
+class MonadIO m => ForkableMonad m where
+  fork :: m a -> m ThreadId
 
 -- | The `HttpM' type class indicates is parametrized with the directon
 -- (`Request' or `Response') for which the implementation should be able to
