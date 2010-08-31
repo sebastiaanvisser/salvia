@@ -42,11 +42,17 @@ instance HttpM Request (Handler p) where
   http st =
     do (a, s) <- runState st <$> getM cRequest
        cRequest =: s >> return a
+  rewrite f m =
+    do x <- H (getM cRequest <* modM cRequest f)
+       m <* H (setM cRequest x)
 
 instance HttpM Response (Handler p) where
   http st =
     do (a, s) <- runState st <$> getM cResponse
        cResponse =: s >> return a
+  rewrite f m =
+    do x <- H (getM cResponse <* modM cResponse f)
+       m <* H (setM cResponse x)
 
 instance RawHttpM Request (Handler p) where
   rawHttp st =

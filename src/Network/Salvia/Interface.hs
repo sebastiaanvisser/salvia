@@ -62,7 +62,12 @@ class MonadIO m => ForkableMonad m where
 -- state computations over the request or response objects.
 
 class (Applicative m, Monad m) => HttpM dir m where
-  http :: State (Http dir) a -> m a
+  http    :: State (Http dir) a -> m a
+  rewrite :: (Http dir -> Http dir) -> m a -> m a
+
+-- | The raw HTTP Request and Response objects represent the request and
+-- responses as received over the line. These should not be subject to any form
+-- of rewriting.
 
 class (Applicative m, Monad m) => RawHttpM dir m where
   rawHttp :: State (Http dir) a -> m a
