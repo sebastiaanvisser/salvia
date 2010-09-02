@@ -27,8 +27,12 @@ import Data.Text.Lazy.Encoding
 import Network.Protocol.Http
 import Network.Protocol.Uri
 import Network.Salvia.Interface
-import qualified Data.ByteString.Lazy as B
-import qualified Data.ByteString.Lazy.UTF8 as U
+import System.IO hiding (hGetContents)
+import System.IO.Unsafe (unsafeInterleaveIO)
+import qualified Data.ByteString.Lazy          as B
+import qualified Data.ByteString.Lazy.UTF8     as B
+import qualified Data.ByteString               as S
+import qualified Data.ByteString.Lazy.Internal as B
 
 -- | Lookup an Data.Text encoding function from a named identifier, currently
 -- identifies "utf-8", "utf-16", "utf-32" with possible little/big endian
@@ -45,6 +49,28 @@ encodingFromName s = k `lookup`
 --   , ("utf32le", decodeUtf32LE)
 --   , ("utf32be", decodeUtf32BE)
   ] where k = map toLower (filter (\c -> isAlpha c || isDigit c) s)
+
+
+
+{- Non-closing version of Data.ByteString.Lazy.hGetContents -}
+
+hGetContents :: Handle -> IO B.ByteString
+hGetContents h = lazyRead -- TODO close on exceptions
+  where
+    lazyRead = unsafeInterleaveIO loop
+
+    loop = do
+        c <- S.hGetNonBlocking h B.defaultChunkSize
+        --TODO: I think this should distinguish EOF from no data available
+        -- the underlying POSIX call makes this distincion, returning either
+        -- 0 or EAGAIN
+        if S.null c
+          then do eof <- hIsEOF h
+                  if eof then return B.Empty
+                         else hWaitForInput h (-1)
+                           >> loop
+          else do cs <- lazyRead
+                  return (B.Chunk c cs)
 
 {- |
 First (possibly naive) handler to retreive the client request or server
@@ -67,7 +93,7 @@ hRawBody _ =
      liftIO $
        case (con, kpa :: Maybe Integer, len :: Maybe Integer) of
          (_, _,       Just n)                           -> B.hGet s (fromIntegral n)
-         (k, Nothing, Nothing) | k /= Just "keep-alive" -> B.hGetContents s
+         (k, Nothing, Nothing) | k /= Just "keep-alive" -> hGetContents s
          _                                              -> return B.empty
 
 -- | Like `hRawBody' but specifically for `Http' `Request's.
@@ -112,7 +138,7 @@ hResponseBodyText = hBodyText forResponse
 -- | Like the `hRawBody' but decodes it as UTF-8 to a `String'.
 
 hBodyStringUTF8 :: BodyM dir m => dir -> m String
-hBodyStringUTF8 d = U.toString <$> body d
+hBodyStringUTF8 d = B.toString <$> body d
 
 -- | Like `hBodyStringUTF8' but specifically for `Http' `Request's.
 
