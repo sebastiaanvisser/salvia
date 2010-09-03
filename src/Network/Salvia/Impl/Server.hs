@@ -30,7 +30,7 @@ start conf handler payload =
   startOne port addr =
     do -- Print out on which addres this server is running.
        a <- inet_ntoa addr
-       putStrLn ("starting listening server on: " ++ a ++ ":" ++ show port)
+       putStrLn ("Starting listening server on: " ++ a ++ ":" ++ show port)
 
        -- Setup socket and start listening.
        s <- socket AF_INET Stream 0
