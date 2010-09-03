@@ -52,7 +52,7 @@ Library
                     pureMD5 >=1.0 && < 1.2,
                     random ==1.0.*,
                     safe ==0.2.*,
-                    stm >= 2.1.2.*,
+                    stm >= 2.1.2,
                     time ==1.1.*,
                     transformers < 0.3,
                     unix >= 2.3 && < 2.5,
