@@ -5,7 +5,7 @@ module Network.Salvia.Handler.Environment
 )
 where
 
-import Control.Monad.State
+import Control.Monad.CatchIO (MonadCatchIO)
 import Network.Protocol.Http
 import Network.Salvia.Interface
 import Network.Salvia.Handler.Banner
@@ -24,11 +24,11 @@ keep-alives (`hKeepAlive`), handling `HEAD` requests (`hHead`) and printing the
 -}
 
 hDefaultEnv
-  :: (MonadIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
+  :: (MonadCatchIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
   => m ()  -- ^ Handler to run in the default environment.
   -> m ()
 hDefaultEnv handler =
-  hKeepAlive $ 
+  hKeepAlive . hCatchAnd500 $
     do hBanner "salvia-httpd"
        _ <- hRequestParser (1000 * 4)
          (hCustomError BadRequest)
@@ -38,13 +38,14 @@ hDefaultEnv handler =
 -- | Like `hDefaultEnv' but only serves one request per connection.
 
 hEnvNoKeepAlive
-  :: (MonadIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
+  :: (MonadCatchIO m, HandleM m, RawHttpM' m, HttpM' m, QueueM m, SendM m, FlushM Response m)
   => m ()  -- ^ Handler to run in this environment.
   -> m ()
 hEnvNoKeepAlive handler =
-  do hBanner "salvia-httpd"
-     _ <- hRequestParser (1000 * 4)
-       (hCustomError BadRequest)
-       (hHead handler)
-     hResponsePrinter
+  hCatchAnd500 $
+    do hBanner "salvia-httpd"
+       _ <- hRequestParser (1000 * 4)
+         (hCustomError BadRequest)
+         (hHead handler)
+       hResponsePrinter
 
