@@ -12,9 +12,10 @@
 module Network.Salvia.Impl.Handler where
 
 import Control.Applicative
-import Control.Concurrent.STM
-import Control.Monad.State
 import Control.Concurrent
+import Control.Concurrent.STM
+import Control.Monad.CatchIO (MonadCatchIO)
+import Control.Monad.State
 import Data.ByteString.Lazy.UTF8 (fromString, toString)
 import Data.Monoid
 import Data.Record.Label
@@ -29,7 +30,13 @@ import Safe
 import qualified Data.ByteString.Lazy as ByteString
 
 newtype Handler p a = H { unH :: StateT (Context p) IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadState (Context p))
+  deriving ( Functor
+           , Applicative
+           , Monad
+           , MonadIO
+           , MonadState (Context p)
+           , MonadCatchIO
+           )
 
 runHandler :: Handler p a -> Context p -> IO (a, Context p)
 runHandler h = runStateT (unH h)

@@ -72,6 +72,7 @@ module Network.Salvia.Handlers {- todo doc - client/server assumptions -}
 , hCustomError
 , hIOError
 , hSafeIO
+, hCatchAnd500
 
 -- ** Logging of client requests.
 

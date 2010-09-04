@@ -4,15 +4,19 @@ module Network.Salvia.Handler.Error
 , hCustomError
 , hIOError
 , hSafeIO
+, hCatchAnd500
 , catchIO
 )
 where
 
+import Control.Exception (SomeException)
+import Control.Monad
 import Control.Monad.Trans
 import Data.Record.Label
 import Network.Protocol.Http
 import Network.Salvia.Interface
 import System.IO.Error
+import qualified Control.Monad.CatchIO as C
 
 -- | The 'hError' handler enables the creation of a default style of error
 -- responses for the specified HTTP `Status` code.
@@ -61,4 +65,9 @@ hSafeIO io h = liftIO (try io) >>= either hIOError h
 
 catchIO :: MonadIO m => IO a -> a -> m a
 catchIO a b = liftIO (a `catch` (const (return b)))
+
+-- | Catch all exceptions and build a 500 InternalServerError when this happens.
+
+hCatchAnd500 :: (C.MonadCatchIO m, SendM m, HttpM Response m) => m () -> m ()
+hCatchAnd500 = C.try >=> either (\e -> hCustomError InternalServerError (show (e :: SomeException))) return
 

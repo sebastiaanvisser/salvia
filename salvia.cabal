@@ -39,27 +39,28 @@ Library
   GHC-Options:      -Wall -fno-warn-orphans
   HS-Source-Dirs:   src
 
-  Build-Depends:    base ==4.*,
-                    bytestring ==0.9.*,
-                    containers >= 0.2 && < 0.4,
-                    directory ==1.0.*,
-                    fclabels ==0.9.*,
-                    monads-fd < 0.2,
-                    network >= 2.2.1.7 && < 2.3,
-                    old-locale ==1.0.*,
-                    process ==1.0.*,
-                    concurrent-extra == 0.4.*,
-                    pureMD5 >=1.0 && < 1.2,
-                    random ==1.0.*,
-                    safe ==0.2.*,
-                    stm >= 2.1.2,
-                    time ==1.1.*,
-                    transformers < 0.3,
-                    unix >= 2.3 && < 2.5,
-                    utf8-string ==0.3.*,
-                    salvia-protocol ==1.1.*,
-                    split ==0.1.*,
-                    text >= 0.5 && < 0.8
+  Build-Depends:    base ==4.*
+                  , bytestring ==0.9.*
+                  , concurrent-extra == 0.4.*
+                  , containers >= 0.2 && < 0.4
+                  , directory ==1.0.*
+                  , fclabels ==0.9.*
+                  , monads-fd < 0.2
+                  , MonadCatchIO-transformers ==0.2.*
+                  , network >= 2.2.1.7 && < 2.3
+                  , old-locale ==1.0.*
+                  , process ==1.0.*
+                  , pureMD5 >=1.0 && < 1.2
+                  , random ==1.0.*
+                  , safe ==0.2.*
+                  , salvia-protocol ==1.1.*
+                  , split ==0.1.*
+                  , stm >= 2.1.2
+                  , text >= 0.5 && < 0.8
+                  , time ==1.1.*
+                  , transformers < 0.3
+                  , unix >= 2.3 && < 2.5
+                  , utf8-string ==0.3.*
 
   Exposed-modules:  Network.Salvia
                     Network.Salvia.Interface
